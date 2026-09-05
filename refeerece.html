@@ -1,0 +1,619 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Home Recomp Manual — Training &amp; Tamil Nadu Food System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg: #FAFAF6;
+    --bg-alt: #F1EEE4;
+    --green-deep: #2F4B3C;
+    --green-tint: #E4ECE4;
+    --gold: #B87A1F;
+    --gold-tint: #F6E8CC;
+    --rust: #A6402C;
+    --ink: #221E17;
+    --ink-soft: #675E4F;
+    --line: #DCD5C4;
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  @media (prefers-reduced-motion: reduce){ html{scroll-behavior:auto;} *{animation:none!important;transition:none!important;} }
+
+  body{
+    margin:0;
+    background:var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    font-size:16px;
+    line-height:1.6;
+  }
+  h1,h2,h3,h4{
+    font-family:'Fraunces', serif;
+    font-weight:600;
+    line-height:1.15;
+    margin:0 0 .4em 0;
+    color:var(--green-deep);
+  }
+  h1{font-size:2.1rem; font-weight:700;}
+  h2{font-size:1.5rem; padding-bottom:.3em; border-bottom:2px solid var(--line);}
+  h3{font-size:1.15rem; color:var(--ink);}
+  p{margin:0 0 1em 0; max-width:70ch;}
+  a{color:var(--green-deep);}
+  .wrap{max-width:800px; margin:0 auto; padding:0 20px 80px;}
+
+  /* Nav */
+  nav.topnav{
+    position:sticky; top:0; z-index:20;
+    background:var(--green-deep);
+    overflow-x:auto;
+    white-space:nowrap;
+    -webkit-overflow-scrolling:touch;
+  }
+  nav.topnav .navinner{
+    max-width:800px; margin:0 auto; padding:0 20px;
+    display:flex; gap:4px;
+  }
+  nav.topnav a{
+    color:#F1EEE4;
+    text-decoration:none;
+    font-size:.85rem;
+    font-weight:600;
+    padding:13px 12px;
+    display:inline-block;
+    border-bottom:3px solid transparent;
+  }
+  nav.topnav a:hover, nav.topnav a:focus-visible{ border-bottom-color:var(--gold); }
+  a:focus-visible, summary:focus-visible, button:focus-visible{
+    outline:2px solid var(--gold); outline-offset:2px;
+  }
+
+  /* Hero */
+  header.hero{ padding:40px 0 10px; }
+  .kicker{ color:var(--ink-soft); font-size:.95rem; margin-bottom:.2em;}
+  .goal-line{ font-size:1.05rem; color:var(--ink-soft); margin-bottom:1.6em;}
+
+  .timeline{
+    display:flex; flex-wrap:wrap; gap:0;
+    border-top:1px solid var(--line);
+    border-bottom:1px solid var(--line);
+    margin:1.6em 0 2em;
+  }
+  .stop{
+    flex:1 1 110px;
+    padding:14px 10px;
+    border-right:1px solid var(--line);
+    min-width:90px;
+  }
+  .stop:last-child{border-right:none;}
+  .stop .time{ font-weight:700; color:var(--green-deep); font-size:.92rem; display:block;}
+  .stop .what{ font-size:.82rem; color:var(--ink-soft); display:block; margin-top:2px;}
+
+  .stat-grid{
+    display:grid; grid-template-columns:repeat(auto-fit,minmax(130px,1fr));
+    gap:1px; background:var(--line);
+    border:1px solid var(--line);
+    margin-bottom:1.8em;
+  }
+  .stat-grid div{ background:var(--bg); padding:14px 16px; }
+  .stat-grid .num{ font-family:'Fraunces',serif; font-size:1.5rem; font-weight:600; color:var(--green-deep); display:block;}
+  .stat-grid .lbl{ font-size:.8rem; color:var(--ink-soft);}
+
+  section{ padding:2.6em 0; border-top:1px solid var(--line); }
+  section:first-of-type{border-top:none;}
+
+  .note{
+    background:var(--bg-alt);
+    border-left:3px solid var(--gold);
+    padding:12px 16px;
+    font-size:.92rem;
+    color:var(--ink-soft);
+    margin:1em 0 1.6em;
+  }
+  .note strong{color:var(--ink);}
+
+  table{ width:100%; border-collapse:collapse; font-size:.92rem;}
+  .table-wrap{ overflow-x:auto; margin:1em 0 1.6em; }
+  th,td{ text-align:left; padding:8px 10px; border-bottom:1px solid var(--line); vertical-align:top;}
+  th{ font-weight:600; color:var(--green-deep); font-size:.82rem; white-space:nowrap;}
+  tr:nth-child(even) td{ background:rgba(0,0,0,.015); }
+
+  /* Day accordions */
+  details.day{
+    border:1px solid var(--line);
+    margin-bottom:10px;
+    background:var(--green-tint);
+  }
+  details.day summary{
+    cursor:pointer; list-style:none;
+    padding:14px 16px;
+    font-family:'Fraunces',serif; font-weight:600; font-size:1.05rem;
+    color:var(--green-deep);
+    display:flex; justify-content:space-between; align-items:center;
+    gap:10px;
+  }
+  details.day summary::-webkit-details-marker{display:none;}
+  details.day summary .foc{ font-family:'Work Sans',sans-serif; font-weight:500; font-size:.85rem; color:var(--ink-soft);}
+  details.day summary::after{
+    content:'+'; font-size:1.3rem; color:var(--gold); flex-shrink:0;
+  }
+  details.day[open] summary::after{ content:'−'; }
+  details.day .daybody{ padding:0 16px 18px; background:var(--bg);}
+  details.day .daymeta{ font-size:.88rem; color:var(--ink-soft); margin:10px 0 0;}
+
+  /* Recipe cards */
+  .recipe{
+    border-left:3px solid var(--gold);
+    background:var(--gold-tint);
+    padding:14px 18px;
+    margin-bottom:14px;
+  }
+  .recipe h4{ font-family:'Fraunces',serif; font-size:1.05rem; margin-bottom:.2em;}
+  .recipe .macro{ font-size:.82rem; color:var(--ink-soft); margin-bottom:.6em;}
+  .recipe .shelf{ font-size:.82rem; color:var(--rust); margin-top:.6em;}
+  .recipe p{ margin-bottom:.5em; font-size:.94rem;}
+  .recipe strong.lbl{ display:block; font-size:.78rem; color:var(--ink-soft); margin-top:.7em; margin-bottom:.15em;}
+
+  .subgroup-title{ font-size:.85rem; color:var(--gold); font-weight:700; margin:1.6em 0 .6em; }
+
+  ul.shop{ columns:2; column-gap:30px; list-style:none; padding:0; margin:0 0 1.6em;}
+  ul.shop li{ break-inside:avoid; padding:5px 0 5px 26px; position:relative; font-size:.94rem; border-bottom:1px dotted var(--line);}
+  ul.shop li::before{
+    content:''; position:absolute; left:0; top:9px; width:13px; height:13px;
+    border:1.5px solid var(--ink-soft);
+  }
+  .shop-cat{ font-weight:700; color:var(--green-deep); margin:1.2em 0 .4em; font-size:1rem;}
+
+  .rest-key{ display:flex; flex-wrap:wrap; gap:10px; margin-bottom:1.4em;}
+  .rest-key span{
+    background:var(--bg-alt); border:1px solid var(--line);
+    font-size:.8rem; padding:5px 10px; color:var(--ink-soft);
+  }
+
+  footer{ padding:2em 0 1em; font-size:.85rem; color:var(--ink-soft); border-top:1px solid var(--line);}
+
+  @media (max-width:600px){
+    h1{font-size:1.7rem;}
+    .stop{flex:1 1 90px;}
+    ul.shop{columns:1;}
+  }
+</style>
+</head>
+<body>
+
+<nav class="topnav">
+  <div class="navinner">
+    <a href="#overview">Overview</a>
+    <a href="#targets">Targets</a>
+    <a href="#training">Training</a>
+    <a href="#nutrition">Nutrition</a>
+    <a href="#recipes">Recipes</a>
+    <a href="#shopping">Shopping</a>
+    <a href="#tracking">Tracking</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<header class="hero" id="overview">
+  <span class="kicker">Home training + Tamil Nadu food system</span>
+  <h1>Recomp Manual — Phase 1</h1>
+  <p class="goal-line">Goal: recomp — build visible muscle while getting slightly leaner, without losing more weight overall. Home equipment only. Built around a 7 AM–6 PM college day.</p>
+
+  <div class="stat-grid">
+    <div><span class="num">160 cm</span><span class="lbl">Height</span></div>
+    <div><span class="num">62 kg</span><span class="lbl">Current weight</span></div>
+    <div><span class="num">35 cm</span><span class="lbl">Biceps</span></div>
+    <div><span class="num">30 cm</span><span class="lbl">Forearm</span></div>
+    <div><span class="num">~70 cm</span><span class="lbl">Waist / core</span></div>
+    <div><span class="num">8</span><span class="lbl">Pull-ups (set 1)</span></div>
+  </div>
+
+  <h3>Today, at a glance</h3>
+  <div class="timeline">
+    <div class="stop"><span class="time">6:00 AM</span><span class="what">Wake, cook breakfast</span></div>
+    <div class="stop"><span class="time">6:30 AM</span><span class="what">Eat — eggs + chapati</span></div>
+    <div class="stop"><span class="time">7:00 AM</span><span class="what">Leave for college</span></div>
+    <div class="stop"><span class="time">1:00 PM</span><span class="what">Lunch — packed box</span></div>
+    <div class="stop"><span class="time">4:30 PM</span><span class="what">Protein shake at bus stop</span></div>
+    <div class="stop"><span class="time">6:00 PM</span><span class="what">Home — 2 bananas</span></div>
+    <div class="stop"><span class="time">7:00 PM</span><span class="what">Train</span></div>
+    <div class="stop"><span class="time">8:15 PM</span><span class="what">Dinner — chicken + chapati</span></div>
+  </div>
+
+  <div class="note"><strong>Equipment on hand:</strong> long barbell (7 kg bare), EZ curl bar (2 kg bare), a light 4 kg bar, adjustable dumbbells (plates: 4×2 kg, 2×2.5 kg, 2×3 kg = 19 kg total), resistance band, pull-up bar, adjustable incline/decline bench, yoga mat, elliptical.
+  <br><br><strong>Working load capacity</strong> — this is what the numbers in the training plan below assume: dumbbells split evenly across two hands ≈ 9.5 kg/hand for two-handed lifts (curls, presses), or up to 19 kg loaded on one handle for single-arm work and goblet holds. Long barbell loaded with all plates ≈ 26 kg max. EZ bar and the 4 kg bar share the same plate pool — use them for lighter isolation work (curls, wrist work) so plates stay free for squat/bench day.</div>
+</header>
+
+<section id="targets">
+  <h2>Daily nutrition target</h2>
+  <div class="stat-grid">
+    <div><span class="num">~2,350</span><span class="lbl">kcal / day</span></div>
+    <div><span class="num">~155 g</span><span class="lbl">Protein</span></div>
+    <div><span class="num">~70 g</span><span class="lbl">Fat</span></div>
+    <div><span class="num">~260 g</span><span class="lbl">Carbs</span></div>
+  </div>
+  <p>This is a working estimate for planning, not a lab-precise number — it sits a bit above the earlier 2,000 kcal target because four lifting days plus three conditioning sessions a week burn noticeably more, and the goal now includes building muscle, not just losing fat. Oil rule carries over: 1 tsp max per dish prep.</p>
+  <div class="note"><strong>Adjustment rule:</strong> track the <em>weekly average</em> weigh-in, not single days. If the average hasn't moved and photos look the same after 3–4 straight weeks, cut the lunch rice portion by about half a cup (~100 kcal). If strength keeps stalling or energy is consistently low, add a small extra — a handful of peanuts or one more chapati (~150 kcal).</div>
+</section>
+
+<section id="training">
+  <h2>Weekly training split</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Day</th><th>Focus</th><th>Session length</th></tr>
+    <tr><td>Mon</td><td>Push + HIIT + Core</td><td>~55–65 min</td></tr>
+    <tr><td>Tue</td><td>Pull</td><td>~45–50 min</td></tr>
+    <tr><td>Wed</td><td>Zone 2 + Core</td><td>~35 min</td></tr>
+    <tr><td>Thu</td><td>Legs</td><td>~50–55 min</td></tr>
+    <tr><td>Fri</td><td>Core + HIIT</td><td>~35–40 min</td></tr>
+    <tr><td>Sat</td><td>Active recovery</td><td>20–30 min walk</td></tr>
+    <tr><td>Sun</td><td>Full rest + meal prep</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <p class="subgroup-title">Rest time key (used in every table below)</p>
+  <div class="rest-key">
+    <span>Heavy compound (squat, bench, rows) → 90–120s</span>
+    <span>Accessory lift (curls, DB press) → 60–75s</span>
+    <span>Small isolation (lateral raise, wrist curl) → 30–45s</span>
+    <span>Core work → 45–60s</span>
+    <span>HIIT recovery → 30s, built into the interval</span>
+  </div>
+
+  <details class="day" open>
+    <summary><span>Mon — Push + HIIT + Core</span><span class="foc">Chest, shoulders, triceps</span></summary>
+    <div class="daybody">
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exercise</th><th>Sets × reps</th><th>Setup</th><th>Rest</th></tr>
+      <tr><td>Barbell bench press</td><td>4×8–10</td><td>Long bar, build toward ~26 kg. 3-sec lowering; last set to failure</td><td>90s</td></tr>
+      <tr><td>Overhead press</td><td>3×8–12</td><td>EZ bar or long bar, seated (bench upright) or standing</td><td>90s</td></tr>
+      <tr><td>Incline DB press</td><td>3×10–12</td><td>Bench at 30–45°, dumbbells ~9.5 kg/hand</td><td>75s</td></tr>
+      <tr><td>EZ bar skullcrushers</td><td>3×10–15</td><td>EZ bar, light load</td><td>60s</td></tr>
+      <tr><td>Push-up burnout</td><td>1×failure</td><td>Feet on bench once bodyweight version is easy</td><td>60s</td></tr>
+      <tr><td>HIIT — elliptical</td><td>8 rounds</td><td>2 min warm-up (L2) → 30s sprint (L5–7) / 30s recovery (L1–2)</td><td>30s built-in</td></tr>
+      <tr><td>Core finisher</td><td>Plank 5×1 min + leg raises 3×15</td><td>Mat</td><td>30–45s</td></tr>
+    </table>
+    </div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Tue — Pull</span><span class="foc">Back, biceps</span></summary>
+    <div class="daybody">
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exercise</th><th>Sets × reps</th><th>Setup</th><th>Rest</th></tr>
+      <tr><td>Pull-ups</td><td>4×max</td><td>Bodyweight — log every set (8/6/5/4 style). Add backpack load once 4×10 is clean</td><td>90–120s</td></tr>
+      <tr><td>Barbell rows</td><td>4×8–12</td><td>Long bar, bent-over, up to ~26 kg</td><td>90s</td></tr>
+      <tr><td>DB bicep curls</td><td>3×10–12</td><td>Dumbbells ~9.5 kg/hand</td><td>60s</td></tr>
+      <tr><td>Hammer curls</td><td>3×10–12</td><td>EZ bar or dumbbells</td><td>60s</td></tr>
+      <tr><td>Band pull-aparts</td><td>3×15–20</td><td>Resistance band, arms straight</td><td>45s</td></tr>
+    </table>
+    </div>
+    <p class="daymeta">No HIIT today by design — heavy lifting days get full recovery. Power nap 20–30 min if possible (set an alarm to avoid deep sleep).</p>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Wed — Zone 2 + Core</span><span class="foc">Conditioning</span></summary>
+    <div class="daybody">
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exercise</th><th>Sets × reps</th><th>Setup</th><th>Rest</th></tr>
+      <tr><td>Elliptical, steady state</td><td>25–30 min</td><td>Level 2–3, conversational pace</td><td>—</td></tr>
+      <tr><td>Plank</td><td>3×30–45s</td><td>Mat</td><td>45s</td></tr>
+      <tr><td>Leg raises</td><td>3×12–15</td><td>Lying or hanging</td><td>45s</td></tr>
+    </table>
+    </div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Thu — Legs</span><span class="foc">Quads, hamstrings, calves</span></summary>
+    <div class="daybody">
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exercise</th><th>Sets × reps</th><th>Setup</th><th>Rest</th></tr>
+      <tr><td>Barbell back squat</td><td>4×8–10</td><td>Long bar, up to ~26 kg</td><td>120s</td></tr>
+      <tr><td>Romanian deadlift</td><td>3×10–12</td><td>Long bar</td><td>90s</td></tr>
+      <tr><td>DB walking lunges</td><td>3×12/leg</td><td>Dumbbells ~9.5 kg/hand</td><td>75s</td></tr>
+      <tr><td>Standing calf raises</td><td>4×15–20</td><td>Bodyweight, add a dumbbell once easy</td><td>45s</td></tr>
+      <tr><td>Goblet squat finisher</td><td>2×15–20</td><td>Single dumbbell ~19 kg at chest — optional, once squat load caps out</td><td>60s</td></tr>
+    </table>
+    </div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Fri — Core + HIIT</span><span class="foc">Abs, shoulders, conditioning</span></summary>
+    <div class="daybody">
+    <div class="table-wrap">
+    <table>
+      <tr><th>Exercise</th><th>Sets × reps</th><th>Setup</th><th>Rest</th></tr>
+      <tr><td>Plank</td><td>3×max hold</td><td>Mat</td><td>60s</td></tr>
+      <tr><td>Hanging leg raises</td><td>3×12–15</td><td>Pull-up bar</td><td>60s</td></tr>
+      <tr><td>Lateral raises</td><td>4×15</td><td>Light dumbbells, 2–2.5 kg/hand</td><td>45s</td></tr>
+      <tr><td>Wrist curls</td><td>3×15–20</td><td>Light dumbbell or band</td><td>30s</td></tr>
+      <tr><td>HIIT — elliptical</td><td>6 rounds</td><td>2 min warm-up (L2) → 30s sprint (L5–7) / 30s recovery (L1–2)</td><td>30s built-in</td></tr>
+    </table>
+    </div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Sat — Active recovery</span><span class="foc">Walk + errand</span></summary>
+    <div class="daybody">
+    <p>Easy 20–30 min walk. Grocery run — buy chicken and wheat flour fresh, top up vegetables for the week.</p>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Sun — Full rest</span><span class="foc">Recovery + prep</span></summary>
+    <div class="daybody">
+    <p>Target 7+ hrs sleep. Batch-cook proteins for the week (marinate/cook chicken, prep soya chunks and sundal). Pre-measure oil into single-tsp portions so weekday cooking is grab-and-go. Weekly weigh-in and progress photo — same conditions, same lighting.</p>
+    </div>
+  </details>
+
+  <h3 style="margin-top:1.8em;">Progression rules</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Stage</th><th>What to do</th></tr>
+    <tr><td>Weeks 1–2</td><td>Focus on form. Hit the low end of the rep range for every set at a comfortable load.</td></tr>
+    <tr><td>Weeks 3–4</td><td>Push to the top of the rep range across all sets before adding any weight.</td></tr>
+    <tr><td>Top of range hit, 2 sessions straight</td><td>Add the smallest available plate (2 kg or 2.5 kg) next session.</td></tr>
+    <tr><td>Equipment maxed out (26 kg bar / 9.5 kg per-hand DB) and still hitting top reps</td><td>Add a 3–4 sec lowering tempo first → then a 2-sec pause at the hardest point → then one extra set → then switch to single-arm/single-leg versions of the same lift.</td></tr>
+    <tr><td>Pull-ups</td><td>Once 4×10+ strict reps is clean, start adding light load via a backpack (books/water bottles), beginning at +2 kg.</td></tr>
+  </table>
+  </div>
+</section>
+
+<section id="nutrition">
+  <h2>Daily meal timeline</h2>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Time</th><th>Meal</th><th>What</th><th>kcal</th><th>Protein</th></tr>
+    <tr><td>6:00–6:30 AM</td><td>Breakfast</td><td>4 whole eggs + 4 chapatis</td><td>~700</td><td>~37g</td></tr>
+    <tr><td>1:00 PM</td><td>Lunch</td><td>Protein + rice base + veg poriyal (packed)</td><td>~530</td><td>~37g</td></tr>
+    <tr><td>4:30–5:00 PM</td><td>Shake</td><td>1 scoop whey + water, at the bus stop</td><td>~120</td><td>~24g</td></tr>
+    <tr><td>6:00 PM</td><td>Pre-workout</td><td>2 bananas, on reaching home</td><td>~210</td><td>~3g</td></tr>
+    <tr><td>7:00–8:15 PM</td><td>Train</td><td>—</td><td>—</td><td>—</td></tr>
+    <tr><td>8:15–8:30 PM</td><td>Dinner</td><td>220g country chicken + 3 chapatis</td><td>~820</td><td>~55g</td></tr>
+  </table>
+  </div>
+  <p>Lunch has to survive ~6 hours unrefrigerated in the bag before it's eaten, so every lunch recipe below is a <em>dry</em> preparation — no dal, no curd, no watery gravy. Turmeric and chili also act as natural preservatives, which is why classic Tamil Nadu travel foods (puliyodharai, sundal) lean dry and well-spiced. Always let food cool fully before packing it — sealing it hot is what actually causes spoilage, not the heat outside.</p>
+</section>
+
+<section id="recipes">
+  <h2>Recipes</h2>
+
+  <p class="subgroup-title">Breakfast — rotate through the week (4 eggs + 4 chapatis, ~700 kcal / 37g protein / 21g fat / 74g carb each)</p>
+
+  <div class="recipe">
+    <h4>Vengaya Muttai Poriyal — onion egg scramble</h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>4 eggs, 1 small onion (finely chopped), 1 green chili (slit), ¼ tsp turmeric, salt, a few curry leaves, 1 tsp oil.</p>
+    <strong class="lbl">Method</strong>
+    <p>Heat oil, splutter curry leaves, sauté onion and chili 2–3 min till soft. Add turmeric and salt, crack in the eggs, scramble on medium heat 2–3 min until just set. Serve with hot chapatis.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Milagu Omelette — cracked pepper omelette</h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>4 eggs, ½ tsp crushed black pepper, 2 tbsp chopped coriander, 1 small onion (finely chopped), salt, 1 tsp oil.</p>
+    <strong class="lbl">Method</strong>
+    <p>Whisk everything together. Pour into a hot pan with the oil, cook flat-omelette style, about 2 min per side.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Boiled eggs + tomato-onion kachumber</h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>4 eggs, 1 tomato + 1 onion (finely chopped), a squeeze of lemon, pinch of salt and pepper.</p>
+    <strong class="lbl">Method</strong>
+    <p>Boil eggs 8–9 min, peel and halve. Mix the tomato, onion, lemon, and salt as a quick side. Fastest option for rushed mornings.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Kalakki Muttai Curry — thick scrambled egg curry</h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>4 eggs, 1 onion, 1 tomato, ¼ tsp turmeric, ½ tsp chili powder, ½ tsp ginger-garlic paste, 1 tsp oil, coriander leaves.</p>
+    <strong class="lbl">Method</strong>
+    <p>Sauté onion till golden, add ginger-garlic, tomato, and spices, cook to a thick masala (3–4 min). Pour in beaten eggs and stir-scramble into the masala until set.</p>
+  </div>
+
+  <p class="subgroup-title">Lunch protein — rotate Mon to Fri. All dry preparations, safe unrefrigerated for ~6 hours</p>
+
+  <div class="recipe">
+    <h4>Naatu Kozhi Milagu Varuval — pepper chicken dry roast <span style="color:var(--ink-soft);font-weight:400;">(Mon)</span></h4>
+    <div class="macro">~180g raw chicken · ~230 kcal / 38g protein / 7g fat / 2g carb</div>
+    <strong class="lbl">Ingredients</strong>
+    <p>180g boneless chicken (cubed), 1 tsp crushed pepper, ½ tsp turmeric, 1 tsp ginger-garlic paste, curry leaves, 1 tsp oil, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Marinate chicken with turmeric, salt, ginger-garlic for 15 min (can batch-marinate on Sunday). Air-fry at 200°C for 12–15 min, shaking halfway, or pan-roast in the oil on medium-high 8–10 min until browned and dry. Toss through crushed pepper and curry leaves at the end.</p>
+    <div class="shelf">Cool completely before packing — never seal hot food into the lunch box.</div>
+  </div>
+
+  <div class="recipe">
+    <h4>Soya Chunks Milagu Varuval — pepper soya dry fry <span style="color:var(--ink-soft);font-weight:400;">(Tue)</span></h4>
+    <div class="macro">50g dry soya chunks · ~180 kcal / 26g protein / 5g fat / 12g carb</div>
+    <strong class="lbl">Ingredients</strong>
+    <p>50g dry soya chunks, 1 onion, ½ tsp pepper, ½ tsp turmeric, curry leaves, 1 tsp oil, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Rehydrate soya chunks in hot water 10 min, then squeeze out excess water firmly (important for shelf life). Sauté onion in oil, add soya chunks and spices, dry-roast 6–8 min until the edges crisp slightly.</p>
+    <div class="shelf">Cheapest protein of the set — good default for tight weeks.</div>
+  </div>
+
+  <div class="recipe">
+    <h4>Vella Kadalai Sundal — white chickpea sundal <span style="color:var(--ink-soft);font-weight:400;">(Wed)</span></h4>
+    <div class="macro">60g dry chickpeas · ~210 kcal / 12g protein / 6g fat / 30g carb</div>
+    <strong class="lbl">Ingredients</strong>
+    <p>60g dry white chickpeas (soaked overnight, pressure-cooked 3–4 whistles till soft), mustard seeds, 1 dry red chili, curry leaves, 2 tbsp grated coconut, 1 tsp oil, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Temper mustard seeds, red chili, and curry leaves in the oil. Add the cooked chickpeas, toss with coconut and salt, and let any excess moisture cook off for 2–3 min.</p>
+    <div class="shelf">The classic temple-prasadam dish — proven to sit unrefrigerated for hours. Lower protein than the chicken days, so pair it with a spare boiled egg if you want the protein target closer.</div>
+  </div>
+
+  <div class="recipe">
+    <h4>Paneer Chettinad Varuval — dry paneer fry <span style="color:var(--ink-soft);font-weight:400;">(Thu)</span></h4>
+    <div class="macro">100g paneer · ~280 kcal / 18g protein / 20g fat / 10g carb</div>
+    <strong class="lbl">Ingredients</strong>
+    <p>100g paneer (cubed), 1 onion, 1 tomato, ½ tsp chettinad masala (or fresh-ground fennel, pepper, cinnamon), 1 tsp oil, curry leaves, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Lightly sear the paneer cubes in a dry pan or air-fry 5 min till the edges firm up. Separately cook onion, tomato, and spices into a thick dry masala, then toss the paneer through to coat.</p>
+    <div class="shelf">Keep it dry-fried, not in gravy — gravy paneer doesn't hold well in a bag.</div>
+  </div>
+
+  <div class="recipe">
+    <h4>Kozhi Chukka — chicken chukka with coconut bits <span style="color:var(--ink-soft);font-weight:400;">(Fri)</span></h4>
+    <div class="macro">~180g raw chicken · ~250 kcal / 38g protein / 9g fat / 5g carb</div>
+    <strong class="lbl">Ingredients</strong>
+    <p>180g chicken, 1 onion, curry leaves, 2 tbsp fresh grated coconut, ½ tsp chili powder, ½ tsp turmeric, 1 tsp oil, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Marinate and cook the chicken as in the Monday recipe. In the last 2 minutes, toss through sautéed onion, coconut bits, and curry leaves for a drier, coconutty finish.</p>
+  </div>
+
+  <p class="subgroup-title">Lunch rice base — rotate</p>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Rice base</th><th>Per cup</th><th>Note</th></tr>
+    <tr><td>Puliyodharai (tamarind rice)</td><td>~230 kcal / 4g protein / 6g fat / 40g carb</td><td>The most heat-stable option — classic travel food</td></tr>
+    <tr><td>Elumichai Sadam (lemon rice)</td><td>~240 kcal / 5g protein / 7g fat / 38g carb</td><td>Tempered with mustard, chana dal, peanuts, curry leaves</td></tr>
+    <tr><td>Thengai Sadam (coconut rice)</td><td>~250 kcal / 4g protein / 8g fat / 40g carb</td><td>Fresh grated coconut + tempering</td></tr>
+    <tr><td>Plain rice / 2 leftover chapatis</td><td>~200 kcal</td><td>Simplest fallback on a rushed morning</td></tr>
+  </table>
+  </div>
+
+  <p class="subgroup-title">Lunch veg side — dry poriyal, ~½ cup, ~60–80 kcal</p>
+  <p>Carrot-beans poriyal, cabbage poriyal, or beetroot poriyal — same method for all: chop the vegetable fine, temper mustard seeds, a pinch of urad dal (for tempering only, not a dal dish), and curry leaves in ½ tsp oil, add the vegetable with a splash of water, cover and cook 5–6 min until just tender and dry, finish with grated coconut. Cool before packing.</p>
+
+  <p class="subgroup-title">Dinner — chicken curry rotation (220g chicken + 3 chapatis, ~820 kcal / 55g protein). Eaten fresh at home, so gravy is fine.</p>
+
+  <div class="recipe">
+    <h4>Naatu Kozhi Kuzhambu — country chicken curry <span style="color:var(--ink-soft);font-weight:400;">(Mon / Thu)</span></h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>220g country chicken, 1 onion, 2 tomatoes, 3 tbsp grated coconut (ground to a paste), 1 tsp ginger-garlic paste, ½ tsp turmeric, 1 tsp chili powder, 1 tsp coriander powder, curry leaves, 1 tsp oil.</p>
+    <strong class="lbl">Method</strong>
+    <p>Sauté onion till golden, add ginger-garlic and tomatoes, cook down. Add spice powders, then the chicken, and sear 3–4 min. Add the coconut paste and enough water for a medium gravy, simmer covered 15–20 min till the chicken is tender.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Milagu Kozhi Varuval — pepper chicken roast <span style="color:var(--ink-soft);font-weight:400;">(Tue / Fri)</span></h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>220g chicken, 1½ tsp crushed pepper, 1 tsp ginger-garlic paste, curry leaves, 1 tsp oil, salt.</p>
+    <strong class="lbl">Method</strong>
+    <p>Marinate 15 min, then air-fry at 200°C for 15–18 min, shaking halfway, or pan-roast in the oil until dry and browned.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Chettinad Kozhi Curry <span style="color:var(--ink-soft);font-weight:400;">(Wed)</span></h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>220g chicken, 1 onion, 1 tomato, 1 tsp chettinad masala (fennel, pepper, star anise, cinnamon, dry red chili — ground fresh), 1 tsp ginger-garlic paste, curry leaves, 1 tsp oil.</p>
+    <strong class="lbl">Method</strong>
+    <p>Sauté onion and ginger-garlic, add tomato and the ground masala, cook till fragrant. Add chicken, sear, then add water for a thick gravy and simmer 15–20 min.</p>
+  </div>
+
+  <div class="recipe">
+    <h4>Kozhi Chukka — dry chicken chukka <span style="color:var(--ink-soft);font-weight:400;">(Sat)</span></h4>
+    <strong class="lbl">Ingredients</strong>
+    <p>220g chicken, 1 onion, 3 tbsp grated coconut, curry leaves, ½ tsp chili powder, ½ tsp turmeric, 1 tsp oil.</p>
+    <strong class="lbl">Method</strong>
+    <p>Cook chicken with spices in minimal water till tender, then let the liquid cook off completely, tossing through the coconut and curry leaves for a dry finish. Lighter, quicker cook for an active-recovery day.</p>
+  </div>
+</section>
+
+<section id="shopping">
+  <h2>Weekly shopping list</h2>
+  <p>Quantities are for one week. Buy chicken and vegetables fresh (Saturday grocery run); pantry items and spices last several weeks.</p>
+
+  <div class="shop-cat">Protein</div>
+  <ul class="shop">
+    <li>Chicken, boneless — 2.2 kg</li>
+    <li>Eggs — 30</li>
+    <li>Paneer — 200g block</li>
+    <li>Soya chunks (dry) — 200g pack</li>
+    <li>Whey protein — 1 kg tin lasts ~4–5 weeks</li>
+  </ul>
+
+  <div class="shop-cat">Grains &amp; legumes</div>
+  <ul class="shop">
+    <li>Wheat atta — 2 kg</li>
+    <li>Rice — 2 kg</li>
+    <li>White chickpeas (vella kadalai) — 250g dry</li>
+    <li>Tamarind — 100g block</li>
+    <li>Peanuts — 100g</li>
+    <li>Chana dal + urad dal (tempering only) — 100g</li>
+  </ul>
+
+  <div class="shop-cat">Vegetables &amp; aromatics</div>
+  <ul class="shop">
+    <li>Onions — 1 kg</li>
+    <li>Tomatoes — 500g</li>
+    <li>Garlic — 1 bulb</li>
+    <li>Ginger — 100g</li>
+    <li>Green chilies — 100g</li>
+    <li>Curry leaves — 2–3 sprigs, fresh</li>
+    <li>Coriander leaves — 1 bunch</li>
+    <li>Carrots — 250g</li>
+    <li>Beans — 250g</li>
+    <li>Cabbage — 1 small</li>
+    <li>Beetroot — 2–3</li>
+    <li>Fresh or frozen grated coconut — 1–2 pieces / 1 pack</li>
+    <li>Lemons — 4–5</li>
+  </ul>
+
+  <div class="shop-cat">Spices &amp; pantry</div>
+  <ul class="shop">
+    <li>Turmeric powder</li>
+    <li>Chili powder</li>
+    <li>Black pepper — whole and powder</li>
+    <li>Mustard seeds</li>
+    <li>Cooking oil — small bottle, 1 tsp/prep rule keeps usage low</li>
+    <li>Salt</li>
+    <li>Chettinad masala, or fennel + cinnamon + star anise to grind fresh</li>
+  </ul>
+
+  <div class="shop-cat">Fruit</div>
+  <ul class="shop">
+    <li>Bananas — 14–16</li>
+  </ul>
+</section>
+
+<section id="tracking">
+  <h2>Tracking</h2>
+
+  <h3>Weekly checklist</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Check</th></tr>
+    <tr><td>Weigh in same conditions — morning, before food. Track the weekly average, not single days.</td></tr>
+    <tr><td>Progress photo — same lighting, same day each week.</td></tr>
+    <tr><td>All 4 lifting days + 3 conditioning sessions completed.</td></tr>
+    <tr><td>If the weekly average stalls 3+ weeks with no visible change → trim lunch rice by ~½ cup.</td></tr>
+    <tr><td>Re-check biceps / forearm / waist measurements every 4 weeks.</td></tr>
+  </table>
+  </div>
+
+  <h3 style="margin-top:1.6em;">Training log — copy this format for every session</h3>
+  <div class="table-wrap">
+  <table>
+    <tr><th>Date</th><th>Exercise</th><th>Weight used</th><th>Reps (set 1–4)</th><th>Notes</th></tr>
+    <tr><td>e.g. Wk1 Tue</td><td>Pull-ups</td><td>Bodyweight</td><td>8 / 6 / 5 / 4</td><td>Grip slipping on set 4</td></tr>
+    <tr><td>e.g. Wk1 Mon</td><td>Bench press</td><td>16 kg</td><td>10 / 10 / 9 / 8</td><td>Ready to add 2 kg next week</td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td></tr>
+  </table>
+  </div>
+</section>
+
+<footer>
+  This is a general fitness and nutrition guide built from the details provided — not medical or professional dietary advice. Adjust based on how the body actually responds week to week, and check with a doctor first if there's any underlying health condition.
+</footer>
+
+</div>
+</body>
+</html>
