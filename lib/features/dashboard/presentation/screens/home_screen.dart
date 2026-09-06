@@ -10,6 +10,7 @@ import '../../../../shared/widgets/calorie_ring.dart';
 import '../../../../shared/widgets/macro_bars.dart';
 import '../../../food_logging/presentation/screens/log_food_screen.dart';
 import '../../../macro_breakdown/presentation/screens/macro_source_screen.dart';
+import '../../../steps_activity/presentation/screens/steps_screen.dart';
 import '../widgets/meal_slot_card.dart';
 import '../widgets/water_card.dart';
 import '../widgets/steps_card.dart';
@@ -278,6 +279,12 @@ class HomeScreen extends ConsumerWidget {
             StepsCard(
               currentSteps: 7420, // Health Connect integration value
               targetSteps: targetSteps,
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const StepsScreen()),
+                );
+              },
               onSimulateStepAdd: () {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Synced steps from Health Connect / Pedometer!')),

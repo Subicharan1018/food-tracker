@@ -384,4 +384,87 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> updateStreak(StreaksCompanion streak) =>
       into(streaks).insertOnConflictUpdate(streak);
+
+  // --- Two-Way Firestore Sync Query Helpers ---
+
+  // Dirty record extractors
+  Future<List<DiaryEntry>> getDirtyDiaryEntries() =>
+      (select(diaryEntries)..where((d) => d.isDirty.equals(true))).get();
+
+  Future<void> markDiaryEntriesClean(List<String> ids) =>
+      (update(diaryEntries)..where((d) => d.id.isIn(ids)))
+          .write(const DiaryEntriesCompanion(isDirty: Value(false)));
+
+  Future<List<WorkoutSession>> getDirtyWorkoutSessions() =>
+      (select(workoutSessions)..where((w) => w.isDirty.equals(true))).get();
+
+  Future<void> markWorkoutSessionsClean(List<String> ids) =>
+      (update(workoutSessions)..where((w) => w.id.isIn(ids)))
+          .write(const WorkoutSessionsCompanion(isDirty: Value(false)));
+
+  Future<List<WeighIn>> getDirtyWeighIns() =>
+      (select(weighIns)..where((w) => w.isDirty.equals(true))).get();
+
+  Future<void> markWeighInsClean(List<String> ids) =>
+      (update(weighIns)..where((w) => w.id.isIn(ids)))
+          .write(const WeighInsCompanion(isDirty: Value(false)));
+
+  Future<List<Measurement>> getDirtyMeasurements() =>
+      (select(measurements)..where((m) => m.isDirty.equals(true))).get();
+
+  Future<void> markMeasurementsClean(List<String> ids) =>
+      (update(measurements)..where((m) => m.id.isIn(ids)))
+          .write(const MeasurementsCompanion(isDirty: Value(false)));
+
+  Future<List<WaterLog>> getDirtyWaterLogs() =>
+      (select(waterLogs)..where((w) => w.isDirty.equals(true))).get();
+
+  Future<void> markWaterLogsClean(List<String> ids) =>
+      (update(waterLogs)..where((w) => w.id.isIn(ids)))
+          .write(const WaterLogsCompanion(isDirty: Value(false)));
+
+  Future<List<CustomFood>> getDirtyCustomFoods() =>
+      (select(customFoods)..where((c) => c.isDirty.equals(true))).get();
+
+  Future<void> markCustomFoodsClean(List<String> ids) =>
+      (update(customFoods)..where((c) => c.id.isIn(ids)))
+          .write(const CustomFoodsCompanion(isDirty: Value(false)));
+
+  // Batch Upsert Helpers for Pull Sync
+  Future<void> upsertDiaryEntriesBatch(List<DiaryEntriesCompanion> entries) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(diaryEntries, entries);
+    });
+  }
+
+  Future<void> upsertWorkoutsBatch(List<WorkoutSessionsCompanion> sessions) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(workoutSessions, sessions);
+    });
+  }
+
+  Future<void> upsertWeighInsBatch(List<WeighInsCompanion> records) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(weighIns, records);
+    });
+  }
+
+  Future<void> upsertMeasurementsBatch(List<MeasurementsCompanion> items) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(measurements, items);
+    });
+  }
+
+  Future<void> upsertWaterLogsBatch(List<WaterLogsCompanion> logs) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(waterLogs, logs);
+    });
+  }
+
+  Future<void> upsertCustomFoodsBatch(List<CustomFoodsCompanion> foods) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(customFoods, foods);
+    });
+  }
 }
+

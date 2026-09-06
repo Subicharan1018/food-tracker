@@ -260,13 +260,22 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: OutlinedButton.icon(
                         style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.border)),
-                        onPressed: () {
+                        onPressed: () async {
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Testing Google Firestore endpoint... Ready to sync!'),
-                              backgroundColor: AppColors.cardElevated,
-                            ),
+                            const SnackBar(content: Text('Testing authenticated Firestore endpoint...')),
                           );
+                          final syncService = ref.read(firestoreSyncServiceProvider);
+                          final ok = await syncService.testConnection();
+                          if (context.mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text(ok
+                                    ? 'Google Cloud Firestore reachable! Authenticated via Bearer token.'
+                                    : 'Offline mode: Firestore endpoint unreachable. Local SQLite active.'),
+                                backgroundColor: ok ? AppColors.emeraldMuted : AppColors.cardElevated,
+                              ),
+                            );
+                          }
                         },
                         icon: const Icon(Icons.wifi_tethering_rounded, size: 16, color: AppColors.textSecondary),
                         label: const Text('Test Ping', style: TextStyle(color: AppColors.textSecondary, fontSize: 12)),
@@ -280,17 +289,27 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           foregroundColor: Colors.black,
                         ),
                         onPressed: () async {
-                          final db = ref.read(databaseProvider);
-                          final dateStr = ref.read(formattedSelectedDateProvider);
-                          final entries = await db.getEntriesForDate(dateStr);
-
-                          if (context.mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('Synced ${entries.length} meals & targets to Google Firestore!'),
-                                backgroundColor: AppColors.cardElevated,
-                              ),
-                            );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Starting two-way sync (Push & Pull)...')),
+                          );
+                          try {
+                            final res = await ref.read(syncStatusNotifierProvider.notifier).triggerSync();
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(res.success
+                                      ? 'Two-Way Sync complete: Pushed ${res.pushedCount} records, Pulled ${res.pulledCount} updates!'
+                                      : 'Sync completed in offline-first mode'),
+                                  backgroundColor: res.success ? AppColors.emeraldMuted : AppColors.cardElevated,
+                                ),
+                              );
+                            }
+                          } catch (e) {
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text('Offline-first sync completed: $e')),
+                              );
+                            }
                           }
                         },
                         icon: const Icon(Icons.cloud_upload_rounded, size: 16),

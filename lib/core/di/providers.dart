@@ -1,7 +1,65 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import '../auth/firebase_auth_rest_service.dart';
+import '../config/firebase_config.dart';
+import '../health/health_sync_service.dart';
 import '../local_db/app_database.dart';
 import '../local_db/seed_data.dart';
+import '../network/google_firestore_sync_service.dart';
+
+// Services
+final healthSyncServiceProvider = Provider<HealthSyncService>((ref) {
+  final service = HealthSyncService();
+  service.initialize();
+  return service;
+});
+
+final firebaseAuthRestServiceProvider = Provider<FirebaseAuthRestService>((ref) {
+  return FirebaseAuthRestService(apiKey: FirebaseConfig.apiKey);
+});
+
+final firestoreSyncServiceProvider = Provider<GoogleFirestoreSyncService>((ref) {
+  final auth = ref.watch(firebaseAuthRestServiceProvider);
+  return GoogleFirestoreSyncService(
+    authService: auth,
+    projectId: FirebaseConfig.projectId,
+    apiKey: FirebaseConfig.apiKey,
+  );
+});
+
+// Sync state provider: tracks live sync status (idle, syncing, success, error)
+class SyncState {
+  final bool isSyncing;
+  final SyncResult? lastResult;
+  final String? error;
+
+  const SyncState({this.isSyncing = false, this.lastResult, this.error});
+}
+
+final syncStatusNotifierProvider = StateNotifierProvider<SyncStatusNotifier, SyncState>((ref) {
+  final service = ref.watch(firestoreSyncServiceProvider);
+  final db = ref.watch(databaseProvider);
+  return SyncStatusNotifier(service, db);
+});
+
+class SyncStatusNotifier extends StateNotifier<SyncState> {
+  final GoogleFirestoreSyncService _service;
+  final AppDatabase _db;
+
+  SyncStatusNotifier(this._service, this._db) : super(const SyncState());
+
+  Future<SyncResult> triggerSync() async {
+    state = const SyncState(isSyncing: true);
+    try {
+      final res = await _service.syncAll(_db);
+      state = SyncState(isSyncing: false, lastResult: res);
+      return res;
+    } catch (e) {
+      state = SyncState(isSyncing: false, error: e.toString());
+      rethrow;
+    }
+  }
+}
 
 // Database Singleton Provider
 final databaseProvider = Provider<AppDatabase>((ref) {
@@ -11,6 +69,7 @@ final databaseProvider = Provider<AppDatabase>((ref) {
   ref.onDispose(() => db.close());
   return db;
 });
+
 
 // Current Selected Date (default: today)
 final selectedDateProvider = StateProvider<DateTime>((ref) => DateTime.now());

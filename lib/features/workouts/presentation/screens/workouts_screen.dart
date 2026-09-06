@@ -302,46 +302,284 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
     final workoutsAsync = ref.watch(dailyWorkoutsProvider);
     final setLogsAsync = ref.watch(dailySetLogsProvider);
     final dateStr = ref.watch(formattedSelectedDateProvider);
+    final workouts = workoutsAsync.value ?? [];
+    final totalBurnedKcal = workouts.fold<double>(0, (sum, w) => sum + w.caloriesBurned).toInt();
 
     return Scaffold(
       appBar: AppBar(
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
-            const Text('Training & Workouts'),
-            Text(dateStr, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+            Text(dateStr, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+            const Icon(Icons.arrow_drop_down_rounded, color: AppColors.textSecondary),
           ],
         ),
         actions: [
           IconButton(
-            icon: const Icon(Icons.add_task_rounded, color: AppColors.emerald),
-            tooltip: 'Log Activity',
-            onPressed: _showActivityLoggerDialog,
+            icon: const Icon(Icons.share_outlined, size: 20),
+            onPressed: () {},
+          ),
+          IconButton(
+            icon: const Icon(Icons.more_vert_rounded, size: 20),
+            onPressed: () {},
           ),
         ],
-        bottom: TabBar(
+      ),
+      body: NestedScrollView(
+        headerSliverBuilder: (context, innerBoxIsScrolled) {
+          return [
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // 1. Hero Calorie Burned Card (Screenshot 3)
+                    Container(
+                      padding: const EdgeInsets.all(18),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 52,
+                            height: 52,
+                            decoration: BoxDecoration(
+                              color: AppColors.cyan.withOpacity(0.15),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(Icons.directions_run_rounded, color: AppColors.cyan, size: 28),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  '$totalBurnedKcal of 361',
+                                  style: AppTypography.displayMedium.copyWith(fontSize: 22, fontWeight: FontWeight.w900),
+                                ),
+                                const Text(
+                                  'Cal Burnt',
+                                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          IconButton(
+                            icon: const Icon(Icons.bar_chart_rounded, color: AppColors.cyan),
+                            onPressed: () {},
+                          ),
+                          Container(
+                            decoration: BoxDecoration(
+                              color: AppColors.cyan.withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            child: IconButton(
+                              icon: const Icon(Icons.add_rounded, color: AppColors.cyan, size: 22),
+                              onPressed: _showActivityLoggerDialog,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // 2. Health Connect Auto-Sync Row (Screenshot 3)
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: AppColors.border),
+                      ),
+                      child: Row(
+                        children: [
+                          Container(
+                            width: 44,
+                            height: 44,
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF97316).withOpacity(0.18),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Center(
+                              child: Text(
+                                '0',
+                                style: TextStyle(color: Color(0xFFFB923C), fontSize: 18, fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 14),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: const [
+                                Text(
+                                  'Others (Health Connect)',
+                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                                ),
+                                SizedBox(height: 2),
+                                Text(
+                                  '221 Steps, Other Activities',
+                                  style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                ),
+                              ],
+                            ),
+                          ),
+                          Container(
+                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            decoration: BoxDecoration(
+                              color: AppColors.cardElevated,
+                              borderRadius: BorderRadius.circular(6),
+                            ),
+                            child: const Text('AUTO', style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 18),
+
+                    // 3. My Workout Routine Section (Screenshot 3)
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: const [
+                        Text('My Workout Routine', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                        Text('VIEW ALL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.emerald)),
+                      ],
+                    ),
+                    const SizedBox(height: 10),
+
+                    // Horizontal Cards Carousel
+                    SizedBox(
+                      height: 130,
+                      child: ListView(
+                        scrollDirection: Axis.horizontal,
+                        children: [
+                          // Card 1: Subicharan's Routine
+                          InkWell(
+                            onTap: () {
+                              _tabController.animateTo(0);
+                            },
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 220,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFF1E293B),
+                                    const Color(0xFF0F172A).withOpacity(0.9),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.emerald.withOpacity(0.3)),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: const [
+                                  Icon(Icons.fitness_center_rounded, color: AppColors.emeraldLight, size: 24),
+                                  Spacer(),
+                                  Text(
+                                    'Subicharan\'s Routine',
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Designed for you · 4-Day Recomp',
+                                    style: TextStyle(fontSize: 11, color: AppColors.emeraldLight),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(width: 12),
+
+                          // Card 2: Quick Workouts @ Home
+                          InkWell(
+                            onTap: () => _showActivityLoggerDialog(),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              width: 200,
+                              padding: const EdgeInsets.all(16),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [
+                                    const Color(0xFF263040),
+                                    const Color(0xFF161C24).withOpacity(0.9),
+                                  ],
+                                  begin: Alignment.topLeft,
+                                  end: Alignment.bottomRight,
+                                ),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(color: AppColors.border),
+                              ),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisAlignment: MainAxisAlignment.end,
+                                children: const [
+                                  Icon(Icons.bolt_rounded, color: AppColors.amber, size: 24),
+                                  Spacer(),
+                                  Text(
+                                    'Quick Workouts @ Home',
+                                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                                  ),
+                                  SizedBox(height: 2),
+                                  Text(
+                                    'Busy? 20-min session',
+                                    style: TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    const SizedBox(height: 14),
+                  ],
+                ),
+              ),
+            ),
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _SliverAppBarDelegate(
+                TabBar(
+                  controller: _tabController,
+                  indicatorColor: AppColors.emerald,
+                  labelColor: AppColors.emerald,
+                  unselectedLabelColor: AppColors.textMuted,
+                  tabs: const [
+                    Tab(text: 'Recomp Split (Sets & Reps)'),
+                    Tab(text: 'Activity History'),
+                  ],
+                ),
+              ),
+            ),
+          ];
+        },
+        body: TabBarView(
           controller: _tabController,
-          indicatorColor: AppColors.emerald,
-          labelColor: AppColors.emerald,
-          unselectedLabelColor: AppColors.textMuted,
-          tabs: const [
-            Tab(text: 'Recomp Split (Sets & Reps)'),
-            Tab(text: 'Activity History'),
+          children: [
+            // Tab 1: Recomp Split
+            _RecompSplitTab(setLogs: setLogsAsync.value ?? []),
+
+            // Tab 2: Activity Log History
+            _WorkoutHistoryTab(
+              workouts: workouts,
+              onLogActivityTap: _showActivityLoggerDialog,
+            ),
           ],
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          // Tab 1: Recomp Split from refeerece.html
-          _RecompSplitTab(setLogs: setLogsAsync.value ?? []),
-
-          // Tab 2: Activity Log History
-          _WorkoutHistoryTab(
-            workouts: workoutsAsync.value ?? [],
-            onLogActivityTap: _showActivityLoggerDialog,
-          ),
-        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         backgroundColor: AppColors.emerald,
@@ -353,6 +591,31 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
     );
   }
 }
+
+class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
+  final TabBar _tabBar;
+
+  _SliverAppBarDelegate(this._tabBar);
+
+  @override
+  double get minExtent => _tabBar.preferredSize.height;
+  @override
+  double get maxExtent => _tabBar.preferredSize.height;
+
+  @override
+  Widget build(BuildContext context, double shrinkOffset, bool overlapsContent) {
+    return Container(
+      color: AppColors.background,
+      child: _tabBar,
+    );
+  }
+
+  @override
+  bool shouldRebuild(_SliverAppBarDelegate oldDelegate) {
+    return false;
+  }
+}
+
 
 class _RecompSplitTab extends ConsumerWidget {
   final List<WorkoutSetLog> setLogs;

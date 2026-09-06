@@ -6,6 +6,9 @@ import '../../features/workouts/presentation/screens/workouts_screen.dart';
 import '../../features/weight_progress/presentation/screens/weight_screen.dart';
 import '../../features/recipes/presentation/screens/recipes_screen.dart';
 import '../../features/settings/presentation/screens/settings_screen.dart';
+import '../../features/macro_breakdown/presentation/screens/macro_source_screen.dart';
+import '../../features/sleep/presentation/screens/sleep_screen.dart';
+import '../../features/steps_activity/presentation/screens/steps_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
@@ -89,6 +92,45 @@ class MoreMenuScreen extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         children: [
           _MenuTile(
+            title: 'Macro Source Breakdown',
+            subtitle: 'Attribution analysis for protein & carb sources',
+            icon: Icons.pie_chart_rounded,
+            color: AppColors.coral,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MacroSourceScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _MenuTile(
+            title: 'Daily Steps & 7-Day Trend',
+            subtitle: 'Health Connect integration and weekly bar trend',
+            icon: Icons.directions_walk_rounded,
+            color: AppColors.cyan,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const StepsScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _MenuTile(
+            title: 'Sleep Tracker & Schedule',
+            subtitle: 'Recommended 8h goal, bedtime & wake schedule',
+            icon: Icons.bedtime_rounded,
+            color: const Color(0xFF60A5FA),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const SleepScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _MenuTile(
             title: 'Personal Recipe Box',
             subtitle: 'Tamil Nadu dry-packs & chicken curries pre-seeded',
             icon: Icons.menu_book_rounded,
@@ -97,19 +139,6 @@ class MoreMenuScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RecipesScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Macro Source Breakdown',
-            subtitle: 'Attribution analysis for protein & carb sources',
-            icon: Icons.pie_chart_rounded,
-            color: AppColors.coral,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
               );
             },
           ),
@@ -131,6 +160,7 @@ class MoreMenuScreen extends StatelessWidget {
     );
   }
 }
+
 
 class _MenuTile extends StatelessWidget {
   final String title;

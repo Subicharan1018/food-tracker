@@ -5,12 +5,14 @@ class StepsCard extends StatelessWidget {
   final int currentSteps;
   final int targetSteps;
   final VoidCallback onSimulateStepAdd;
+  final VoidCallback? onTap;
 
   const StepsCard({
     super.key,
     required this.currentSteps,
     required this.targetSteps,
     required this.onSimulateStepAdd,
+    this.onTap,
   });
 
   @override
@@ -19,13 +21,17 @@ class StepsCard extends StatelessWidget {
     final km = (currentSteps * 0.00078).toStringAsFixed(1);
     final kcal = (currentSteps * 0.04).round();
 
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-      ),
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border),
+        ),
+
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -132,6 +138,8 @@ class StepsCard extends StatelessWidget {
           ),
         ],
       ),
+    ),
     );
   }
 }
+

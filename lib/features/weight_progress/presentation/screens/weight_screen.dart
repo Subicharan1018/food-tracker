@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:fl_chart/fl_chart.dart';
+import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/local_db/app_database.dart';
@@ -16,6 +17,55 @@ class WeightProgressScreen extends ConsumerStatefulWidget {
 }
 
 class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
+  double _goalLossKg = 1.8;
+  int _weeksRemaining = 2;
+
+  void _showEditGoalDialog() {
+    final lossCtrl = TextEditingController(text: _goalLossKg.toStringAsFixed(1));
+    final weeksCtrl = TextEditingController(text: '$_weeksRemaining');
+
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: AppColors.surface,
+        title: const Text('Edit Weight Goal', style: AppTypography.titleLarge),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            TextField(
+              controller: lossCtrl,
+              keyboardType: const TextInputType.numberWithOptions(decimal: true),
+              decoration: const InputDecoration(labelText: 'Weight to Lose (kg)'),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: weeksCtrl,
+              keyboardType: TextInputType.number,
+              decoration: const InputDecoration(labelText: 'Weeks Remaining'),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+            onPressed: () {
+              setState(() {
+                _goalLossKg = double.tryParse(lossCtrl.text) ?? _goalLossKg;
+                _weeksRemaining = int.tryParse(weeksCtrl.text) ?? _weeksRemaining;
+              });
+              Navigator.pop(ctx);
+            },
+            child: const Text('Save', style: TextStyle(color: Colors.black, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
   void _showWeighInDialog(double currentWeight) {
     double weight = currentWeight;
 
@@ -79,7 +129,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                             id: const Uuid().v4(),
                             date: dateStr,
                             weightKg: weight,
-                            rollingAvgKg: Value(weight), // computed by engine
+                            rollingAvgKg: Value(weight),
                             loggedAt: Value(DateTime.now()),
                           ),
                         );
@@ -235,19 +285,76 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weight & Trend'),
+        title: const Text('Weight Tracker'),
         actions: [
           IconButton(
             icon: const Icon(Icons.straighten_rounded, color: AppColors.emerald),
             tooltip: 'Tape Measurements',
             onPressed: _showMeasurementDialog,
           ),
+          IconButton(
+            icon: const Icon(Icons.more_vert_rounded),
+            onPressed: () {},
+          ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: const Color(0xFF7C3AED),
+        foregroundColor: Colors.white,
+        elevation: 4,
+        onPressed: () => _showWeighInDialog(currentWeight),
+        child: const Icon(Icons.add_rounded, size: 30),
       ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          // Current Weight & Rolling Average Summary
+          // 1. Goal Card (Screenshot 2)
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  width: 48,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED).withOpacity(0.18),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.scale_rounded, color: Color(0xFFA78BFA), size: 26),
+                ),
+                const SizedBox(width: 14),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Lose ${_goalLossKg.toStringAsFixed(1)} kg',
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '$_weeksRemaining weeks remaining',
+                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 18),
+                  onPressed: _showEditGoalDialog,
+                ),
+              ],
+            ),
+          ),
+
+          const SizedBox(height: 16),
+
+          // 2. 7-Day Rolling Trend Chart
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -255,35 +362,73 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Current Weight', style: TextStyle(fontSize: 13, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
-                    const SizedBox(height: 4),
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(currentWeight.toStringAsFixed(1), style: AppTypography.displayLarge.copyWith(fontSize: 32, fontWeight: FontWeight.w900)),
-                        const Text(' kg', style: TextStyle(fontSize: 16, color: AppColors.textSecondary)),
-                      ],
-                    ),
-                    const SizedBox(height: 2),
-                    const Text('Goal: Recomp (Hold ~62kg, build muscle)', style: TextStyle(fontSize: 11, color: AppColors.emeraldLight)),
+                    const Text('Weight Trend (7-Day Avg)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                    Text('Current: ${currentWeight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 12, color: AppColors.emeraldLight, fontWeight: FontWeight.w600)),
                   ],
                 ),
-                ElevatedButton.icon(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppColors.emerald,
-                    foregroundColor: Colors.black,
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  onPressed: () => _showWeighInDialog(currentWeight),
-                  icon: const Icon(Icons.add, size: 18),
-                  label: const Text('Weigh In', style: TextStyle(fontWeight: FontWeight.w700)),
+                const SizedBox(height: 20),
+                SizedBox(
+                  height: 180,
+                  child: weighIns.isEmpty
+                      ? const Center(
+                          child: Text(
+                            'No chart data available.\nLog weigh-ins to see your 7-day trend.',
+                            textAlign: TextAlign.center,
+                            style: TextStyle(color: AppColors.textMuted, fontSize: 13),
+                          ),
+                        )
+                      : LineChart(
+                          LineChartData(
+                            gridData: FlGridData(
+                              show: true,
+                              drawVerticalLine: false,
+                              getDrawingHorizontalLine: (value) => const FlLine(color: AppColors.borderSubtle, strokeWidth: 1),
+                            ),
+                            titlesData: FlTitlesData(
+                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                              leftTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 36,
+                                  getTitlesWidget: (val, _) => Text('${val.toStringAsFixed(1)}', style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
+                                ),
+                              ),
+                              bottomTitles: AxisTitles(
+                                sideTitles: SideTitles(
+                                  showTitles: true,
+                                  reservedSize: 22,
+                                  getTitlesWidget: (val, _) {
+                                    final index = val.toInt();
+                                    if (index < 0 || index >= weighIns.length) return const SizedBox.shrink();
+                                    final date = DateFormat('M/d').format(DateTime.tryParse(weighIns[index].date) ?? DateTime.now());
+                                    return Text(date, style: const TextStyle(color: AppColors.textMuted, fontSize: 10));
+                                  },
+                                ),
+                              ),
+                            ),
+                            borderData: FlBorderData(show: false),
+                            lineBarsData: [
+                              LineChartBarData(
+                                spots: weighIns.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.weightKg)).toList(),
+                                isCurved: true,
+                                color: AppColors.emerald,
+                                barWidth: 3,
+                                dotData: const FlDotData(show: true),
+                                belowBarData: BarAreaData(
+                                  show: true,
+                                  color: AppColors.emerald.withOpacity(0.08),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
                 ),
               ],
             ),
@@ -347,8 +492,9 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
             ),
           ],
 
-          // 7-Day Rolling Trend Chart
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
+
+          // 3. Build Your Progress Gallery Card (Screenshot 2)
           Container(
             padding: const EdgeInsets.all(18),
             decoration: BoxDecoration(
@@ -356,114 +502,129 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
               borderRadius: BorderRadius.circular(16),
               border: Border.all(color: AppColors.border),
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+            child: Row(
               children: [
-                const Text('7-Day Rolling Trend', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                const SizedBox(height: 4),
-                const Text('Filters daily water fluctuation to show actual tissue recomp.', style: TextStyle(fontSize: 12, color: AppColors.textMuted)),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 180,
-                  child: LineChart(
-                    LineChartData(
-                      gridData: FlGridData(
-                        show: true,
-                        drawVerticalLine: false,
-                        getDrawingHorizontalLine: (value) => const FlLine(color: AppColors.borderSubtle, strokeWidth: 1),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const Text(
+                        'Build Your Progress Gallery',
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: Color(0xFFA78BFA)),
                       ),
-                      titlesData: FlTitlesData(
-                        topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                        leftTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 34,
-                            getTitlesWidget: (val, _) => Text('${val.toInt()}', style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-                          ),
-                        ),
-                        bottomTitles: AxisTitles(
-                          sideTitles: SideTitles(
-                            showTitles: true,
-                            reservedSize: 22,
-                            getTitlesWidget: (val, _) => Text('Wk${val.toInt()}', style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-                          ),
-                        ),
+                      const SizedBox(height: 4),
+                      const Text(
+                        'Every photo helps you see changes the scale can\'t.',
+                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
                       ),
-                      borderData: FlBorderData(show: false),
-                      minY: 60,
-                      maxY: 64,
-                      lineBarsData: [
-                        LineChartBarData(
-                          spots: weighIns.isNotEmpty
-                              ? weighIns.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.weightKg)).toList()
-                              : const [
-                                  FlSpot(0, 62.2),
-                                  FlSpot(1, 62.0),
-                                  FlSpot(2, 61.9),
-                                  FlSpot(3, 62.0),
-                                  FlSpot(4, 62.1),
-                                ],
-                          isCurved: true,
-                          color: AppColors.emerald,
-                          barWidth: 3,
-                          dotData: const FlDotData(show: true),
-                          belowBarData: BarAreaData(
-                            show: true,
-                            color: AppColors.emerald.withOpacity(0.08),
-                          ),
+                      const SizedBox(height: 12),
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: const Color(0xFF7C3AED),
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                      ],
-                    ),
+                        onPressed: () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Photo progress attached to today\'s weigh-in!')),
+                          );
+                        },
+                        child: const Text('Add Photo  >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                      ),
+                    ],
                   ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  width: 60,
+                  height: 60,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7C3AED).withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFF7C3AED).withOpacity(0.3)),
+                  ),
+                  child: const Icon(Icons.photo_library_rounded, color: Color(0xFFA78BFA), size: 30),
                 ),
               ],
             ),
           ),
 
-          // Baseline Body Measurements from refeerece.html
           const SizedBox(height: 20),
-          const Text('PHASE 1 BASELINE MEASUREMENTS', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 0.5)),
-          const SizedBox(height: 10),
+
+          // 4. Timeline Section (Screenshot 2)
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
-              Expanded(child: _MetricBadge(label: 'Height', value: '160 cm', sub: 'Baseline')),
-              SizedBox(width: 8),
-              Expanded(child: _MetricBadge(label: 'Biceps', value: '35 cm', sub: 'Upper Arm')),
-              SizedBox(width: 8),
-              Expanded(child: _MetricBadge(label: 'Forearm', value: '30 cm', sub: 'Grip')),
-              SizedBox(width: 8),
-              Expanded(child: _MetricBadge(label: 'Waist', value: '~70 cm', sub: 'Core')),
+              Text('Timeline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              Text('View Progress Gallery >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: Color(0xFFA78BFA))),
             ],
           ),
-        ],
-      ),
-    );
-  }
-}
+          const SizedBox(height: 12),
 
-class _MetricBadge extends StatelessWidget {
-  final String label;
-  final String value;
-  final String sub;
+          // Timeline weigh-in records
+          if (weighIns.isEmpty)
+            Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: const Center(
+                child: Text('No weigh-ins recorded yet. Tap + to log today.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
+              ),
+            )
+          else
+            ...weighIns.map((item) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                decoration: BoxDecoration(
+                  color: AppColors.card,
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  children: [
+                    Container(
+                      width: 10,
+                      height: 10,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF7C3AED),
+                        shape: BoxShape.circle,
+                      ),
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${item.weightKg.toStringAsFixed(1)} kg',
+                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                          ),
+                          Text(
+                            item.date,
+                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.camera_alt_outlined, color: Color(0xFFA78BFA), size: 20),
+                      onPressed: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Attached progress snapshot')),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              );
+            }),
 
-  const _MetricBadge({required this.label, required this.value, required this.sub});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Column(
-        children: [
-          Text(value, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
-          const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.emeraldLight)),
-          Text(sub, style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+          const SizedBox(height: 80), // Padding for FAB
         ],
       ),
     );
