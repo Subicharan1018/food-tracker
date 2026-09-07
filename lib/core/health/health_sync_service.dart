@@ -37,11 +37,36 @@ class HealthSyncService {
     }
   }
 
+  Future<HealthConnectSdkStatus?> getSdkStatus() async {
+    try {
+      return await _health.getHealthConnectSdkStatus();
+    } catch (e) {
+      debugPrint('Error getting Health Connect SDK status: $e');
+      return null;
+    }
+  }
+
+  Future<void> installHealthConnect() async {
+    try {
+      await _health.installHealthConnect();
+    } catch (e) {
+      debugPrint('Error launching Health Connect installation: $e');
+    }
+  }
+
   Future<bool> requestPermissions() async {
     if (!_isConfigured) {
       await initialize();
     }
     try {
+      if (defaultTargetPlatform == TargetPlatform.android) {
+        final status = await _health.getHealthConnectSdkStatus();
+        if (status == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+          await _health.installHealthConnect();
+          return false;
+        }
+      }
+
       final permissions = _dataTypes.map((_) => HealthDataAccess.READ).toList();
       final granted = await _health.requestAuthorization(
         _dataTypes,

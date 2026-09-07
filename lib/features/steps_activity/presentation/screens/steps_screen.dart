@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:fl_chart/fl_chart.dart';
 import 'package:intl/intl.dart';
 import 'package:drift/drift.dart' hide Column;
+import 'package:health/health.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/health/health_sync_service.dart';
 import '../../../../core/local_db/app_database.dart';
@@ -39,6 +40,42 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
         _isRefreshing = false;
       });
     }
+  }
+
+  Future<void> _requestHealthConnectPermissions() async {
+    setState(() => _isRefreshing = true);
+    final healthService = ref.read(healthSyncServiceProvider);
+
+    final status = await healthService.getSdkStatus();
+    if (status == HealthConnectSdkStatus.sdkUnavailableProviderUpdateRequired) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: const Text('Google Health Connect is not installed. Opening Play Store...'),
+            action: SnackBarAction(
+              label: 'Install',
+              onPressed: () => healthService.installHealthConnect(),
+            ),
+          ),
+        );
+      }
+      await healthService.installHealthConnect();
+      if (mounted) setState(() => _isRefreshing = false);
+      return;
+    }
+
+    final granted = await healthService.requestPermissions();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(granted
+              ? 'Connected to Health Connect! Steps synced.'
+              : 'Health Connect permission not granted. Please enable in Health Connect.'),
+          backgroundColor: granted ? AppColors.emeraldMuted : AppColors.cardElevated,
+        ),
+      );
+    }
+    await _loadStepsData();
   }
 
   void _showEditGoalDialog(int currentGoal) {
@@ -190,54 +227,67 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
           const SizedBox(height: 16),
 
           // 2. Connection Status Row
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'You are connected to',
-                  style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(8),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2563EB).withOpacity(0.15),
-                            borderRadius: BorderRadius.circular(10),
+          InkWell(
+            onTap: _isRefreshing ? null : _requestHealthConnectPermissions,
+            borderRadius: BorderRadius.circular(16),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'You are connected to',
+                        style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontWeight: FontWeight.w600),
+                      ),
+                      Text(
+                        'TAP TO SYNC / CONNECT',
+                        style: TextStyle(fontSize: 10, color: AppColors.cyan, fontWeight: FontWeight.w700),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Row(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFF2563EB).withOpacity(0.15),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: const Icon(Icons.favorite_rounded, color: Color(0xFF38BDF8), size: 20),
                           ),
-                          child: const Icon(Icons.favorite_rounded, color: Color(0xFF38BDF8), size: 20),
-                        ),
-                        const SizedBox(width: 12),
-                        const Text(
-                          'Health Connect',
-                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                        ),
-                      ],
-                    ),
-                    IconButton(
-                      icon: _isRefreshing
-                          ? const SizedBox(
-                              width: 18,
-                              height: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.cyan),
-                            )
-                          : const Icon(Icons.sync_rounded, color: AppColors.cyan, size: 22),
-                      onPressed: _isRefreshing ? null : _loadStepsData,
-                    ),
-                  ],
-                ),
-              ],
+                          const SizedBox(width: 12),
+                          const Text(
+                            'Health Connect',
+                            style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                          ),
+                        ],
+                      ),
+                      IconButton(
+                        icon: _isRefreshing
+                            ? const SizedBox(
+                                width: 18,
+                                height: 18,
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.cyan),
+                              )
+                            : const Icon(Icons.sync_rounded, color: AppColors.cyan, size: 22),
+                        onPressed: _isRefreshing ? null : _requestHealthConnectPermissions,
+                      ),
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
 
