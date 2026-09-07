@@ -64,7 +64,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                         children: [
                           Text(recipe.name, style: AppTypography.titleLarge),
                           if (recipe.tamilName != null)
-                            Text(recipe.tamilName!, style: const TextStyle(fontSize: 13, color: AppColors.amber)),
+                            Text(recipe.tamilName!, style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
                         ],
                       ),
                     ),
@@ -76,7 +76,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                       ),
                       child: Text(
                         recipe.mealSlot.toUpperCase(),
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.emeraldLight),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
                       ),
                     ),
                   ],
@@ -94,10 +94,10 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _RecipeStat(label: 'Calories', value: '${recipe.calories.toInt()} kcal', color: AppColors.emerald),
-                      _RecipeStat(label: 'Protein', value: '${recipe.proteinG}g', color: AppColors.coral),
-                      _RecipeStat(label: 'Carbs', value: '${recipe.carbsG}g', color: AppColors.amber),
-                      _RecipeStat(label: 'Fat', value: '${recipe.fatG}g', color: AppColors.violet),
+                      _RecipeStat(label: 'Calories', value: '${recipe.calories.toInt()} kcal', color: AppColors.primary),
+                      _RecipeStat(label: 'Protein', value: '${recipe.proteinG}g', color: AppColors.textPrimary),
+                      _RecipeStat(label: 'Carbs', value: '${recipe.carbsG}g', color: AppColors.textPrimary),
+                      _RecipeStat(label: 'Fat', value: '${recipe.fatG}g', color: AppColors.textPrimary),
                     ],
                   ),
                 ),
@@ -107,14 +107,14 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.amber.withOpacity(0.1),
+                      color: AppColors.attention.withOpacity(0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.amber.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.attention.withOpacity(0.3)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.shield_outlined, color: AppColors.amber, size: 18),
+                        const Icon(Icons.shield_outlined, color: AppColors.attention, size: 18),
                         const SizedBox(width: 8),
                         Expanded(
                           child: Text(
@@ -136,7 +136,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('• ', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.bold)),
+                        const Text('• ', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
                         Expanded(child: Text(ing, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary))),
                       ],
                     ),
@@ -155,8 +155,8 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   height: 50,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.emerald,
-                      foregroundColor: Colors.black,
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: () async {
@@ -290,30 +290,30 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.emerald.withOpacity(0.12),
+                                    color: AppColors.primary.withOpacity(0.12),
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     '${r.calories.toInt()} kcal',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.emeraldLight),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
                                   ),
                                 ),
                               ],
                             ),
                             if (r.tamilName != null) ...[
                               const SizedBox(height: 2),
-                              Text(r.tamilName!, style: const TextStyle(fontSize: 12, color: AppColors.amber)),
+                              Text(r.tamilName!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                             ],
                             const SizedBox(height: 8),
                             Row(
                               children: [
-                                _MacroBadge(label: 'P', value: '${r.proteinG}g', color: AppColors.coral),
+                                _MacroBadge(label: 'P', value: '${r.proteinG}g', color: AppColors.textPrimary),
                                 const SizedBox(width: 8),
-                                _MacroBadge(label: 'C', value: '${r.carbsG}g', color: AppColors.amber),
+                                _MacroBadge(label: 'C', value: '${r.carbsG}g', color: AppColors.textPrimary),
                                 const SizedBox(width: 8),
-                                _MacroBadge(label: 'F', value: '${r.fatG}g', color: AppColors.violet),
+                                _MacroBadge(label: 'F', value: '${r.fatG}g', color: AppColors.textPrimary),
                                 const Spacer(),
-                                const Text('View Recipe & 1-Tap Log →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.emerald)),
+                                const Text('View Recipe & 1-Tap Log →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
                               ],
                             ),
                           ],
@@ -323,7 +323,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.emerald)),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
               error: (err, _) => Center(child: Text('Error: $err')),
             ),
           ),
@@ -389,14 +389,14 @@ class _ChipItem extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.emerald,
+      selectedColor: AppColors.primary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.black : AppColors.textSecondary,
+        color: selected ? Colors.white : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.emerald : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
       showCheckmark: false,
     );
   }

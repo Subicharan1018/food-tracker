@@ -8,7 +8,7 @@ class HealthActivitySummary {
   final bool isConnected;
 
   const HealthActivitySummary({
-    this.steps = 221,
+    this.steps = 0,
     this.activeCalories = 0,
     this.workouts = const [],
     this.isConnected = true,
@@ -75,7 +75,7 @@ class HealthSyncService {
       _hasPermissions = granted;
       return granted;
     } catch (e) {
-      debugPrint('Health request permissions exception (graceful fallback): $e');
+      debugPrint('Health request permissions exception: $e');
       _hasPermissions = false;
       return false;
     }
@@ -89,7 +89,7 @@ class HealthSyncService {
       final hasPerm = await _health.hasPermissions(_dataTypes);
       return hasPerm ?? false;
     } catch (e) {
-      return true; // Report reachable/connected fallback in mock/standalone mode
+      return false;
     }
   }
 
@@ -104,18 +104,13 @@ class HealthSyncService {
     } catch (e) {
       debugPrint('Error fetching steps from Health Connect: $e');
     }
-    // Return sample baseline steps matching reference screenshot if 0 or unavailable
-    return 221;
+    return 0;
   }
 
   /// Returns 7-day daily step history for the Steps Trend BarChart
   Future<List<DailyStepRecord>> fetch7DayStepsTrend() async {
     final now = DateTime.now();
     final List<DailyStepRecord> trend = [];
-
-    // Realistic recent week pattern from reference screenshot:
-    // Mon 31: 11,770, Tue 1: 8,113, Wed 2: 7,733, Thu 3: 2,108, Fri 4: 3,419, Sat 5: 2,501, Sun 6: 221
-    final referenceValues = [11770, 8113, 7733, 2108, 3419, 2501, 221];
 
     for (int i = 6; i >= 0; i--) {
       final date = now.subtract(Duration(days: i));
@@ -129,12 +124,6 @@ class HealthSyncService {
           steps = count;
         }
       } catch (_) {}
-
-      if (steps == 0) {
-        // Use reference pattern if sensor data not present
-        final refIndex = 6 - i;
-        steps = refIndex < referenceValues.length ? referenceValues[refIndex] : 3500;
-      }
 
       trend.add(DailyStepRecord(date: dayStart, steps: steps));
     }
@@ -158,7 +147,7 @@ class HealthSyncService {
     } catch (e) {
       debugPrint('Error reading workouts from Health Connect: $e');
     }
-    return ['221 Steps, Other Activities'];
+    return [];
   }
 }
 

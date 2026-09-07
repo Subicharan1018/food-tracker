@@ -106,13 +106,13 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
     final durationStr = SleepEngine.formatDuration(totalMinutes);
 
     return Scaffold(
-      backgroundColor: const Color(0xFF070D1A), // Dark Midnight Navy
+      backgroundColor: AppColors.background,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
           'Setup your Sleep Tracker',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: Colors.white),
+          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
         ),
       ),
       body: _isLoading
@@ -129,7 +129,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                     style: const TextStyle(
                       fontSize: 48,
                       fontWeight: FontWeight.w800,
-                      color: Colors.white,
+                      color: AppColors.textPrimary,
                       letterSpacing: -0.5,
                     ),
                   ),
@@ -139,7 +139,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                     style: TextStyle(
                       fontSize: 15,
                       fontWeight: FontWeight.w600,
-                      color: Color(0xFF4ADE80), // Emerald Green
+                      color: AppColors.positive,
                     ),
                   ),
                   const SizedBox(height: 14),
@@ -150,7 +150,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                       textAlign: TextAlign.center,
                       style: TextStyle(
                         fontSize: 13,
-                        color: Color(0xFF94A3B8),
+                        color: AppColors.textMuted,
                         height: 1.45,
                       ),
                     ),
@@ -172,13 +172,13 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
                             const Text(
                               'Regular Sleep Time',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                             ),
                             const SizedBox(height: 12),
                             TextButton(
@@ -196,7 +196,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF60A5FA),
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
@@ -208,7 +208,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                       Container(
                         height: 90,
                         width: 1,
-                        color: const Color(0xFF1E293B),
+                        color: AppColors.border,
                       ),
 
                       // Regular Wake Time Card
@@ -222,13 +222,13 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                               style: const TextStyle(
                                 fontSize: 18,
                                 fontWeight: FontWeight.w800,
-                                color: Colors.white,
+                                color: AppColors.textPrimary,
                               ),
                             ),
                             const SizedBox(height: 8),
                             const Text(
                               'Regular Wake Time',
-                              style: TextStyle(fontSize: 12, color: Color(0xFF94A3B8)),
+                              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
                             ),
                             const SizedBox(height: 12),
                             TextButton(
@@ -246,7 +246,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: Color(0xFF60A5FA),
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ),
@@ -264,7 +264,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                     height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF3B82F6), // Vibrant Blue
+                        backgroundColor: AppColors.primary,
                         foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

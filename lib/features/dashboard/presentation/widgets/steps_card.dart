@@ -39,10 +39,14 @@ class StepsCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Row(
-                children: const [
-                  Icon(Icons.directions_walk_rounded, color: AppColors.emerald, size: 20),
-                  SizedBox(width: 8),
-                  Text(
+                children: [
+                  Icon(
+                    Icons.directions_walk_rounded,
+                    color: progress >= 1.0 ? AppColors.positive : AppColors.primary,
+                    size: 20,
+                  ),
+                  const SizedBox(width: 8),
+                  const Text(
                     'Steps & Activity',
                     style: TextStyle(
                       fontSize: 15,
@@ -58,7 +62,7 @@ class StepsCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.emerald.withOpacity(0.12),
+                    color: AppColors.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Text(
@@ -66,7 +70,7 @@ class StepsCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.emerald,
+                      color: AppColors.primary,
                     ),
                   ),
                 ),
@@ -120,7 +124,9 @@ class StepsCard extends StatelessWidget {
                     child: CircularProgressIndicator(
                       value: progress,
                       backgroundColor: AppColors.cardElevated,
-                      valueColor: const AlwaysStoppedAnimation<Color>(AppColors.emerald),
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        progress >= 1.0 ? AppColors.positive : AppColors.primary,
+                      ),
                       strokeWidth: 5,
                     ),
                   ),

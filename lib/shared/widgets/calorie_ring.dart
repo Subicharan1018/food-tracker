@@ -22,7 +22,27 @@ class CalorieRing extends StatelessWidget {
     final progress = targetCalories > 0
         ? (consumedCalories / targetCalories).clamp(0.0, 1.5)
         : 0.0;
-    final isOver = remaining < 0;
+
+    // 95% - 105% buffer window matching macro tolerance:
+    // < 95%: Primary Blue (in progress)
+    // 95% - 105%: Positive Green (target met / on-track)
+    // > 105%: Attention Amber (exceeded)
+    final isOver = targetCalories > 0 && consumedCalories > (targetCalories * 1.05);
+    final isOnTrack = targetCalories > 0 &&
+        consumedCalories >= (targetCalories * 0.95) &&
+        consumedCalories <= (targetCalories * 1.05);
+
+    final Color ringColor = isOver
+        ? AppColors.attention
+        : (isOnTrack ? AppColors.positive : AppColors.primary);
+
+    final String subtitle = isOver
+        ? 'kcal over'
+        : (isOnTrack ? 'kcal · on track' : 'kcal remaining');
+
+    final Color subtitleColor = isOver
+        ? AppColors.attention
+        : (isOnTrack ? AppColors.positive : AppColors.textSecondary);
 
     return SizedBox(
       width: size,
@@ -34,7 +54,7 @@ class CalorieRing extends StatelessWidget {
             size: Size(size, size),
             painter: _RingPainter(
               progress: progress,
-              ringColor: isOver ? AppColors.coral : AppColors.emerald,
+              ringColor: ringColor,
               trackColor: AppColors.cardElevated,
               strokeWidth: 16,
             ),
@@ -45,7 +65,7 @@ class CalorieRing extends StatelessWidget {
               Text(
                 '${remaining.abs()}',
                 style: AppTypography.displayLarge.copyWith(
-                  color: isOver ? AppColors.coral : AppColors.textPrimary,
+                  color: isOver ? AppColors.attention : AppColors.textPrimary,
                   fontWeight: FontWeight.w900,
                   fontSize: 38,
                   height: 1.0,
@@ -53,9 +73,9 @@ class CalorieRing extends StatelessWidget {
               ),
               const SizedBox(height: 4),
               Text(
-                isOver ? 'kcal over' : 'kcal remaining',
+                subtitle,
                 style: AppTypography.labelSmall.copyWith(
-                  color: isOver ? AppColors.coral : AppColors.emeraldLight,
+                  color: subtitleColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),

@@ -47,8 +47,8 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.emerald,
-          labelColor: AppColors.emerald,
+          indicatorColor: AppColors.primary,
+          labelColor: AppColors.primary,
           unselectedLabelColor: AppColors.textMuted,
           tabs: const [
             Tab(text: 'Protein Sources'),
@@ -120,7 +120,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Protein',
                       totalConsumed: totalProtein,
                       target: proteinTarget,
-                      color: AppColors.coral,
+                      color: AppColors.primary,
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.proteinG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -130,7 +130,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Carbohydrates',
                       totalConsumed: totalCarbs,
                       target: carbTarget,
-                      color: AppColors.amber,
+                      color: AppColors.primary,
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.carbsG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -140,7 +140,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Fat',
                       totalConsumed: totalFat,
                       target: fatTarget,
-                      color: AppColors.violet,
+                      color: AppColors.primary,
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.fatG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -150,7 +150,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.emerald)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
         error: (err, _) => Center(child: Text('Error loading macro sources: $err')),
       ),
     );
@@ -346,14 +346,14 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.emerald,
+      selectedColor: AppColors.primary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.black : AppColors.textSecondary,
+        color: selected ? Colors.white : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.emerald : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
       showCheckmark: false,
     );
   }

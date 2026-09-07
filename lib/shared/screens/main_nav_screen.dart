@@ -44,32 +44,32 @@ class _MainNavScreenState extends State<MainNavScreen> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
           backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.emerald.withOpacity(0.2),
+          indicatorColor: AppColors.primary.withOpacity(0.18),
           elevation: 0,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.home_rounded, color: AppColors.emerald),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.primary),
               label: 'Home',
             ),
             NavigationDestination(
               icon: Icon(Icons.restaurant_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.restaurant_rounded, color: AppColors.emerald),
+              selectedIcon: Icon(Icons.restaurant_rounded, color: AppColors.primary),
               label: 'Log',
             ),
             NavigationDestination(
               icon: Icon(Icons.fitness_center_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.fitness_center_rounded, color: AppColors.emerald),
+              selectedIcon: Icon(Icons.fitness_center_rounded, color: AppColors.primary),
               label: 'Train',
             ),
             NavigationDestination(
               icon: Icon(Icons.trending_up_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.trending_up_rounded, color: AppColors.emerald),
+              selectedIcon: Icon(Icons.trending_up_rounded, color: AppColors.primary),
               label: 'Progress',
             ),
             NavigationDestination(
               icon: Icon(Icons.grid_view_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.emerald),
+              selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.primary),
               label: 'More',
             ),
           ],
@@ -95,7 +95,7 @@ class MoreMenuScreen extends StatelessWidget {
             title: 'Macro Source Breakdown',
             subtitle: 'Attribution analysis for protein & carb sources',
             icon: Icons.pie_chart_rounded,
-            color: AppColors.coral,
+            color: AppColors.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -108,7 +108,7 @@ class MoreMenuScreen extends StatelessWidget {
             title: 'Daily Steps & 7-Day Trend',
             subtitle: 'Health Connect integration and weekly bar trend',
             icon: Icons.directions_walk_rounded,
-            color: AppColors.cyan,
+            color: AppColors.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -119,9 +119,9 @@ class MoreMenuScreen extends StatelessWidget {
           const SizedBox(height: 12),
           _MenuTile(
             title: 'Sleep Tracker & Schedule',
-            subtitle: 'Recommended 8h goal, bedtime & wake schedule',
+            subtitle: 'Recommended sleep goal, bedtime & wake schedule',
             icon: Icons.bedtime_rounded,
-            color: const Color(0xFF60A5FA),
+            color: AppColors.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -134,7 +134,7 @@ class MoreMenuScreen extends StatelessWidget {
             title: 'Personal Recipe Box',
             subtitle: 'Tamil Nadu dry-packs & chicken curries pre-seeded',
             icon: Icons.menu_book_rounded,
-            color: AppColors.amber,
+            color: AppColors.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -147,7 +147,7 @@ class MoreMenuScreen extends StatelessWidget {
             title: 'Settings & Daily Targets',
             subtitle: 'Calorie budget, protein targets, and equipment setup',
             icon: Icons.settings_rounded,
-            color: AppColors.emerald,
+            color: AppColors.primary,
             onTap: () {
               Navigator.push(
                 context,
@@ -160,7 +160,6 @@ class MoreMenuScreen extends StatelessWidget {
     );
   }
 }
-
 
 class _MenuTile extends StatelessWidget {
   final String title;

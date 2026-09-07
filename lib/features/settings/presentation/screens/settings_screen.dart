@@ -51,7 +51,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               onPressed: () async {
                 final db = ref.read(databaseProvider);
                 await db.saveUserProfile(
@@ -74,7 +74,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   );
                 }
               },
-              child: const Text('Save Targets', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700)),
+              child: const Text('Save Targets', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
             ),
           ],
         );
@@ -108,10 +108,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   width: 52,
                   height: 52,
                   decoration: BoxDecoration(
-                    color: AppColors.emerald.withOpacity(0.15),
+                    color: AppColors.primary.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.person_rounded, color: AppColors.emerald, size: 28),
+                  child: const Icon(Icons.person_rounded, color: AppColors.primary, size: 28),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -122,7 +122,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       const SizedBox(height: 2),
                       Text('Height: ${user?.heightCm.toInt() ?? 160} cm · Weight: ${user?.weightKg.toStringAsFixed(1) ?? 62.0} kg · Age: ${user?.age ?? 21}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                       const SizedBox(height: 2),
-                      const Text('Goal: Build visible muscle, slightly leaner (recomp)', style: TextStyle(fontSize: 11, color: AppColors.emeraldLight)),
+                      const Text('Goal: Build visible muscle, slightly leaner (recomp)', style: TextStyle(fontSize: 11, color: AppColors.primary)),
                     ],
                   ),
                 ),
@@ -144,32 +144,32 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
               children: [
                 ListTile(
                   title: const Text('Daily Calorie Budget'),
-                  trailing: Text('${user?.calorieTarget ?? 2350} kcal', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.emeraldLight)),
+                  trailing: Text('${user?.calorieTarget ?? 2350} kcal', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Protein Target'),
-                  trailing: Text('${user?.proteinTargetG.toInt() ?? 155} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.coralLight)),
+                  trailing: Text('${user?.proteinTargetG.toInt() ?? 155} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Carbohydrates Target'),
-                  trailing: Text('${user?.carbTargetG.toInt() ?? 260} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.amberLight)),
+                  trailing: Text('${user?.carbTargetG.toInt() ?? 260} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Fats Target'),
-                  trailing: Text('${user?.fatTargetG.toInt() ?? 70} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.violet)),
+                  trailing: Text('${user?.fatTargetG.toInt() ?? 70} g', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Water Intake Target'),
-                  trailing: Text('${user?.waterTargetMl ?? 3000} ml', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.cyan)),
+                  trailing: Text('${user?.waterTargetMl ?? 3000} ml', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 ),
                 const Divider(height: 1),
                 ListTile(
                   title: const Text('Daily Steps Target'),
-                  trailing: Text('${user?.stepsTarget ?? 10000} steps', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.emerald)),
+                  trailing: Text('${user?.stepsTarget ?? 10000} steps', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.primary)),
                 ),
                 const Divider(height: 1),
                 Padding(
@@ -177,10 +177,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   child: SizedBox(
                     width: double.infinity,
                     child: OutlinedButton.icon(
-                      style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.emerald)),
+                      style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.primary)),
                       onPressed: user != null ? () => _showEditTargetsDialog(user) : null,
-                      icon: const Icon(Icons.tune_rounded, color: AppColors.emerald, size: 18),
-                      label: const Text('Edit Targets & Macros', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.w700)),
+                      icon: const Icon(Icons.tune_rounded, color: AppColors.primary, size: 18),
+                      label: const Text('Edit Targets & Macros', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
                     ),
                   ),
                 ),
@@ -207,7 +207,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 Text('• Long barbell (7 kg bare, loaded with plates ≈ 26 kg max)', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 Text('• EZ curl bar (2 kg bare) & light 4 kg bar for isolation work', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 Text('• Adjustable dumbbells (4×2kg, 2×2.5kg, 2×3kg plates = 19 kg total)', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                Text('• Working load: ~9.5 kg/hand for two-handed lifts, or 19 kg single-arm/goblet', style: TextStyle(fontSize: 12, color: AppColors.emeraldLight)),
+                Text('• Working load: ~9.5 kg/hand for two-handed lifts, or 19 kg single-arm/goblet', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                 Text('• Incline/decline bench, pull-up bar, resistance band, elliptical trainer', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               ],
             ),
@@ -232,10 +232,10 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: AppColors.amber.withOpacity(0.15),
+                        color: AppColors.primary.withOpacity(0.15),
                         borderRadius: BorderRadius.circular(8),
                       ),
-                      child: const Icon(Icons.cloud_sync_rounded, color: AppColors.amber, size: 22),
+                      child: const Icon(Icons.cloud_sync_rounded, color: AppColors.primary, size: 22),
                     ),
                     const SizedBox(width: 10),
                     Expanded(
@@ -272,7 +272,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 content: Text(ok
                                     ? 'Google Cloud Firestore reachable! Authenticated via Bearer token.'
                                     : 'Offline mode: Firestore endpoint unreachable. Local SQLite active.'),
-                                backgroundColor: ok ? AppColors.emeraldMuted : AppColors.cardElevated,
+                                backgroundColor: ok ? AppColors.positive.withOpacity(0.15) : AppColors.cardElevated,
                               ),
                             );
                           }
@@ -285,8 +285,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     Expanded(
                       child: ElevatedButton.icon(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.emerald,
-                          foregroundColor: Colors.black,
+                          backgroundColor: AppColors.primary,
+                          foregroundColor: Colors.white,
                         ),
                         onPressed: () async {
                           ScaffoldMessenger.of(context).showSnackBar(
@@ -300,7 +300,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   content: Text(res.success
                                       ? 'Two-Way Sync complete: Pushed ${res.pushedCount} records, Pulled ${res.pulledCount} updates!'
                                       : 'Sync completed in offline-first mode'),
-                                  backgroundColor: res.success ? AppColors.emeraldMuted : AppColors.cardElevated,
+                                  backgroundColor: res.success ? AppColors.positive.withOpacity(0.15) : AppColors.cardElevated,
                                 ),
                               );
                             }

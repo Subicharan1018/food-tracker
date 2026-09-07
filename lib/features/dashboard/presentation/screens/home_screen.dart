@@ -77,29 +77,36 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
-                  'KINETIK',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w900,
-                    letterSpacing: 1.2,
-                    color: AppColors.textPrimary,
+            Flexible(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Text(
+                    'KINETIK',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 1.2,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                Text(
-                  'Recomp · Phase 1',
-                  style: const TextStyle(fontSize: 11, color: AppColors.emeraldLight, fontWeight: FontWeight.w600),
-                ),
-              ],
+                  Text(
+                    'Recomp · Phase 1',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: const TextStyle(fontSize: 11, color: AppColors.positive, fontWeight: FontWeight.w600),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
         actions: [
           // Date Selector
           IconButton(
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: EdgeInsets.zero,
             icon: const Icon(Icons.chevron_left_rounded),
             onPressed: () {
               ref.read(selectedDateProvider.notifier).state =
@@ -119,7 +126,7 @@ class HomeScreen extends ConsumerWidget {
               }
             },
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
               decoration: BoxDecoration(
                 color: AppColors.card,
                 borderRadius: BorderRadius.circular(8),
@@ -127,11 +134,13 @@ class HomeScreen extends ConsumerWidget {
               ),
               child: Text(
                 isToday ? 'Today' : DateFormat('MMM d').format(selectedDate),
-                style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
               ),
             ),
           ),
           IconButton(
+            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
+            padding: EdgeInsets.zero,
             icon: const Icon(Icons.chevron_right_rounded),
             onPressed: () {
               ref.read(selectedDateProvider.notifier).state =
@@ -140,7 +149,9 @@ class HomeScreen extends ConsumerWidget {
           ),
           // Macro source button
           IconButton(
-            icon: const Icon(Icons.pie_chart_rounded, color: AppColors.emerald),
+            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
+            padding: const EdgeInsets.only(right: 8),
+            icon: const Icon(Icons.pie_chart_rounded, color: AppColors.primary),
             tooltip: 'Macro Source Breakdown',
             onPressed: () {
               Navigator.push(
@@ -152,12 +163,13 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.emerald,
+        color: AppColors.primary,
         backgroundColor: AppColors.card,
         onRefresh: () async {
           ref.invalidate(diaryEntriesProvider);
           ref.invalidate(dailyWaterProvider);
           ref.invalidate(dailyWorkoutsProvider);
+          ref.invalidate(todayStepsProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),
@@ -187,7 +199,7 @@ class HomeScreen extends ConsumerWidget {
                       ),
                       child: Text(
                         '🔥 +$totalBurnedKcal kcal burned in workouts offset budget',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.amberLight),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.attention),
                       ),
                     ),
                   ],
@@ -229,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.hub_rounded, color: AppColors.coral, size: 20),
+                    const Icon(Icons.hub_rounded, color: AppColors.primary, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
@@ -240,7 +252,7 @@ class HomeScreen extends ConsumerWidget {
                         ],
                       ),
                     ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.emerald),
+                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
                   ],
                 ),
               ),
@@ -277,7 +289,7 @@ class HomeScreen extends ConsumerWidget {
 
             // 5. Steps Card
             StepsCard(
-              currentSteps: 7420, // Health Connect integration value
+              currentSteps: ref.watch(todayStepsProvider).value ?? 0,
               targetSteps: targetSteps,
               onTap: () {
                 Navigator.push(
@@ -286,6 +298,7 @@ class HomeScreen extends ConsumerWidget {
                 );
               },
               onSimulateStepAdd: () {
+                ref.invalidate(todayStepsProvider);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Synced steps from Health Connect / Pedometer!')),
                 );

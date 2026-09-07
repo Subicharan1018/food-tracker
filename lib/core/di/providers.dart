@@ -143,3 +143,11 @@ final workoutStreakProvider = FutureProvider<Streak?>((ref) {
   final db = ref.watch(databaseProvider);
   return db.getStreak('workout');
 });
+
+const defaultDailyStepsTarget = 10000;
+
+// Today Steps Provider (from Health Connect / Local sync)
+final todayStepsProvider = FutureProvider<int>((ref) async {
+  final health = ref.watch(healthSyncServiceProvider);
+  return health.fetchTodaySteps();
+});

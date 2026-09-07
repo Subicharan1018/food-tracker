@@ -17,7 +17,7 @@ class StepsScreen extends ConsumerStatefulWidget {
 }
 
 class _StepsScreenState extends ConsumerState<StepsScreen> {
-  int _todaySteps = 221;
+  int _todaySteps = 0;
   bool _isRefreshing = false;
   List<DailyStepRecord> _trendData = [];
 
@@ -71,7 +71,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
           content: Text(granted
               ? 'Connected to Health Connect! Steps synced.'
               : 'Health Connect permission not granted. Please enable in Health Connect.'),
-          backgroundColor: granted ? AppColors.emeraldMuted : AppColors.cardElevated,
+          backgroundColor: granted ? AppColors.positive.withOpacity(0.15) : AppColors.cardElevated,
         ),
       );
     }
@@ -99,7 +99,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
             child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
             onPressed: () async {
               final newGoal = int.tryParse(ctrl.text);
               if (newGoal != null && newGoal > 0) {
@@ -122,7 +122,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 );
               }
             },
-            child: const Text('Save', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700)),
+            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -132,7 +132,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
   @override
   Widget build(BuildContext context) {
     final userAsync = ref.watch(userProfileProvider);
-    final stepGoal = userAsync.value?.stepsTarget ?? 10000;
+    final stepGoal = userAsync.value?.stepsTarget ?? defaultDailyStepsTarget;
     final selectedDate = ref.watch(selectedDateProvider);
     final dateDisplay = DateFormat('MMM d, yyyy').format(selectedDate);
 
@@ -170,51 +170,61 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      crossAxisAlignment: CrossAxisAlignment.baseline,
-                      textBaseline: TextBaseline.alphabetic,
-                      children: [
-                        Text(
-                          '$_todaySteps',
-                          style: AppTypography.displayLarge.copyWith(
-                            color: AppColors.textPrimary,
-                            fontWeight: FontWeight.w900,
-                            fontSize: 34,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.baseline,
+                        textBaseline: TextBaseline.alphabetic,
+                        children: [
+                          Text(
+                            '$_todaySteps',
+                            style: AppTypography.displayLarge.copyWith(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w900,
+                              fontSize: 34,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'of ${NumberFormat("#,###").format(stepGoal)} steps walked',
-                          style: const TextStyle(
-                            fontSize: 14,
-                            color: AppColors.textSecondary,
-                            fontWeight: FontWeight.w500,
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              'of ${NumberFormat("#,###").format(stepGoal)} steps',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                fontSize: 14,
+                                color: AppColors.textSecondary,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Container(
-                          width: 8,
-                          height: 8,
-                          decoration: const BoxDecoration(
-                            color: AppColors.emerald,
-                            shape: BoxShape.circle,
+                        ],
+                      ),
+                      const SizedBox(height: 6),
+                      Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: const BoxDecoration(
+                              color: AppColors.positive,
+                              shape: BoxShape.circle,
+                            ),
                           ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${((_todaySteps / stepGoal) * 100).toStringAsFixed(1)}% of daily goal reached',
-                          style: const TextStyle(fontSize: 12, color: AppColors.emeraldLight),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              '${((_todaySteps / stepGoal) * 100).toStringAsFixed(1)}% of daily goal reached',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(fontSize: 12, color: AppColors.positive),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
                 ),
                 IconButton(
                   icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 20),
@@ -249,7 +259,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                       ),
                       Text(
                         'TAP TO SYNC / CONNECT',
-                        style: TextStyle(fontSize: 10, color: AppColors.cyan, fontWeight: FontWeight.w700),
+                        style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
@@ -262,10 +272,10 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2563EB).withOpacity(0.15),
+                              color: AppColors.primary.withOpacity(0.15),
                               borderRadius: BorderRadius.circular(10),
                             ),
-                            child: const Icon(Icons.favorite_rounded, color: Color(0xFF38BDF8), size: 20),
+                            child: const Icon(Icons.favorite_rounded, color: AppColors.primary, size: 20),
                           ),
                           const SizedBox(width: 12),
                           const Text(
@@ -279,9 +289,9 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.cyan),
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
                               )
-                            : const Icon(Icons.sync_rounded, color: AppColors.cyan, size: 22),
+                            : const Icon(Icons.sync_rounded, color: AppColors.primary, size: 22),
                         onPressed: _isRefreshing ? null : _requestHealthConnectPermissions,
                       ),
                     ],
@@ -314,7 +324,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                       const SnackBar(content: Text('Evening step goal reminder set for 8:00 PM')),
                     );
                   },
-                  child: const Text('SET', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.w700)),
+                  child: const Text('SET', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -336,10 +346,10 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.amber.withOpacity(0.12),
+                    color: AppColors.attention.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.directions_walk_rounded, color: AppColors.amber, size: 24),
+                  child: const Icon(Icons.directions_walk_rounded, color: AppColors.attention, size: 24),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -476,7 +486,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                                 barRods: [
                                   BarChartRodData(
                                     toY: item.steps.toDouble(),
-                                    color: isMet ? AppColors.emerald : const Color(0xFF67E8F9),
+                                    color: isMet ? AppColors.positive : AppColors.primary,
                                     width: 22,
                                     borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                                   ),
@@ -521,11 +531,11 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 ),
                 Container(
                   padding: const EdgeInsets.all(10),
-                  decoration: const BoxDecoration(
-                    color: Color(0xFF99F6E4),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.15),
                     shape: BoxShape.circle,
                   ),
-                  child: const Icon(Icons.star_rounded, color: Colors.white, size: 24),
+                  child: const Icon(Icons.star_rounded, color: AppColors.primary, size: 24),
                 ),
               ],
             ),

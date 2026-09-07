@@ -35,8 +35,8 @@ class MacroBarsGrid extends StatelessWidget {
                 consumed: proteinConsumed,
                 target: proteinTarget,
                 unit: 'g',
-                color: AppColors.coral,
                 icon: Icons.fitness_center_rounded,
+                isProtein: true,
               ),
             ),
             const SizedBox(width: 12),
@@ -46,7 +46,6 @@ class MacroBarsGrid extends StatelessWidget {
                 consumed: carbsConsumed,
                 target: carbsTarget,
                 unit: 'g',
-                color: AppColors.amber,
                 icon: Icons.bolt_rounded,
               ),
             ),
@@ -61,7 +60,6 @@ class MacroBarsGrid extends StatelessWidget {
                 consumed: fatConsumed,
                 target: fatTarget,
                 unit: 'g',
-                color: AppColors.violet,
                 icon: Icons.pie_chart_rounded,
               ),
             ),
@@ -72,7 +70,6 @@ class MacroBarsGrid extends StatelessWidget {
                 consumed: fiberConsumed,
                 target: fiberTarget,
                 unit: 'g',
-                color: AppColors.teal,
                 icon: Icons.eco_rounded,
               ),
             ),
@@ -88,22 +85,55 @@ class _MacroCard extends StatelessWidget {
   final double consumed;
   final double target;
   final String unit;
-  final Color color;
   final IconData icon;
+  final bool isProtein;
 
   const _MacroCard({
     required this.name,
     required this.consumed,
     required this.target,
     required this.unit,
-    required this.color,
     required this.icon,
+    this.isProtein = false,
   });
+
+  Color _resolveColor() {
+    if (target <= 0) return AppColors.primary;
+    // Special-cased Protein: Blue in-progress, Green when reached or exceeded. NEVER turns Amber.
+    if (isProtein) {
+      return consumed >= target ? AppColors.positive : AppColors.primary;
+    }
+    // Carbs, Fat, Fiber: Blue in-progress, Green 95-105%, Amber over 105%
+    if (consumed > target * 1.05) {
+      return AppColors.attention;
+    }
+    if (consumed >= target * 0.95) {
+      return AppColors.positive;
+    }
+    return AppColors.primary;
+  }
 
   @override
   Widget build(BuildContext context) {
     final progress = target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
-    final remaining = (target - consumed).clamp(0.0, target);
+    final stateColor = _resolveColor();
+
+    final isExceeded = !isProtein && (consumed > target * 1.05);
+    final isTargetMet = isProtein
+        ? consumed >= target
+        : (consumed >= target * 0.95 && consumed <= target * 1.05);
+
+    final String statusLabel;
+    if (isExceeded) {
+      statusLabel = '${(consumed - target).toStringAsFixed(0)}$unit over';
+    } else if (isTargetMet) {
+      statusLabel = isProtein && consumed > target
+          ? '+${(consumed - target).toStringAsFixed(0)}$unit surplus'
+          : 'Goal reached';
+    } else {
+      final remaining = (target - consumed).clamp(0.0, target);
+      statusLabel = '${remaining.toStringAsFixed(0)}$unit left';
+    }
 
     return Container(
       padding: const EdgeInsets.all(14),
@@ -126,7 +156,7 @@ class _MacroCard extends StatelessWidget {
                   color: AppColors.textSecondary,
                 ),
               ),
-              Icon(icon, size: 16, color: color),
+              Icon(icon, size: 16, color: AppColors.textMuted),
             ],
           ),
           const SizedBox(height: 8),
@@ -157,17 +187,19 @@ class _MacroCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.cardElevated,
-              valueColor: AlwaysStoppedAnimation<Color>(color),
+              valueColor: AlwaysStoppedAnimation<Color>(stateColor),
               minHeight: 6,
             ),
           ),
           const SizedBox(height: 4),
           Text(
-            '${remaining.toStringAsFixed(0)}$unit left',
+            statusLabel,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
               fontSize: 11,
               fontWeight: FontWeight.w500,
-              color: remaining == 0 ? color : AppColors.textMuted,
+              color: isTargetMet || isExceeded ? stateColor : AppColors.textMuted,
             ),
           ),
         ],

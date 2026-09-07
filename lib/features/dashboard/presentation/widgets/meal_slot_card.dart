@@ -46,7 +46,10 @@ class MealSlotCard extends StatelessWidget {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
+                      Wrap(
+                        crossAxisAlignment: WrapCrossAlignment.center,
+                        spacing: 8,
+                        runSpacing: 4,
                         children: [
                           Text(
                             title,
@@ -56,7 +59,6 @@ class MealSlotCard extends StatelessWidget {
                               color: AppColors.textPrimary,
                             ),
                           ),
-                          const SizedBox(width: 8),
                           Container(
                             padding: const EdgeInsets.symmetric(
                                 horizontal: 6, vertical: 2),
@@ -94,7 +96,7 @@ class MealSlotCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.emeraldLight,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
@@ -102,7 +104,7 @@ class MealSlotCard extends StatelessWidget {
                       style: const TextStyle(
                         fontSize: 12,
                         fontWeight: FontWeight.w600,
-                        color: AppColors.coralLight,
+                        color: AppColors.textSecondary,
                       ),
                     ),
                   ],
@@ -169,13 +171,13 @@ class MealSlotCard extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onAddTap,
-                icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.emerald),
+                icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.primary),
                 label: Text(
                   'Add to $title',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.emerald,
+                    color: AppColors.primary,
                   ),
                 ),
                 style: OutlinedButton.styleFrom(

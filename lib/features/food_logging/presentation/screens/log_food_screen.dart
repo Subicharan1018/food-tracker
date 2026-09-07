@@ -114,10 +114,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _MacroMini(label: 'Calories', value: '${calories.toInt()}', unit: 'kcal', color: AppColors.emerald),
-                        _MacroMini(label: 'Protein', value: protein.toStringAsFixed(1), unit: 'g', color: AppColors.coral),
-                        _MacroMini(label: 'Carbs', value: carbs.toStringAsFixed(1), unit: 'g', color: AppColors.amber),
-                        _MacroMini(label: 'Fat', value: fat.toStringAsFixed(1), unit: 'g', color: AppColors.violet),
+                        _MacroMini(label: 'Calories', value: '${calories.toInt()}', unit: 'kcal', color: AppColors.primary),
+                        _MacroMini(label: 'Protein', value: protein.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
+                        _MacroMini(label: 'Carbs', value: carbs.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
+                        _MacroMini(label: 'Fat', value: fat.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
                       ],
                     ),
                   ),
@@ -139,7 +139,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline_rounded),
-                            color: AppColors.emerald,
+                            color: AppColors.primary,
                             onPressed: portionQty > 0.25
                                 ? () => setModalState(() => portionQty -= 0.25)
                                 : null,
@@ -162,7 +162,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline_rounded),
-                            color: AppColors.emerald,
+                            color: AppColors.primary,
                             onPressed: () => setModalState(() => portionQty += 0.25),
                           ),
                         ],
@@ -182,10 +182,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: selected ? AppColors.emerald : AppColors.card,
+                            color: selected ? AppColors.primary : AppColors.card,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: selected ? AppColors.emerald : AppColors.border,
+                              color: selected ? AppColors.primary : AppColors.border,
                             ),
                           ),
                           child: Text(
@@ -193,7 +193,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: selected ? Colors.black : AppColors.textSecondary,
+                              color: selected ? Colors.white : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -209,8 +209,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.emerald,
-                        foregroundColor: Colors.black,
+                        backgroundColor: AppColors.primary,
+                        foregroundColor: Colors.white,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -338,7 +338,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
               child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
               onPressed: () async {
                 final name = nameCtrl.text.trim();
                 final kcal = double.tryParse(kcalCtrl.text) ?? 0.0;
@@ -375,7 +375,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   );
                 }
               },
-              child: const Text('Add Entry', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700)),
+              child: const Text('Add Entry', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
             ),
           ],
         );
@@ -393,8 +393,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
         actions: [
           TextButton.icon(
             onPressed: _showManualEntryDialog,
-            icon: const Icon(Icons.edit_note_rounded, color: AppColors.emerald),
-            label: const Text('Manual Entry', style: TextStyle(color: AppColors.emerald, fontWeight: FontWeight.w600)),
+            icon: const Icon(Icons.edit_note_rounded, color: AppColors.primary),
+            label: const Text('Manual Entry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -481,7 +481,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
           // Food items list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.emerald))
+                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
                 : _searchResults.isEmpty
                     ? Center(
                         child: Column(
@@ -493,9 +493,9 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: _showManualEntryDialog,
-                              icon: const Icon(Icons.add, color: Colors.black),
-                              label: const Text('Add Custom Food', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w700)),
-                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.emerald),
+                              icon: const Icon(Icons.add, color: Colors.white),
+                              label: const Text('Add Custom Food', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
                             ),
                           ],
                         ),
@@ -515,10 +515,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             trailing: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.emerald.withOpacity(0.12),
+                                color: AppColors.primary.withOpacity(0.12),
                                 borderRadius: BorderRadius.circular(8),
                               ),
-                              child: const Icon(Icons.add_rounded, color: AppColors.emerald, size: 20),
+                              child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
                             ),
                             onTap: () => _showPortionDialog(item),
                           );
@@ -545,14 +545,14 @@ class _SlotChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.emerald,
+      selectedColor: AppColors.primary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.black : AppColors.textSecondary,
+        color: selected ? Colors.white : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.emerald : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
       showCheckmark: false,
     );
   }

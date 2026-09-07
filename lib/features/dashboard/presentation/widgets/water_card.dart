@@ -33,7 +33,7 @@ class WaterTrackingCard extends StatelessWidget {
             children: [
               Row(
                 children: const [
-                  Icon(Icons.water_drop_rounded, color: AppColors.cyan, size: 20),
+                  Icon(Icons.water_drop_rounded, color: AppColors.primary, size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Water & Hydration',
@@ -50,7 +50,7 @@ class WaterTrackingCard extends StatelessWidget {
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.cyan,
+                  color: AppColors.primary,
                 ),
               ),
             ],
@@ -115,7 +115,7 @@ class WaterTrackingCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.cardElevated,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.cyan),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
               minHeight: 8,
             ),
           ),
@@ -139,16 +139,16 @@ class _QuickWaterButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.cyan.withOpacity(0.12),
+          color: AppColors.primary.withOpacity(0.12),
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.cyan.withOpacity(0.3)),
+          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
         ),
         child: Text(
           label,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.cyan,
+            color: AppColors.primary,
           ),
         ),
       ),
