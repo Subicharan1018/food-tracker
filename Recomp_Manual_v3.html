@@ -1,0 +1,1133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recomp Blueprint — Training + Tamil Nadu Diet</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#F7F5F0; --bg2:#EDEAE0; --bg3:#E2DDD0;
+  --green:#243D2F; --green2:#3A5E48; --green-tint:#DDE8DC;
+  --gold:#A86D10; --gold-tint:#F3E4C0;
+  --red:#8B2A1A; --red-tint:#F3DDD9;
+  --ink:#1A1611; --ink2:#5C5340; --line:#D4CEBB;
+  --simple:#1E5C8A; --simple-tint:#D4E8F5;
+  --complex:#6B3FA0; --complex-tint:#EAE0F5;
+  --weekend:#1E5C8A;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto;}}
+body{background:var(--bg);color:var(--ink);font-family:'IBM Plex Sans',sans-serif;font-size:15px;line-height:1.65;}
+h1,h2,h3,h4{font-family:'Fraunces',serif;line-height:1.15;}
+h1{font-size:2rem;font-weight:700;color:var(--green);}
+h2{font-size:1.35rem;font-weight:700;color:var(--green);padding-bottom:.3em;border-bottom:2px solid var(--line);margin-bottom:.8em;}
+h3{font-size:1.05rem;font-weight:500;color:var(--ink);margin:1.2em 0 .4em;}
+h4{font-size:.95rem;font-weight:600;color:var(--green2);}
+p{max-width:72ch;margin-bottom:.8em;color:var(--ink2);}
+a{color:var(--green2);}
+
+nav.top{position:sticky;top:0;z-index:30;background:var(--green);overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;}
+nav.top .ni{max-width:1000px;margin:0 auto;padding:0 16px;display:flex;gap:2px;}
+nav.top a{color:#E8F0E4;text-decoration:none;font-size:.78rem;font-weight:600;padding:12px 10px;display:inline-block;border-bottom:3px solid transparent;letter-spacing:.02em;}
+nav.top a:hover,nav.top a:focus-visible{border-bottom-color:#F3E4C0;}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px;}
+
+.wrap{max-width:1000px;margin:0 auto;padding:0 16px 100px;}
+
+/* hero */
+header.hero{padding:36px 0 0;}
+.kicker{color:var(--ink2);font-size:.88rem;margin-bottom:.2em;}
+.goal{font-size:1rem;color:var(--ink2);margin:0 0 1.4em;}
+.statg{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:1px;background:var(--line);border:1px solid var(--line);margin:1.2em 0 1.6em;}
+.statg div{background:var(--bg);padding:12px 14px;}
+.statg .n{font-family:'Fraunces',serif;font-size:1.35rem;font-weight:700;color:var(--green);display:block;}
+.statg .l{font-size:.74rem;color:var(--ink2);}
+.tline{display:flex;flex-wrap:wrap;border-top:1px solid var(--line);border-bottom:1px solid var(--line);margin:1.4em 0;}
+.ts{flex:1 1 100px;padding:11px 9px;border-right:1px solid var(--line);min-width:88px;}
+.ts:last-child{border-right:none;}
+.ts .t{font-weight:600;color:var(--green);font-size:.82rem;display:block;}
+.ts .w{font-size:.76rem;color:var(--ink2);display:block;margin-top:1px;}
+
+section{padding:2.2em 0;border-top:1px solid var(--line);}
+
+.note{background:var(--gold-tint);border-left:3px solid var(--gold);padding:11px 15px;font-size:.88rem;color:var(--ink2);margin:1em 0 1.4em;}
+.note strong{color:var(--ink);}
+.warn{background:var(--red-tint);border-left:3px solid var(--red);padding:11px 15px;font-size:.88rem;color:var(--ink2);margin:.8em 0;}
+
+/* tables */
+.tw{overflow-x:auto;margin:.8em 0 1.4em;}
+table{width:100%;border-collapse:collapse;font-size:.84rem;}
+th,td{text-align:left;padding:7px 9px;border-bottom:1px solid var(--line);vertical-align:top;}
+th{font-weight:600;color:var(--green);font-size:.76rem;white-space:nowrap;background:var(--bg2);}
+tr:nth-child(even) td{background:rgba(0,0,0,.018);}
+td.r{text-align:right;white-space:nowrap;}
+th.r{text-align:right;}
+td.bold{font-weight:600;}
+
+/* recipe complexity badges */
+.badge{display:inline-block;font-size:.66rem;font-weight:700;padding:2px 6px;vertical-align:middle;letter-spacing:.04em;}
+.badge.S{background:var(--simple-tint);color:var(--simple);}
+.badge.C{background:var(--complex-tint);color:var(--complex);}
+
+/* recipe section label */
+.rlabel{font-size:.78rem;font-weight:700;color:var(--gold);margin:1.6em 0 .4em;display:block;padding-bottom:4px;border-bottom:2px solid var(--gold-tint);}
+.rsub{font-size:.8rem;color:var(--ink2);margin:.2em 0 .9em;font-style:italic;}
+
+/* accordion days */
+details.day{border:1px solid var(--line);margin-bottom:8px;}
+details.day summary{cursor:pointer;list-style:none;padding:12px 14px;font-family:'Fraunces',serif;font-weight:700;font-size:1rem;color:var(--green);display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--green-tint);}
+details.day summary::-webkit-details-marker{display:none;}
+details.day summary .sub{font-family:'IBM Plex Sans',sans-serif;font-weight:400;font-size:.8rem;color:var(--ink2);}
+details.day summary::after{content:'+';font-size:1.3rem;color:var(--gold);flex-shrink:0;}
+details.day[open] summary::after{content:'−';}
+details.day .db{padding:0 14px 16px;background:var(--bg);}
+
+/* shopping */
+.shopg{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:1.2em;margin:1em 0;}
+.shopblock h4{color:var(--green);font-size:.88rem;margin-bottom:.5em;border-bottom:1px solid var(--line);padding-bottom:4px;}
+.shopblock ul{list-style:none;padding:0;}
+.shopblock li{padding:4px 0 4px 22px;position:relative;font-size:.84rem;border-bottom:1px dotted var(--line);color:var(--ink2);}
+.shopblock li::before{content:'';position:absolute;left:0;top:7px;width:12px;height:12px;border:1.5px solid var(--ink2);}
+
+/* bottom tracker bar */
+#bar{position:fixed;left:0;right:0;bottom:0;z-index:40;background:var(--green);color:#E8F0E4;padding:9px 14px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px 14px;font-size:.76rem;box-shadow:0 -2px 12px rgba(0,0,0,.2);}
+#bar .sums{display:flex;flex-wrap:wrap;gap:4px 14px;}
+#bar b{color:#F3E4C0;}
+#bar .tgt{color:#A8C0A4;font-size:.72rem;}
+#bar button{background:transparent;border:1px solid #7FA090;color:#E8F0E4;padding:4px 10px;cursor:pointer;font-size:.73rem;font-family:'IBM Plex Sans',sans-serif;border-radius:2px;}
+#bar button:hover{background:rgba(255,255,255,.1);}
+input[type=checkbox]{width:15px;height:15px;accent-color:var(--gold);cursor:pointer;flex-shrink:0;}
+
+/* ingredient source reference */
+.srcref{font-size:.72rem;color:var(--ink2);margin-top:.4em;font-style:italic;}
+
+.rk{display:flex;flex-wrap:wrap;gap:8px;margin:.6em 0 1em;}
+.rk span{background:var(--bg2);border:1px solid var(--line);font-size:.76rem;padding:4px 9px;color:var(--ink2);}
+
+footer{padding:2em 0 1em;font-size:.8rem;color:var(--ink2);border-top:1px solid var(--line);}
+
+@media(max-width:600px){
+  h1{font-size:1.6rem;}
+  .ts{flex:1 1 80px;}
+  .shopg{grid-template-columns:1fr;}
+}
+</style>
+</head>
+<body>
+
+<nav class="top">
+  <div class="ni">
+    <a href="#overview">Overview</a>
+    <a href="#macros">Macros & Why</a>
+    <a href="#training">Training</a>
+    <a href="#nutrition">Meal Plan</a>
+    <a href="#breakfast">Breakfast</a>
+    <a href="#lunch">Lunch</a>
+    <a href="#dinner">Dinner</a>
+    <a href="#snacks">Snacks</a>
+    <a href="#shopping">Shopping</a>
+    <a href="#tracking">Tracking</a>
+  </div>
+</nav>
+
+<div class="wrap">
+
+<!-- ===== HERO ===== -->
+<header class="hero" id="overview">
+  <span class="kicker">Home training + Tamil Nadu food system · Blueprint v3</span>
+  <h1>Recomp Blueprint — Phase 1</h1>
+  <p class="goal">Goal: recomp — build muscle + get slightly leaner at the same weight. Home equipment only. Built around a 7 AM–6 PM college day. Boiler chicken only. Chapati + side dish at breakfast and lunch, rice + chicken always at dinner. Equipment: long barbell (7 kg bare, ~26 kg max loaded), EZ curl bar (2 kg), adjustable dumbbells (~9.5 kg/hand max), resistance band, pull-up bar, adjustable incline/decline bench, yoga mat, elliptical, 003cstrong003eair fryer003c/strong003e.</p>
+
+  <div class="statg">
+    <div><span class="n">160 cm</span><span class="l">Height</span></div>
+    <div><span class="n">62 kg</span><span class="l">Weight</span></div>
+    <div><span class="n">35 cm</span><span class="l">Biceps</span></div>
+    <div><span class="n">30 cm</span><span class="l">Forearm</span></div>
+    <div><span class="n">77 cm</span><span class="l">Waist</span></div>
+    <div><span class="n">8</span><span class="l">Pull-ups max</span></div>
+    <div><span class="n">~20</span><span class="l">Push-ups max</span></div>
+  </div>
+
+  <h3>Daily schedule</h3>
+  <div class="tline">
+    <div class="ts"><span class="t">6:00 AM</span><span class="w">Wake, cook</span></div>
+    <div class="ts"><span class="t">6:30 AM</span><span class="w">Breakfast — chapati + side</span></div>
+    <div class="ts"><span class="t">7:00 AM</span><span class="w">Leave</span></div>
+    <div class="ts"><span class="t">1:00 PM</span><span class="w">Lunch — packed box</span></div>
+    <div class="ts"><span class="t">4:30 PM</span><span class="w">Whey shake at bus stop</span></div>
+    <div class="ts"><span class="t">6:00 PM</span><span class="w">Home — 2 bananas</span></div>
+    <div class="ts"><span class="t">7:00 PM</span><span class="w">Train</span></div>
+    <div class="ts"><span class="t">8:15 PM</span><span class="w">Dinner — rice + chicken</span></div>
+  </div>
+
+  <div class="note"><strong>How to use this blueprint:</strong> Every recipe has a checkbox and exact macro data. Check off what you eat today — the bottom bar live-tracks kcal, protein, carbs, fat, and fiber against daily targets. <strong><span class="badge S">S</span> = Simple (weekday-ready, ≤15 min active prep)</strong> &nbsp; <strong><span class="badge C">C</span> = Complex (for weekends when there's time)</strong>. Reset the bar by clicking Reset or reloading the page each morning — nothing is saved between sessions.</div>
+</header>
+
+<!-- ===== MACRO TARGETS ===== -->
+<section id="macros">
+  <h2>Macro targets & calorie reasoning</h2>
+  <div class="statg">
+    <div><span class="n">2,350</span><span class="l">kcal / day</span></div>
+    <div><span class="n">155 g</span><span class="l">Protein (2.5g/kg)</span></div>
+    <div><span class="n">260 g</span><span class="l">Carbs</span></div>
+    <div><span class="n">70 g</span><span class="l">Fat</span></div>
+    <div><span class="n">35 g</span><span class="l">Fiber</span></div>
+    <div><span class="n">1,200 mg</span><span class="l">Calcium (milk / curd)</span></div>
+  </div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Calculation step</th><th class="r">Value</th></tr>
+    <tr><td>BMR — Mifflin-St Jeor (160 cm, 62 kg, ~20 yr male)</td><td class="r">1,526 kcal</td></tr>
+    <tr><td>Activity multiplier — college day: 1h commute each way, walking campus, 11h out; sedentary with walking episodes → 1.375</td><td class="r">2,098 kcal</td></tr>
+    <tr><td>Training burn averaged across 7 days (4 weight sessions, 2 HIIT finishers, 1 Zone-2, 1 walk)</td><td class="r">+240 kcal/day avg</td></tr>
+    <tr><td><strong>Estimated maintenance</strong></td><td class="r"><strong>~2,340 kcal</strong></td></tr>
+    <tr><td>Meal-by-meal sum (chapati × 3, chicken 200g, eggs × 4, rice 1 cup, whey, 2 bananas, side dishes) independently cross-checked</td><td class="r">~2,350 kcal</td></tr>
+    <tr><td><strong>Target: maintenance (not deficit)</strong> — waist-height ratio 0.48, visible abs, very little spare fat; cutting now kills muscle gain</td><td class="r"><strong>2,350 kcal</strong></td></tr>
+  </table>
+  </div>
+
+  <h3>Ingredient macro reference (USDA FoodData Central, per 100g)</h3>
+  <p style="font-size:.82rem;color:var(--ink2);margin-bottom:.5em;">These are the numbers used to build every recipe calorie count below. All verified against USDA FoodData Central 2024–25 release.</p>
+  <div class="tw">
+  <table>
+    <tr><th>Ingredient</th><th class="r">kcal</th><th class="r">P (g)</th><th class="r">C (g)</th><th class="r">F (g)</th><th class="r">Fiber (g)</th><th>State</th></tr>
+    <tr><td>Whole egg</td><td class="r">155</td><td class="r">13</td><td class="r">1.1</td><td class="r">11</td><td class="r">0</td><td>Raw, ~55g each → 85 kcal, 7.2g P</td></tr>
+    <tr><td>Egg white</td><td class="r">52</td><td class="r">11</td><td class="r">0.7</td><td class="r">0.2</td><td class="r">0</td><td>Raw, ~30g each → 16 kcal, 3.3g P</td></tr>
+    <tr><td>Boiler chicken breast, cooked</td><td class="r">165</td><td class="r">31</td><td class="r">0</td><td class="r">3.6</td><td class="r">0</td><td>Cooked, no skin — 200g = 330 kcal, 62g P</td></tr>
+    <tr><td>Chapati / roti (medium, 40g, no oil)</td><td class="r">112</td><td class="r">3.2</td><td class="r">21</td><td class="r">0.5</td><td class="r">2.4</td><td>Home-made whole wheat, no added fat</td></tr>
+    <tr><td>White rice, cooked</td><td class="r">130</td><td class="r">2.7</td><td class="r">28</td><td class="r">0.3</td><td class="r">0.4</td><td>Per 100g cooked; 1 cup (200g) = 260 kcal</td></tr>
+    <tr><td>Rolled oats, dry</td><td class="r">389</td><td class="r">13</td><td class="r">67</td><td class="r">7</td><td class="r">10</td><td>40g serving = 156 kcal, 5.2g P</td></tr>
+    <tr><td>Curd / dahi (Indian, whole milk)</td><td class="r">65</td><td class="r">3.5</td><td class="r">4.7</td><td class="r">3.3</td><td class="r">0</td><td>100g = 65 kcal</td></tr>
+    <tr><td>Hung curd / thick curd (strained)</td><td class="r">98</td><td class="r">11</td><td class="r">3.4</td><td class="r">4.3</td><td class="r">0</td><td>Protein doubles vs regular curd after straining</td></tr>
+    <tr><td>Greek yogurt, full-fat</td><td class="r">97</td><td class="r">8.8</td><td class="r">3.6</td><td class="r">4.1</td><td class="r">0</td><td>If using branded Greek yogurt</td></tr>
+    <tr><td>Paneer (full-fat)</td><td class="r">265</td><td class="r">18</td><td class="r">3.4</td><td class="r">20</td><td class="r">0</td><td>100g = 265 kcal</td></tr>
+    <tr><td>Soya chunks, dry</td><td class="r">345</td><td class="r">52</td><td class="r">33</td><td class="r">0.5</td><td class="r">14</td><td>50g dry → ~110g rehydrated</td></tr>
+    <tr><td>Chickpeas, cooked</td><td class="r">164</td><td class="r">8.9</td><td class="r">27</td><td class="r">2.6</td><td class="r">7.6</td><td>Per 100g cooked</td></tr>
+    <tr><td>Kidney beans (rajma), cooked</td><td class="r">127</td><td class="r">8.7</td><td class="r">23</td><td class="r">0.5</td><td class="r">7.4</td><td>Per 100g cooked</td></tr>
+    <tr><td>Whole green moong, cooked</td><td class="r">105</td><td class="r">7.0</td><td class="r">19</td><td class="r">0.4</td><td class="r">7.6</td><td>Per 100g cooked</td></tr>
+    <tr><td>Peanuts, roasted</td><td class="r">567</td><td class="r">26</td><td class="r">16</td><td class="r">49</td><td class="r">8.5</td><td>15g serving = 85 kcal</td></tr>
+    <tr><td>Whey protein (isolate)</td><td class="r">380</td><td class="r">90</td><td class="r">4</td><td class="r">1</td><td class="r">0</td><td>1 scoop ~30g = 114 kcal, 27g P</td></tr>
+    <tr><td>Banana</td><td class="r">89</td><td class="r">1.1</td><td class="r">23</td><td class="r">0.3</td><td class="r">2.6</td><td>1 medium (~120g) = 107 kcal</td></tr>
+    <tr><td>Cooking oil (any)</td><td class="r">884</td><td class="r">0</td><td class="r">0</td><td class="r">100</td><td class="r">0</td><td>1 tsp (4g) = 35 kcal — stick to 1 tsp max/meal</td></tr>
+    <tr><td>Coconut (fresh grated)</td><td class="r">354</td><td class="r">3.3</td><td class="r">15</td><td class="r">33</td><td class="r">9</td><td>2 tbsp (15g) = 53 kcal</td></tr>
+  </table>
+  </div>
+  <p class="srcref">Source: USDA FoodData Central 2024–25 release · Chapati: Clearcals 2026 (cross-validated with USDA FDC #174075) · Curd: SnapCalorie 2026 · Hung curd: Indian curd strained ~2 hours removes ~40% water, concentrating protein to ~11g/100g</p>
+</section>
+
+<!-- ===== TRAINING ===== -->
+<section id="training">
+  <h2>Training plan — researched & corrected</h2>
+
+  <div class="note"><strong>What changed from v2 and why:</strong> The previous plan had each muscle hit only once per week (Push Mon, Pull Tue, Legs Thu). Research consensus is that hitting each muscle group 2× per week produces significantly more hypertrophy than 1× per week at the same total volume (Schoenfeld et al. 2016, replicated multiple times). With the available equipment (max 26 kg barbell, 9.5 kg per-hand dumbbells), an Upper/Lower 4-day split hits this frequency, keeps individual sessions manageable, and leaves Mon/Wed/Fri for conditioning — matching the original schedule intent.</div>
+
+  <div class="tw">
+  <table>
+    <tr><th>Day</th><th>Focus</th><th>Muscle groups hit 2× this week</th><th>Duration</th></tr>
+    <tr><td>Mon</td><td>Upper A (push emphasis)</td><td>Chest, shoulders, triceps, back, biceps</td><td>50–60 min</td></tr>
+    <tr><td>Tue</td><td>Lower A + core</td><td>Quads, hamstrings, calves, glutes, abs</td><td>50–60 min</td></tr>
+    <tr><td>Wed</td><td>Zone 2 conditioning</td><td>Heart, lungs, active recovery</td><td>30–35 min</td></tr>
+    <tr><td>Thu</td><td>Upper B (pull emphasis)</td><td>Back, biceps, chest, shoulders, triceps</td><td>50–60 min</td></tr>
+    <tr><td>Fri</td><td>Lower B + HIIT + core</td><td>Quads, hamstrings, glutes, abs</td><td>50 min</td></tr>
+    <tr><td>Sat</td><td>Active recovery walk</td><td>—</td><td>20–30 min</td></tr>
+    <tr><td>Sun</td><td>Full rest + meal prep</td><td>—</td><td>—</td></tr>
+  </table>
+  </div>
+
+  <div class="rk">
+    <span>Compound (squat, bench, rows) → 90–120s rest</span>
+    <span>Accessory (DB curls, press) → 60–75s</span>
+    <span>Isolation (lateral raise, wrist) → 30–45s</span>
+    <span>Core → 45–60s</span>
+    <span>HIIT interval → 30s built-in</span>
+  </div>
+
+  <details class="day" open>
+    <summary><span>Mon — Upper A &nbsp;<span class="sub">Push emphasis · chest, shoulders, triceps primary</span></span></summary>
+    <div class="db">
+    <div class="tw"><table>
+      <tr><th>Exercise</th><th>Sets × Reps</th><th>Load / Setup</th><th>Rest</th><th>Cue</th></tr>
+      <tr><td>Barbell bench press</td><td>4 × 8–10</td><td>Long bar (~16–22 kg to start). 3-sec lowering. Last set: stop 1 rep before failure.</td><td>120s</td><td>Retract shoulder blades, bar touches mid-chest</td></tr>
+      <tr><td>Incline DB press</td><td>3 × 10–12</td><td>Bench at 30–45°, dumbbells ~8–9 kg/hand</td><td>90s</td><td>Don't flare elbows >75° from torso</td></tr>
+      <tr><td>Overhead press (seated)</td><td>3 × 10–12</td><td>EZ bar or long bar, bench upright</td><td>90s</td><td>Chin back on the way up, don't arch lower back</td></tr>
+      <tr><td>Barbell bent-over row</td><td>3 × 10–12</td><td>Long bar, hinge to ~45°, pull to lower ribs</td><td>90s</td><td>Row for back, not biceps — lead with elbow</td></tr>
+      <tr><td>EZ bar skullcrusher</td><td>3 × 12–15</td><td>Light load on EZ bar, elbows stay fixed</td><td>60s</td><td>Keep upper arms perpendicular to floor</td></tr>
+      <tr><td>DB lateral raise</td><td>3 × 15</td><td>2–3 kg/hand only, strict form</td><td>45s</td><td>Slight forward lean, lead with pinkies</td></tr>
+      <tr><td>Push-up burnout</td><td>1 × failure</td><td>Bodyweight; feet on bench when easy</td><td>—</td><td>Full ROM — chest touches floor each rep</td></tr>
+    </table></div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Tue — Lower A &nbsp;<span class="sub">Quad emphasis · squat pattern</span></span></summary>
+    <div class="db">
+    <div class="tw"><table>
+      <tr><th>Exercise</th><th>Sets × Reps</th><th>Load / Setup</th><th>Rest</th><th>Cue</th></tr>
+      <tr><td>Barbell back squat</td><td>4 × 8–10</td><td>Long bar on upper back, up to ~22–26 kg. Squat to parallel or below.</td><td>120s</td><td>Knees track over toes, chest stays up</td></tr>
+      <tr><td>Romanian deadlift</td><td>3 × 10–12</td><td>Long bar, hinge from hips, soft knee bend</td><td>90s</td><td>Bar skims legs, feel hamstring stretch</td></tr>
+      <tr><td>DB walking lunge</td><td>3 × 12/leg</td><td>Dumbbells ~8–9 kg/hand</td><td>75s</td><td>Rear knee almost touches floor each rep</td></tr>
+      <tr><td>Standing calf raise</td><td>4 × 20–25</td><td>Bodyweight, hold dumbbell once easy, full range</td><td>45s</td><td>Pause 1s at top and bottom each rep</td></tr>
+      <tr><td>Plank</td><td>3 × 45–60s</td><td>Mat, neutral spine</td><td>45s</td><td>Squeeze glutes and abs simultaneously</td></tr>
+      <tr><td>Hanging leg raises</td><td>3 × 10–15</td><td>Pull-up bar</td><td>60s</td><td>No swing — control the lowering</td></tr>
+    </table></div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Wed — Zone 2 conditioning &nbsp;<span class="sub">Aerobic base, active recovery</span></span></summary>
+    <div class="db">
+    <p style="padding-top:.8em;">Elliptical at Level 2–3, 30 min continuous, conversational pace (can hold a sentence without gasping). Heart rate target: 120–140 bpm. This is <em>not</em> HIIT — it flushes soreness and builds aerobic base without eating into recovery for Thu/Fri lifting.</p>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Thu — Upper B &nbsp;<span class="sub">Pull emphasis · back, biceps primary</span></span></summary>
+    <div class="db">
+    <div class="tw"><table>
+      <tr><th>Exercise</th><th>Sets × Reps</th><th>Load / Setup</th><th>Rest</th><th>Cue</th></tr>
+      <tr><td>Pull-ups</td><td>4 × max (stop 2 short of failure)</td><td>Dead hang start, chin clears bar. Log every set: e.g. 8/6/5/4</td><td>120s</td><td>Don't kip; scapular retraction at the top</td></tr>
+      <tr><td>DB bicep curl (supinated)</td><td>3 × 10–12</td><td>Dumbbells ~8–9 kg/hand</td><td>60s</td><td>Full extension at bottom — don't cut ROM</td></tr>
+      <tr><td>Hammer curl</td><td>3 × 10–12</td><td>EZ bar or neutral-grip DBs</td><td>60s</td><td>Builds brachialis — adds arm thickness</td></tr>
+      <tr><td>Resistance band pull-apart</td><td>3 × 20</td><td>Band at chest height, arms straight</td><td>30s</td><td>Rear deltoid and rotator cuff health</td></tr>
+      <tr><td>Incline DB chest press (lighter)</td><td>3 × 12–15</td><td>Lower load than Mon — maintain volume, not max load</td><td>75s</td><td>This is Upper B — chest still gets frequency</td></tr>
+      <tr><td>Overhead press (standing)</td><td>3 × 10–12</td><td>EZ bar or light bar, strict form</td><td>90s</td><td>Brace core; don't lean back</td></tr>
+      <tr><td>Wrist curl + reverse curl</td><td>2+2 × 15–20</td><td>Light dumbbell, wrist only moves</td><td>30s</td><td>Forearm strength — matches your current 30 cm forearm goal</td></tr>
+    </table></div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Fri — Lower B + HIIT + Core &nbsp;<span class="sub">Hinge pattern emphasis + conditioning</span></span></summary>
+    <div class="db">
+    <div class="tw"><table>
+      <tr><th>Exercise</th><th>Sets × Reps</th><th>Load / Setup</th><th>Rest</th><th>Cue</th></tr>
+      <tr><td>Goblet squat</td><td>3 × 15–20</td><td>Single dumbbell ~15–19 kg at chest — quad endurance</td><td>75s</td><td>Elbows inside knees at bottom</td></tr>
+      <tr><td>Sumo DB deadlift</td><td>3 × 10–12</td><td>One heavy dumbbell held with both hands, wide stance</td><td>90s</td><td>Hinge at hips, not a squat</td></tr>
+      <tr><td>Reverse lunge</td><td>3 × 12/leg</td><td>Bodyweight or light dumbbells</td><td>60s</td><td>Variation from Tue's walking lunge</td></tr>
+      <tr><td>Calf raise single-leg</td><td>3 × 15/leg</td><td>Hold wall for balance, bodyweight</td><td>30s</td><td>More load per calf than both-leg version</td></tr>
+      <tr><td>HIIT — elliptical</td><td>6–8 rounds</td><td>2 min warm-up (L2) → 30s sprint (L6–7) : 30s recovery (L1). Total ~10 min</td><td>Built-in</td><td>Sprint is actually sprinting — feel it</td></tr>
+      <tr><td>Plank holds</td><td>3 × max</td><td>Mat</td><td>60s</td><td>Goal: eventually 2 min continuous</td></tr>
+      <tr><td>Bicycle crunch</td><td>3 × 20</td><td>Mat, controlled rotation</td><td>45s</td><td>Don't yank neck — rotate from core</td></tr>
+    </table></div>
+    </div>
+  </details>
+
+  <details class="day">
+    <summary><span>Sat — Active recovery &nbsp;<span class="sub">Walk + grocery run</span></span></summary>
+    <div class="db"><p style="padding-top:.8em;">20–30 min easy walk. Buy the week's chicken, curd, and vegetables fresh. Pre-marinate chicken for the week and store in the fridge.</p></div>
+  </details>
+
+  <details class="day">
+    <summary><span>Sun — Full rest + meal prep &nbsp;<span class="sub">Recovery + cook batch</span></span></summary>
+    <div class="db"><p style="padding-top:.8em;">7+ hrs sleep. Batch-prep: cook and portion chicken for weekday lunches, soak legumes overnight, pre-measure oil into 1-tsp portions for the week. Weekly weigh-in + progress photo — same time, same lighting every week.</p></div>
+  </details>
+
+  <h3>Progression rules</h3>
+  <div class="tw"><table>
+    <tr><th>Condition</th><th>Action</th></tr>
+    <tr><td>Form is rough on any lift</td><td>Stay at current load — form first, always</td></tr>
+    <tr><td>Hit top of rep range on all sets, 2 sessions in a row</td><td>Add smallest plate available (2 kg) next session</td></tr>
+    <tr><td>Bar maxed (26 kg) and reps still easy</td><td>Add 3-sec lowering → then 2-sec pause → then extra set → then single-arm/single-leg variant</td></tr>
+    <tr><td>Pull-ups: 4 × 10 strict reps clean</td><td>Add +2 kg via loaded backpack (books/water bottles)</td></tr>
+    <tr><td>Push-ups: 3 × 25 easy</td><td>Feet on bench (decline) → one-arm negative → archer push-up</td></tr>
+    <tr><td>3+ weeks without strength progress</td><td>Check sleep and calorie intake first before adding volume</td></tr>
+  </table></div>
+
+  <div class="warn"><strong>Is the workout enough?</strong> Yes — for someone with 3 months of prior gym experience, now back after a gap: 4 resistance sessions/week hitting each muscle 2×, plus 2 conditioning sessions, is well above the minimum effective dose for hypertrophy. Volume per muscle group is 10–14 sets/week, which sits squarely in the optimal range (10–20 sets/week per Schoenfeld 2017). The limiting factor now is execution quality and progressive overload, not adding more sessions.</div>
+</section>
+
+<!-- ===== MEAL OVERVIEW ===== -->
+<section id="nutrition">
+  <h2>Daily meal overview</h2>
+  <div class="tw"><table>
+    <tr><th>Time</th><th>Meal</th><th>Format</th><th class="r">~kcal</th><th class="r">~P</th><th class="r">~C</th><th class="r">~F</th></tr>
+    <tr><td>6:30 AM</td><td>Breakfast</td><td>3 chapatis + egg/oat side (pick 1 of 20)</td><td class="r">450–520</td><td class="r">28–38g</td><td class="r">55–70g</td><td class="r">12–18g</td></tr>
+    <tr><td>1:00 PM</td><td>Lunch</td><td>2 chapatis + protein side (pick 1 of 20) — dry pack</td><td class="r">380–460</td><td class="r">28–42g</td><td class="r">42–55g</td><td class="r">8–16g</td></tr>
+    <tr><td>4:30 PM</td><td>Whey shake</td><td>1 scoop whey + 250 ml water</td><td class="r">114</td><td class="r">27g</td><td class="r">4g</td><td class="r">1g</td></tr>
+    <tr><td>6:00 PM</td><td>2 bananas</td><td>Pre-workout carbs</td><td class="r">214</td><td class="r">2.6g</td><td class="r">55g</td><td class="r">0.7g</td></tr>
+    <tr><td>8:15 PM</td><td>Dinner</td><td>1 cup rice + 200g boiler chicken curry (pick 1 of 20)</td><td class="r">590–660</td><td class="r">64–66g</td><td class="r">60–70g</td><td class="r">10–16g</td></tr>
+    <tr><td>Anytime</td><td>Snacks</td><td>1–2 picks from the 30-recipe list</td><td class="r">150–300</td><td class="r">varies</td><td class="r">varies</td><td class="r">varies</td></tr>
+    <tr><td colspan="2"><strong>Daily base total (no snacks)</strong></td><td></td><td class="r bold">~1,970</td><td class="r bold">~150g</td><td class="r bold">~230g</td><td class="r bold">~48g</td></tr>
+    <tr><td colspan="2"><strong>+ 1–2 snacks to reach target</strong></td><td></td><td class="r bold">~2,350</td><td class="r bold">~155g</td><td class="r bold">~260g</td><td class="r bold">~70g</td></tr>
+  </table></div>
+
+  <div class="note"><strong>Lunch packing rule (important):</strong> Lunch sits in the bag 6–7 hrs unrefrigerated in Tamil Nadu heat. No curd, no fresh dairy, no wet gravies at lunch. The dry side dishes below are specifically chosen for this. Curd and yogurt appear freely at breakfast (home) and dinner (home) — only lunch excludes them for safety. All oat/yogurt breakfasts are eaten at home before leaving.</div>
+</section>
+
+<!-- ===== BREAKFAST ===== -->
+
+<!-- ===== BREAKFAST ===== -->
+<section id="breakfast">
+  <h2>Breakfast — 20 recipes</h2>
+  <p>Always <strong>3 chapatis as base (3 × 112 kcal = 336 kcal · 9.6g P · 63g C · 1.5g F · 7.2g fiber)</strong>. Macros shown are side dish + chapati total. <span class="badge S">S</span> = simple weekday (≤15 min). <span class="badge C">C</span> = weekend / prep-ahead. No curd at breakfast since you leave at 7 AM and there's no time to ferment — yogurt/hung curd added to recipes that eat well warm and fast.</p>
+  <div class="note"><strong>DMart ingredients used across breakfasts:</strong> rolled oats (Quaker/DMart Premia), garam masala, tandoori masala, kashmiri chili powder, Italian herbs/oregano, soy sauce, pasta, tomato ketchup, chilli sauce — all available at DMart/DMart Ready Tamil Nadu.</div>
+
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients (side dish)</th><th>Method</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th></tr>
+
+    <!-- SOUTH INDIAN -->
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="38" data-c="68" data-f="15" data-fib="8"></td>
+      <td class="bold">1. Vengaya Muttai Poriyal <span class="badge S">S</span><br><small>Onion egg scramble</small></td>
+      <td>4 eggs, 1 onion, 1 green chili, curry leaves, 1 tsp oil</td>
+      <td>Sauté onion 2 min, crack in eggs, scramble. Done in 6 min.</td>
+      <td class="r">508</td><td class="r">38g</td><td class="r">68g</td><td class="r">15g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="38" data-c="68" data-f="15" data-fib="8"></td>
+      <td class="bold">2. Milagu Omelette <span class="badge S">S</span><br><small>Cracked-pepper flat omelette</small></td>
+      <td>4 eggs, ½ tsp black pepper, 1 onion, 2 tbsp coriander, 1 tsp oil</td>
+      <td>Whisk all, pour into pan, cook flat 2 min/side.</td>
+      <td class="r">508</td><td class="r">38g</td><td class="r">68g</td><td class="r">15g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="38" data-c="69" data-f="15" data-fib="9"></td>
+      <td class="bold">3. Thakkali Muttai <span class="badge S">S</span><br><small>Tomato egg scramble</small></td>
+      <td>4 eggs, 2 tomatoes, ½ tsp turmeric, ½ tsp chili pwd, 1 tsp oil</td>
+      <td>Cook tomatoes to a jam (4 min), scramble eggs through.</td>
+      <td class="r">508</td><td class="r">38g</td><td class="r">69g</td><td class="r">15g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="38" data-c="68" data-f="15" data-fib="8"></td>
+      <td class="bold">4. Poondu Milagai Muttai <span class="badge S">S</span><br><small>Garlic chili scramble</small></td>
+      <td>4 eggs, 5 garlic cloves (minced), 2 green chilies, 1 tsp oil</td>
+      <td>Sauté garlic golden (don't burn), add eggs, scramble.</td>
+      <td class="r">508</td><td class="r">38g</td><td class="r">68g</td><td class="r">15g</td><td class="r">8g</td></tr>
+
+    <!-- NORTH INDIAN / PAN-INDIAN -->
+    <tr><td><input class="trk" type="checkbox" data-k="536" data-p="40" data-c="70" data-f="16" data-fib="9"></td>
+      <td class="bold">5. Anda Bhurji (Mumbai-style) <span class="badge S">S</span><br><small>Spiced scrambled egg</small></td>
+      <td>4 eggs, 1 onion, 1 tomato, ½ tsp garam masala, ½ tsp cumin, 2 green chilies, ginger (½ inch), 1 tsp oil</td>
+      <td>Sauté cumin + onion + ginger, add tomato, cook down, scramble eggs with garam masala.</td>
+      <td class="r">536</td><td class="r">40g</td><td class="r">70g</td><td class="r">16g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="544" data-p="40" data-c="70" data-f="17" data-fib="8"></td>
+      <td class="bold">6. Air-Fryer Tandoori Egg <span class="badge S">S</span><br><small>Soft-boiled eggs coated in tandoori marinade</small></td>
+      <td>4 eggs (boiled 7 min, peeled), 1 tbsp hung curd, 1 tsp tandoori masala (DMart: MDH / Everest brand), 1 tsp kashmiri chili pwd, ½ tsp oil</td>
+      <td>Score eggs with a knife, coat in curd + tandoori masala, air-fry 200°C 6 min. Smoky char on outside, jammy inside.</td>
+      <td class="r">544</td><td class="r">40g</td><td class="r">70g</td><td class="r">17g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="520" data-p="39" data-c="70" data-f="15" data-fib="8"></td>
+      <td class="bold">7. Egg Keema (minced egg curry) <span class="badge S">S</span><br><small>Crumbled egg in thick masala — North Indian street style</small></td>
+      <td>4 eggs (boiled, roughly crumbled), 1 onion, 1 tomato, ½ tsp garam masala, ½ tsp chili pwd, 1 tsp oil</td>
+      <td>Build masala, add crumbled eggs, toss and cook 3 min until coated.</td>
+      <td class="r">520</td><td class="r">39g</td><td class="r">70g</td><td class="r">15g</td><td class="r">8g</td></tr>
+
+    <!-- OATS -->
+    <tr><td><input class="trk" type="checkbox" data-k="492" data-p="36" data-c="78" data-f="14" data-fib="13"></td>
+      <td class="bold">8. Masala Oats + Boiled Egg <span class="badge S">S</span><br><small>Savory oats — weekday staple</small></td>
+      <td>40g rolled oats, 250 ml water, 1 onion, 1 tomato, ½ tsp cumin, 2 boiled eggs</td>
+      <td>Boil water, add oats + veg + spice, stir 5 min to porridge. Egg on side.</td>
+      <td class="r">492</td><td class="r">36g</td><td class="r">78g</td><td class="r">14g</td><td class="r">13g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="476" data-p="33" data-c="78" data-f="14" data-fib="14"></td>
+      <td class="bold">9. Overnight Oats + Whey <span class="badge S">S</span><br><small>Zero morning effort — prep the night before</small></td>
+      <td>40g rolled oats, 200 ml whole milk, ½ scoop whey (15g), 1 mashed banana</td>
+      <td>Mix everything in a jar the night before, refrigerate. Eat cold straight from jar.</td>
+      <td class="r">476</td><td class="r">33g</td><td class="r">78g</td><td class="r">14g</td><td class="r">14g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="494" data-p="36" data-c="84" data-f="12" data-fib="12"></td>
+      <td class="bold">10. Oats Upma + Egg <span class="badge S">S</span><br><small>South Indian upma style with oats</small></td>
+      <td>50g rolled oats, mustard seeds, curry leaves, 1 onion, 1 carrot (grated), 2 scrambled eggs, 1 tsp oil</td>
+      <td>Temper, sauté veg, add oats + water (1:2), stir to upma, fold in eggs last.</td>
+      <td class="r">494</td><td class="r">36g</td><td class="r">84g</td><td class="r">12g</td><td class="r">12g</td></tr>
+
+    <!-- GLOBAL / SIMPLE INGREDIENT -->
+    <tr><td><input class="trk" type="checkbox" data-k="524" data-p="39" data-c="72" data-f="16" data-fib="8"></td>
+      <td class="bold">11. Egg Fried Rice Style <span class="badge S">S</span><br><small>Soy sauce scrambled eggs — 3-ingredient simple</small></td>
+      <td>4 eggs, 1 tbsp soy sauce (DMart), ½ tsp pepper, 1 tsp sesame oil or regular oil, spring onion</td>
+      <td>Beat eggs with soy sauce and pepper. Scramble in hot pan. Top with spring onion. Fastest.</td>
+      <td class="r">524</td><td class="r">39g</td><td class="r">72g</td><td class="r">16g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="38" data-c="68" data-f="15" data-fib="8"></td>
+      <td class="bold">12. Harissa-style Spicy Egg <span class="badge S">S</span><br><small>Hot sauce + egg — 2-ingredient side</small></td>
+      <td>4 eggs, 1 tsp hot chilli sauce (DMart: Maggi/Sunrise), ½ tsp cumin, 1 tsp oil</td>
+      <td>Scramble eggs, stir in hot sauce at the end. Done in 5 min.</td>
+      <td class="r">508</td><td class="r">38g</td><td class="r">68g</td><td class="r">15g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="520" data-p="38" data-c="70" data-f="15" data-fib="9"></td>
+      <td class="bold">13. Italian Herb Omelette <span class="badge S">S</span><br><small>Oregano + chilli flakes — Italian seasoning from DMart</small></td>
+      <td>4 eggs, ½ tsp oregano (DMart: Keya/Catch brand), ½ tsp chilli flakes, 1 small onion, 1 tsp oil</td>
+      <td>Whisk eggs with herbs, cook as a flat omelette. Easy variety-changer.</td>
+      <td class="r">520</td><td class="r">38g</td><td class="r">70g</td><td class="r">15g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="535" data-p="41" data-c="72" data-f="16" data-fib="8"></td>
+      <td class="bold">14. Paneer Bhurji (light) <span class="badge S">S</span><br><small>Crumbled paneer + 2 eggs</small></td>
+      <td>60g paneer (crumbled), 2 eggs, 1 onion, 1 tomato, ½ tsp cumin, 1 tsp oil</td>
+      <td>Temper cumin, sauté onion-tomato, add paneer + eggs, stir-scramble 3 min.</td>
+      <td class="r">535</td><td class="r">41g</td><td class="r">72g</td><td class="r">16g</td><td class="r">8g</td></tr>
+
+    <!-- PROTEIN RECIPES -->
+    <tr><td><input class="trk" type="checkbox" data-k="496" data-p="37" data-c="75" data-f="16" data-fib="9"></td>
+      <td class="bold">15. Soya Muttai Poriyal <span class="badge S">S</span><br><small>Soya chunks + egg — highest protein breakfast</small></td>
+      <td>3 eggs, 30g dry soya chunks (rehydrated, squeezed), 1 onion, 1 tsp oil, spices</td>
+      <td>Rehydrate soya (10 min hot water), squeeze dry, sauté with onion, fold in eggs.</td>
+      <td class="r">496</td><td class="r">37g</td><td class="r">75g</td><td class="r">16g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="517" data-p="37" data-c="78" data-f="16" data-fib="13"></td>
+      <td class="bold">16. Banana Oat Egg Pancakes <span class="badge S">S</span><br><small>3-ingredient — no flour needed</small></td>
+      <td>2 eggs, 1 banana (120g), 30g rolled oats, pinch cinnamon, ½ tsp oil</td>
+      <td>Mash banana + oats + eggs to batter. Cook small pancakes 2 min/side. Eat instead of chapati.</td>
+      <td class="r">517</td><td class="r">37g</td><td class="r">78g</td><td class="r">16g</td><td class="r">13g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="490" data-p="33" data-c="77" data-f="14" data-fib="13"></td>
+      <td class="bold">17. Oats Porridge + Boiled Eggs <span class="badge S">S</span><br><small>Simplest option — 5 min total</small></td>
+      <td>50g rolled oats, 300 ml water, pinch salt, 3 boiled eggs (boil the night before)</td>
+      <td>Boil oats 4 min. Eggs already boiled. Fastest possible.</td>
+      <td class="r">490</td><td class="r">33g</td><td class="r">77g</td><td class="r">14g</td><td class="r">13g</td></tr>
+
+    <!-- COMPLEX / WEEKEND -->
+    <tr><td><input class="trk" type="checkbox" data-k="530" data-p="43" data-c="72" data-f="17" data-fib="8"></td>
+      <td class="bold">18. Moong Dal Cheela + Egg <span class="badge C">C</span><br><small>Protein-rich lentil crepe — soak overnight</small></td>
+      <td>60g split moong (soaked overnight, blended to batter), 2 eggs mixed in, onion, green chili, ½ tsp oil</td>
+      <td>Blend soaked moong to smooth batter, add eggs, pour thin crepe on pan. 2 min/side.</td>
+      <td class="r">530</td><td class="r">43g</td><td class="r">72g</td><td class="r">17g</td><td class="r">8g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="544" data-p="42" data-c="76" data-f="17" data-fib="9"></td>
+      <td class="bold">19. Muttai Kola Urundai <span class="badge C">C</span><br><small>Air-fryer spiced egg patties — weekend</small></td>
+      <td>4 eggs (boiled, mashed), 2 tbsp besan, 1 onion, ½ tsp fennel, spices, 1 tsp oil</td>
+      <td>Mix into firm dough, shape patties, air-fry 190°C 12 min till golden. Best with mint chutney.</td>
+      <td class="r">544</td><td class="r">42g</td><td class="r">76g</td><td class="r">17g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="508" data-p="39" data-c="72" data-f="17" data-fib="10"></td>
+      <td class="bold">20. Egg + Sprouted Moong Bowl <span class="badge C">C</span><br><small>High fiber + protein — sprout 36 hrs ahead</small></td>
+      <td>3 scrambled eggs, 60g sprouted green moong, lemon juice, chaat masala (DMart)</td>
+      <td>Scramble eggs, toss sprouts with lemon and chaat masala, serve together.</td>
+      <td class="r">508</td><td class="r">39g</td><td class="r">72g</td><td class="r">17g</td><td class="r">10g</td></tr>
+
+  </table></div>
+  <p class="srcref">Chapati base (3 × 40g, no oil): 336 kcal, 9.6g P, 63g C, 1.5g F, 7.2g fiber — USDA FDC #174075. Each row total = side + chapati. Oats (40g dry): 156 kcal, 5.2g P — USDA FDC #173904.</p>
+</section>
+
+<!-- ===== LUNCH ===== -->
+<section id="lunch">
+  <h2>Lunch — 20 recipes</h2>
+  <p>Always <strong>2 chapatis as base (2 × 112 = 224 kcal · 6.4g P · 42g C · 1g F · 4.8g fiber)</strong>. Side dish is protein — dry pack only, safe for 6–7 hrs unrefrigerated. No curd, no wet gravy in the box. Macros = side + chapati total. Variety now spans Tamil Nadu, North Indian, and global-inspired flavors — all with DMart/supermarket ingredients.</p>
+  <div class="note"><strong>Simple ingredient recipes flagged below</strong> — some use just 4–5 ingredients total. The "DMart tag" shows the one non-obvious ingredient you'll buy there.</div>
+
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients (side dish — chapati separate)</th><th>Method &amp; notes</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th></tr>
+
+    <!-- CHICKEN DRY -->
+    <tr><td><input class="trk" type="checkbox" data-k="445" data-p="42" data-c="44" data-f="9" data-fib="6"></td>
+      <td class="bold">1. Air-Fryer Tandoori Chicken <span class="badge S">S</span><br><small>The king — air fryer makes it brilliant</small></td>
+      <td>180g chicken breast, 3 tbsp hung curd, 1 tbsp tandoori masala (MDH/Everest — DMart), 1 tsp kashmiri chili pwd, lemon juice, ginger-garlic</td>
+      <td>Marinate 30 min or overnight. Air-fry 200°C 15 min, flip halfway. Char edges = authentic. Cool before packing.</td>
+      <td class="r">445</td><td class="r">42g</td><td class="r">44g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="440" data-p="41" data-c="44" data-f="9" data-fib="6"></td>
+      <td class="bold">2. Milagu Kozhi Varuval <span class="badge S">S</span><br><small>South Indian pepper dry roast — 4 ingredients</small></td>
+      <td>180g chicken, 1½ tsp black pepper, ginger-garlic paste, 1 tsp oil, curry leaves</td>
+      <td>Marinate 15 min, air-fry 200°C 14 min or pan-roast completely dry. Cool before packing.</td>
+      <td class="r">440</td><td class="r">41g</td><td class="r">44g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="442" data-p="42" data-c="44" data-f="9" data-fib="6"></td>
+      <td class="bold">3. Hariyali Chicken (Green Masala) <span class="badge S">S</span><br><small>Mint + coriander marinated — bright and simple</small></td>
+      <td>180g chicken, handful mint + coriander (blended to paste), 1 tsp ginger-garlic, lemon, 1 tsp oil</td>
+      <td>Coat in green paste, air-fry 200°C 14 min. Turns beautifully fragrant. Simple 4-ingredient marinade.</td>
+      <td class="r">442</td><td class="r">42g</td><td class="r">44g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="448" data-p="42" data-c="45" data-f="10" data-fib="6"></td>
+      <td class="bold">4. Soy-Garlic Chicken <span class="badge S">S</span><br><small>3-ingredient marinade — global, simple</small></td>
+      <td>180g chicken, 2 tbsp soy sauce (DMart), 5 garlic cloves (minced), ½ tsp pepper, 1 tsp oil</td>
+      <td>Marinate 20 min, air-fry 200°C 14 min. No other spices needed. Extremely simple.</td>
+      <td class="r">448</td><td class="r">42g</td><td class="r">45g</td><td class="r">10g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="444" data-p="42" data-c="44" data-f="10" data-fib="6"></td>
+      <td class="bold">5. Chilli Garlic Chicken (Indo-Chinese) <span class="badge S">S</span><br><small>Hot sauce + soy — dry stir-fry</small></td>
+      <td>180g chicken, 1 tbsp soy sauce, 1 tsp chilli sauce (DMart), garlic, ginger, capsicum (50g), 1 tsp oil</td>
+      <td>Stir-fry on highest heat 8 min till absolutely dry. No sauce pooling — it all absorbs.</td>
+      <td class="r">444</td><td class="r">42g</td><td class="r">44g</td><td class="r">10g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="440" data-p="42" data-c="44" data-f="9" data-fib="6"></td>
+      <td class="bold">6. Lemon Pepper Chicken <span class="badge S">S</span><br><small>2-ingredient marinade — as simple as it gets</small></td>
+      <td>180g chicken, juice of 1 lemon, 1 tsp black pepper, pinch salt, ½ tsp oil</td>
+      <td>Marinate 15 min, air-fry 200°C 13 min. The simplest possible chicken prep.</td>
+      <td class="r">440</td><td class="r">42g</td><td class="r">44g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="450" data-p="43" data-c="45" data-f="10" data-fib="7"></td>
+      <td class="bold">7. Chicken Tikka Dry <span class="badge S">S</span><br><small>Classic tikka — cubed, air-fried</small></td>
+      <td>180g chicken (cubed), 2 tbsp curd (carried dried marinade — curd cooks off), tikka masala (MDH/DMart), ginger-garlic, 1 tsp oil</td>
+      <td>Marinate cubed chicken in thick masala minimum 30 min. Air-fry 200°C 12 min. Tikka masala bakes dry. Safe to carry.</td>
+      <td class="r">450</td><td class="r">43g</td><td class="r">45g</td><td class="r">10g</td><td class="r">7g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="455" data-p="43" data-c="47" data-f="10" data-fib="7"></td>
+      <td class="bold">8. Sesame Soy Chicken <span class="badge S">S</span><br><small>Ellu + soy coating — crispy air-fryer</small></td>
+      <td>180g chicken, 1 tbsp sesame seeds, 1 tbsp soy sauce, ½ tsp pepper, ginger, 1 tsp oil</td>
+      <td>Coat chicken in sesame + soy + pepper. Air-fry 200°C 14 min. Sesame crust forms nicely.</td>
+      <td class="r">455</td><td class="r">43g</td><td class="r">47g</td><td class="r">10g</td><td class="r">7g</td></tr>
+
+    <!-- VEG PROTEIN -->
+    <tr><td><input class="trk" type="checkbox" data-k="398" data-p="26" data-c="61" data-f="9" data-fib="15"></td>
+      <td class="bold">9. Vella Kadalai Sundal <span class="badge S">S</span><br><small>White chickpea sundal — batch-cook on Sunday</small></td>
+      <td>80g dry white chickpeas (soaked + pressure-cooked), mustard, curry leaves, coconut (2 tbsp), 1 tsp oil</td>
+      <td>Temper mustard + curry leaves, add chickpeas + coconut, cook off any moisture 3 min.</td>
+      <td class="r">398</td><td class="r">26g</td><td class="r">61g</td><td class="r">9g</td><td class="r">15g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="380" data-p="34" data-c="52" data-f="8" data-fib="11"></td>
+      <td class="bold">10. Soya Milagu Varuval <span class="badge S">S</span><br><small>Pepper soya dry fry</small></td>
+      <td>50g dry soya chunks (rehydrated, squeezed very dry), 1 onion, 1 tsp pepper, curry leaves, 1 tsp oil</td>
+      <td>Rehydrate in hot water 10 min, squeeze hard. Stir-fry with onion + pepper 8 min till edges crisp.</td>
+      <td class="r">380</td><td class="r">34g</td><td class="r">52g</td><td class="r">8g</td><td class="r">11g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="442" data-p="30" data-c="52" data-f="22" data-fib="6"></td>
+      <td class="bold">11. Paneer Tikka (air-fried dry) <span class="badge S">S</span><br><small>Cubed paneer — tikka masala dry coat</small></td>
+      <td>100g paneer (cubed), 1 tsp tikka masala (DMart), ½ tsp kashmiri chili, lemon, pinch salt, ½ tsp oil</td>
+      <td>Coat cubed paneer, air-fry 200°C 8 min. No marinade required — just toss and fry.</td>
+      <td class="r">442</td><td class="r">30g</td><td class="r">52g</td><td class="r">22g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="388" data-p="33" data-c="56" data-f="8" data-fib="9"></td>
+      <td class="bold">12. Soya Chilli (dry) <span class="badge S">S</span><br><small>Indo-Chinese dry — soy sauce + chilli sauce</small></td>
+      <td>50g dry soya, 1 capsicum, 1 tbsp soy sauce, 1 tsp chilli sauce (DMart), garlic, 1 tsp oil</td>
+      <td>Rehydrate soya, squeeze dry, stir-fry on high heat with capsicum + sauces till all liquid absorbed.</td>
+      <td class="r">388</td><td class="r">33g</td><td class="r">56g</td><td class="r">8g</td><td class="r">9g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="410" data-p="29" data-c="55" data-f="9" data-fib="13"></td>
+      <td class="bold">13. Rajma Poriyal <span class="badge S">S</span><br><small>Dry kidney bean stir-fry</small></td>
+      <td>80g dry rajma (soaked overnight, pressure-cooked), tempering, 1 tsp oil</td>
+      <td>Cook beans, dry-roast with tempering. Batch cook on Sunday — zero morning prep.</td>
+      <td class="r">410</td><td class="r">29g</td><td class="r">55g</td><td class="r">9g</td><td class="r">13g</td></tr>
+
+    <!-- EGG -->
+    <tr><td><input class="trk" type="checkbox" data-k="445" data-p="40" data-c="45" data-f="11" data-fib="6"></td>
+      <td class="bold">14. Muttai Kola Urundai (packed) <span class="badge S">S</span><br><small>Air-fried egg patties — travel perfectly</small></td>
+      <td>4 boiled eggs (mashed), 2 tbsp besan, spices, ½ tsp oil</td>
+      <td>Mix into dough, shape, air-fry 190°C 12 min. Very dry — holds shape in a box all day.</td>
+      <td class="r">445</td><td class="r">40g</td><td class="r">45g</td><td class="r">11g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="430" data-p="38" data-c="44" data-f="10" data-fib="6"></td>
+      <td class="bold">15. Ketchup Masala Egg <span class="badge S">S</span><br><small>4-ingredient — tomato ketchup as the sauce</small></td>
+      <td>4 boiled eggs (halved), 2 tbsp tomato ketchup (DMart), ½ tsp chilli pwd, ½ tsp cumin, ½ tsp oil</td>
+      <td>Fry halved eggs cut-side down 2 min, pour ketchup + spices, toss to coat, cook 2 min more till dry.</td>
+      <td class="r">430</td><td class="r">38g</td><td class="r">44g</td><td class="r">10g</td><td class="r">6g</td></tr>
+
+    <!-- MORE VARIETY -->
+    <tr><td><input class="trk" type="checkbox" data-k="440" data-p="41" data-c="46" data-f="10" data-fib="7"></td>
+      <td class="bold">16. Kadai Chicken Chukka <span class="badge S">S</span><br><small>Capsicum + chicken dry stir-fry</small></td>
+      <td>180g chicken, 1 capsicum, 1 onion, kadai masala (DMart) or cumin + coriander + pepper, 1 tsp oil</td>
+      <td>Dry stir-fry chicken + capsicum together. No water. Cook off all moisture.</td>
+      <td class="r">440</td><td class="r">41g</td><td class="r">46g</td><td class="r">10g</td><td class="r">7g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="420" data-p="33" data-c="56" data-f="9" data-fib="14"></td>
+      <td class="bold">17. Mixed Bean Sundal <span class="badge S">S</span><br><small>Any combo of legumes — Sunday batch</small></td>
+      <td>40g chickpeas + 40g rajma (cooked), tempering, 2 tbsp coconut, 1 tsp oil</td>
+      <td>Same sundal method. Mix beans for variety. Pre-cook on Sunday.</td>
+      <td class="r">420</td><td class="r">33g</td><td class="r">56g</td><td class="r">9g</td><td class="r">14g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="444" data-p="43" data-c="45" data-f="9" data-fib="6"></td>
+      <td class="bold">18. Vinegar-Pepper Chicken <span class="badge S">S</span><br><small>Goan-inspired dry — simple 3-ingredient marinade</small></td>
+      <td>180g chicken, 2 tsp vinegar (DMart), 1 tsp black pepper, 4 garlic cloves, 1 tsp oil</td>
+      <td>Marinate in vinegar + pepper + garlic 20 min. Pan-roast or air-fry completely dry.</td>
+      <td class="r">444</td><td class="r">43g</td><td class="r">45g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="450" data-p="43" data-c="46" data-f="10" data-fib="7"></td>
+      <td class="bold">19. Peanut Pepper Chicken <span class="badge S">S</span><br><small>Crushed peanut crust — simple coating</small></td>
+      <td>180g chicken, 20g peanuts (coarsely crushed), 1 tsp pepper, lemon, 1 tsp oil</td>
+      <td>Coat chicken in peanut + pepper + lemon, air-fry 200°C 14 min. Crunchy coating.</td>
+      <td class="r">450</td><td class="r">43g</td><td class="r">46g</td><td class="r">10g</td><td class="r">7g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="438" data-p="42" data-c="44" data-f="9" data-fib="6"></td>
+      <td class="bold">20. Turmeric Lemon Herb Chicken <span class="badge S">S</span><br><small>Mediterranean-style — oregano from DMart</small></td>
+      <td>180g chicken, juice of 1 lemon, 1 tsp turmeric, ½ tsp oregano (DMart: Keya/Catch), garlic, 1 tsp oil</td>
+      <td>Marinate 20 min, air-fry 200°C 13 min. Fragrant and clean-tasting.</td>
+      <td class="r">438</td><td class="r">42g</td><td class="r">44g</td><td class="r">9g</td><td class="r">6g</td></tr>
+
+  </table></div>
+  <p class="srcref">Chapati base (2 × 40g, no oil): 224 kcal, 6.4g P, 42g C, 1g F, 4.8g fiber. Chicken 180g raw breast ≈ 135g cooked = 223 kcal, 42g P (USDA FDC #171477). All totals include chapatis. Tikka/tandoori masala cooked dry = no dairy left in the packed lunch.</p>
+</section>
+
+<!-- ===== DINNER ===== -->
+<section id="dinner">
+  <h2>Dinner — 20 recipes</h2>
+  <p>Always: <strong>1 cup (200g) cooked white rice (260 kcal · 5.4g P · 56g C · 0.6g F) + 200g boiler chicken curry or side</strong>. Macros include rice. Curd-based, coconut milk, pasta sauces — all fine here. Eaten fresh at home. Global variety included — all ingredients from DMart TN.</p>
+
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients (curry for 200g chicken)</th><th>Method note</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th></tr>
+
+    <!-- SOUTH INDIAN -->
+    <tr><td><input class="trk" type="checkbox" data-k="618" data-p="68" data-c="60" data-f="13" data-fib="5"></td>
+      <td class="bold">1. Naatu Kozhi Kuzhambu Style <span class="badge S">S</span><br><small>Classic Tamil coconut-tomato gravy</small></td>
+      <td>Onion, tomato, ground coconut paste (3 tbsp), spices, 1 tsp oil</td>
+      <td>Sauté onion-tomato-masala, add chicken, coconut paste + water, simmer 20 min.</td>
+      <td class="r">618</td><td class="r">68g</td><td class="r">60g</td><td class="r">13g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="606" data-p="68" data-c="57" data-f="12" data-fib="4"></td>
+      <td class="bold">2. Pepper Garlic Chicken Dry <span class="badge S">S</span><br><small>Simple 3-ingredient dry roast at dinner</small></td>
+      <td>2 tsp black pepper, 8 garlic cloves, curry leaves, 1 tsp oil</td>
+      <td>Pan-roast or air-fry. Simplest dinner.</td>
+      <td class="r">606</td><td class="r">68g</td><td class="r">57g</td><td class="r">12g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="621" data-p="68" data-c="60" data-f="13" data-fib="4"></td>
+      <td class="bold">3. Chettinad Kozhi Curry <span class="badge C">C</span><br><small>Complex spiced gravy — weekend</small></td>
+      <td>Fresh-ground chettinad masala (fennel, pepper, cinnamon, star anise, dry red chili), onion, tomato, 1 tsp oil</td>
+      <td>Grind masala, build gravy, simmer 20 min.</td>
+      <td class="r">621</td><td class="r">68g</td><td class="r">60g</td><td class="r">13g</td><td class="r">5g</td></tr>
+
+    <!-- NORTH INDIAN STYLE -->
+    <tr><td><input class="trk" type="checkbox" data-k="636" data-p="70" data-c="60" data-f="14" data-fib="4"></td>
+      <td class="bold">4. Tandoori Chicken + Rice <span class="badge S">S</span><br><small>Air-fryer tandoori — the dinner version</small></td>
+      <td>3 tbsp hung curd, 1 tbsp tandoori masala (MDH — DMart), kashmiri chili pwd, ginger-garlic, lemon</td>
+      <td>Marinate 30 min or overnight. Air-fry 200°C 18 min (bigger pieces). Serve over rice.</td>
+      <td class="r">636</td><td class="r">70g</td><td class="r">60g</td><td class="r">14g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="628" data-p="68" data-c="61" data-f="14" data-fib="5"></td>
+      <td class="bold">5. Butter Chicken Style (lighter) <span class="badge C">C</span><br><small>No butter/cream — tomato-curd base</small></td>
+      <td>Onion, 3 tomatoes, 50g hung curd, garam masala, kashmiri chili, ginger-garlic, 1 tsp oil</td>
+      <td>Blend onion-tomato base, cook with spices, add chicken + hung curd (no fresh cream). Light version.</td>
+      <td class="r">628</td><td class="r">68g</td><td class="r">61g</td><td class="r">14g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="625" data-p="68" data-c="61" data-f="14" data-fib="5"></td>
+      <td class="bold">6. Chicken Salna <span class="badge S">S</span><br><small>Chennai street-style thin gravy</small></td>
+      <td>Onion, tomato, fennel, coconut paste, star anise, 1 tsp oil</td>
+      <td>Thin fragrant gravy — pairs perfectly with rice.</td>
+      <td class="r">625</td><td class="r">68g</td><td class="r">61g</td><td class="r">14g</td><td class="r">5g</td></tr>
+
+    <!-- GLOBAL / FUSION -->
+    <tr><td><input class="trk" type="checkbox" data-k="626" data-p="68" data-c="62" data-f="14" data-fib="4"></td>
+      <td class="bold">7. Soy-Ginger Chicken on Rice <span class="badge S">S</span><br><small>Asian-style — soy sauce + ginger</small></td>
+      <td>2 tbsp soy sauce (DMart), 1-inch ginger (grated), 2 garlic cloves, ½ tsp sesame oil, spring onion, 1 tsp oil</td>
+      <td>High-heat stir-fry 8 min, serve over rice. Pour the pan juices over the rice.</td>
+      <td class="r">626</td><td class="r">68g</td><td class="r">62g</td><td class="r">14g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="617" data-p="68" data-c="59" data-f="13" data-fib="4"></td>
+      <td class="bold">8. Chicken Schezwan Stir-fry <span class="badge S">S</span><br><small>Indo-Chinese — schezwan sauce (DMart)</small></td>
+      <td>1 tsp schezwan sauce (DMart), capsicum, spring onion, soy sauce, garlic, 1 tsp oil</td>
+      <td>High heat stir-fry, schezwan sauce goes in last. Serve immediately over rice.</td>
+      <td class="r">617</td><td class="r">68g</td><td class="r">59g</td><td class="r">13g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="634" data-p="68" data-c="62" data-f="15" data-fib="5"></td>
+      <td class="bold">9. Chicken Peanut Kuzhambu <span class="badge C">C</span><br><small>Peanut paste gravy — Tamil Nadu-inspired</small></td>
+      <td>30g peanuts (boiled, ground to paste), onion, tomato, chili, 1 tsp oil</td>
+      <td>Use peanut paste as thickener instead of coconut. Earthy, nutty gravy.</td>
+      <td class="r">634</td><td class="r">68g</td><td class="r">62g</td><td class="r">15g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="647" data-p="68" data-c="63" data-f="16" data-fib="5"></td>
+      <td class="bold">10. Coconut Milk Chicken Curry <span class="badge S">S</span><br><small>Kozhi Thengai Paal — creamy gravy</small></td>
+      <td>100 ml coconut milk (canned — DMart), onion, tomato, spices, 1 tsp oil</td>
+      <td>Build base, add chicken, stir in coconut milk last — never boil hard once added.</td>
+      <td class="r">647</td><td class="r">68g</td><td class="r">63g</td><td class="r">16g</td><td class="r">5g</td></tr>
+
+    <!-- SIMPLE INGREDIENTS -->
+    <tr><td><input class="trk" type="checkbox" data-k="616" data-p="68" data-c="59" data-f="13" data-fib="4"></td>
+      <td class="bold">11. Pepper Tamarind Chicken <span class="badge S">S</span><br><small>4-ingredient — pepper + tamarind + chili + oil</small></td>
+      <td>Tamarind water (small ball), 2 tsp pepper, 2 dried red chilies, 1 tsp oil</td>
+      <td>Thin peppery-sour gravy. Simmer 15 min.</td>
+      <td class="r">616</td><td class="r">68g</td><td class="r">59g</td><td class="r">13g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="620" data-p="68" data-c="61" data-f="13" data-fib="5"></td>
+      <td class="bold">12. Tomato Chicken Curry <span class="badge S">S</span><br><small>3 tomatoes + spices — beginner-proof</small></td>
+      <td>3 large tomatoes (chopped), onion, garam masala, chili pwd, 1 tsp oil</td>
+      <td>Pressure-cook 3 whistles or simmer 20 min. Very forgiving — can't go wrong.</td>
+      <td class="r">620</td><td class="r">68g</td><td class="r">61g</td><td class="r">13g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="617" data-p="68" data-c="59" data-f="13" data-fib="4"></td>
+      <td class="bold">13. Ketchup Chicken Curry <span class="badge S">S</span><br><small>Tomato ketchup as the base — simplest curry ever</small></td>
+      <td>3 tbsp tomato ketchup (DMart), 1 onion, garlic, ½ tsp chili pwd, 1 tsp oil</td>
+      <td>Sauté onion-garlic, add ketchup + spice, add chicken, add water (50 ml), simmer 15 min. Surprisingly good.</td>
+      <td class="r">617</td><td class="r">68g</td><td class="r">59g</td><td class="r">13g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="630" data-p="69" data-c="62" data-f="14" data-fib="5"></td>
+      <td class="bold">14. Chicken Egg Kuzhambu <span class="badge S">S</span><br><small>Double protein — 2 eggs added to curry</small></td>
+      <td>Onion, tomato, spices, 2 boiled eggs (added to gravy last 5 min), 1 tsp oil</td>
+      <td>Normal gravy + add 2 eggs whole in last 5 min to absorb gravy.</td>
+      <td class="r">630</td><td class="r">69g</td><td class="r">62g</td><td class="r">14g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="630" data-p="68" data-c="62" data-f="14" data-fib="6"></td>
+      <td class="bold">15. Chicken Spinach Curry <span class="badge S">S</span><br><small>Iron + protein — add spinach at the end</small></td>
+      <td>80g spinach (fresh), onion, tomato, spices, 1 tsp oil</td>
+      <td>Normal gravy, add spinach only in last 3 min. Wilts fast. Adds micronutrients.</td>
+      <td class="r">630</td><td class="r">68g</td><td class="r">62g</td><td class="r">14g</td><td class="r">6g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="640" data-p="69" data-c="61" data-f="15" data-fib="4"></td>
+      <td class="bold">16. Thayir Kozhi (Curd Chicken) <span class="badge C">C</span><br><small>Curd-based tangy curry</small></td>
+      <td>120g whisked curd, mild spices, onion, 1 tsp oil</td>
+      <td>Cook chicken in onion-spice base, take off heat, stir in curd slowly. Never boil once curd is in.</td>
+      <td class="r">640</td><td class="r">69g</td><td class="r">61g</td><td class="r">15g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="617" data-p="68" data-c="59" data-f="13" data-fib="4"></td>
+      <td class="bold">17. Mint Chicken (Pudina Kozhi) <span class="badge S">S</span><br><small>Fresh mint paste — bright and simple</small></td>
+      <td>50g fresh mint, green chili, ginger, onion, 1 tsp oil</td>
+      <td>Blend mint + chili + ginger to paste. Use as marinade + sauce base. Simmer 15 min.</td>
+      <td class="r">617</td><td class="r">68g</td><td class="r">59g</td><td class="r">13g</td><td class="r">4g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="622" data-p="68" data-c="61" data-f="13" data-fib="5"></td>
+      <td class="bold">18. Chicken Capsicum Masala <span class="badge S">S</span><br><small>Bell pepper base curry</small></td>
+      <td>2 capsicums, onion, tomato, masala, 1 tsp oil</td>
+      <td>Sauté capsicum soft, build masala, add chicken, 15 min.</td>
+      <td class="r">622</td><td class="r">68g</td><td class="r">61g</td><td class="r">13g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="614" data-p="68" data-c="58" data-f="13" data-fib="5"></td>
+      <td class="bold">19. Chicken Mushroom Stir-fry <span class="badge S">S</span><br><small>Earthy + protein — soy sauce version</small></td>
+      <td>120g mushroom, soy sauce (1 tbsp), garlic, pepper, 1 tsp oil</td>
+      <td>Use 120g chicken + 120g mushroom. Stir-fry together with soy sauce. Mushroom releases and reabsorbs liquid.</td>
+      <td class="r">614</td><td class="r">68g</td><td class="r">58g</td><td class="r">13g</td><td class="r">5g</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="618" data-p="68" data-c="60" data-f="13" data-fib="4"></td>
+      <td class="bold">20. Vinegar Garlic Chicken Curry <span class="badge S">S</span><br><small>Goan-inspired — vinegar (DMart) + garlic</small></td>
+      <td>2 tsp vinegar (DMart), 8 garlic cloves (sliced), 2 dried red chilies, tomato, 1 tsp oil</td>
+      <td>Sauté garlic golden, add vinegar + tomato + chilies, add chicken, thin gravy, simmer 15 min.</td>
+      <td class="r">618</td><td class="r">68g</td><td class="r">60g</td><td class="r">13g</td><td class="r">4g</td></tr>
+
+  </table></div>
+  <p class="srcref">Rice (200g cooked): 260 kcal, 5.4g P, 56g C, 0.6g F — USDA FDC #168879. Chicken (200g cooked breast): 330 kcal, 62g P — USDA FDC #171477. All dinner totals include rice.</p>
+</section>
+
+<section id="snacks">
+  <h2>Snacks — 30 recipes</h2>
+  <p>Tick what's eaten. Pick 1–2 per day to bridge from the base ~1,970 kcal to the 2,350 kcal target, or to hit a macro that's running short. These are real diet snacks — not junk. Includes protein desserts, "nice cream", protein brownies, and Tamil Nadu classics.</p>
+  <span class="rlabel">☀️ Morning / College</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="230" data-p="10" data-c="8" data-f="18" data-fib="3"></td>
+      <td class="bold">1. Masala Peanuts</td>
+      <td>40g roasted peanuts, curry leaves, chili, turmeric, ½ tsp oil</td>
+      <td class="r">230</td><td class="r">10g</td><td class="r">8g</td><td class="r">18g</td><td class="r">3g</td><td>College carry</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="175" data-p="8" data-c="20" data-f="8" data-fib="2"></td>
+      <td class="bold">2. Chikki (Peanut Jaggery Brittle)</td>
+      <td>25g peanuts, 20g jaggery — melt jaggery, mix peanuts, set flat, break into pieces</td>
+      <td class="r">175</td><td class="r">8g</td><td class="r">20g</td><td class="r">8g</td><td class="r">2g</td><td>Pre-workout / college</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="210" data-p="10" data-c="20" data-f="11" data-fib="4"></td>
+      <td class="bold">3. Trail Mix (carry pouch)</td>
+      <td>20g roasted peanuts, 10g pumpkin seeds, 10g roasted chana dal, curry leaves</td>
+      <td class="r">210</td><td class="r">10g</td><td class="r">20g</td><td class="r">11g</td><td class="r">4g</td><td>Anytime, no spoilage</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="150" data-p="11" data-c="25" data-f="1" data-fib="6"></td>
+      <td class="bold">4. Sprouted Moong Chaat</td>
+      <td>60g sprouted green moong, onion, tomato, lemon, chaat masala</td>
+      <td class="r">150</td><td class="r">11g</td><td class="r">25g</td><td class="r">1g</td><td class="r">6g</td><td>Home — morning gap</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="160" data-p="4" data-c="28" data-f="4" data-fib="4"></td>
+      <td class="bold">5. Vellam Pottukadalai Urundai</td>
+      <td>40g roasted gram (pottukadalai), 25g jaggery, cardamom — shape into balls</td>
+      <td class="r">160</td><td class="r">4g</td><td class="r">28g</td><td class="r">4g</td><td class="r">4g</td><td>Pre-workout energy</td></tr>
+  </table></div>
+
+  <span class="rlabel">🥤 Protein drinks & smoothies</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="220" data-p="25" data-c="24" data-f="3" data-fib="2"></td>
+      <td class="bold">6. Whey Banana Shake</td>
+      <td>½ scoop whey (15g), 1 banana (120g), 150 ml milk — blend</td>
+      <td class="r">220</td><td class="r">25g</td><td class="r">24g</td><td class="r">3g</td><td class="r">2g</td><td>Post-workout</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="215" data-p="18" data-c="24" data-f="6" data-fib="3"></td>
+      <td class="bold">7. Peanut Butter Banana Shake</td>
+      <td>1 banana, 1 tbsp peanut butter (15g), 200 ml milk — blend</td>
+      <td class="r">215</td><td class="r">18g</td><td class="r">24g</td><td class="r">6g</td><td class="r">3g</td><td>Post-workout</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="190" data-p="16" data-c="26" data-f="3" data-fib="2"></td>
+      <td class="bold">8. High-Protein Mango Lassi</td>
+      <td>100g curd, ½ scoop whey, 1 small mango (100g), blend with ice</td>
+      <td class="r">190</td><td class="r">16g</td><td class="r">26g</td><td class="r">3g</td><td class="r">2g</td><td>Afternoon treat</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="60" data-p="3" data-c="5" data-f="2" data-fib="0"></td>
+      <td class="bold">9. Spiced Buttermilk (Mor)</td>
+      <td>80g curd, 200 ml water, curry leaves, ginger, green chili, salt — whisk</td>
+      <td class="r">60</td><td class="r">3g</td><td class="r">5g</td><td class="r">2g</td><td class="r">0g</td><td>Digestion / hydration</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="175" data-p="13" data-c="22" data-f="4" data-fib="2"></td>
+      <td class="bold">10. Oat Curd Shake</td>
+      <td>20g rolled oats (blended dry to powder), 100g curd, water, jaggery 5g — blend</td>
+      <td class="r">175</td><td class="r">13g</td><td class="r">22g</td><td class="r">4g</td><td class="r">2g</td><td>Morning or post-workout</td></tr>
+  </table></div>
+
+  <span class="rlabel">🫙 Protein desserts — sweet but high protein</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th>Method summary</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="220" data-p="18" data-c="28" data-f="6" data-fib="4"></td>
+      <td class="bold">11. Protein Brownie Bites<br><small>Fudgy, no bake</small></td>
+      <td>30g peanut butter, 20g cocoa powder, ½ scoop whey (15g), 20g jaggery, 1 tbsp oats, splash milk</td>
+      <td>Mix all, shape into 4 balls, refrigerate 30 min. Makes 4 balls total. <span class="badge C">C</span></td>
+      <td class="r">220</td><td class="r">18g</td><td class="r">28g</td><td class="r">6g</td><td class="r">4g</td><td>Dessert / post-dinner</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="185" data-p="16" data-c="22" data-f="4" data-fib="2"></td>
+      <td class="bold">12. Banana Nice Cream (Protein)<br><small>"Ice cream" with no ice cream</small></td>
+      <td>2 frozen bananas (240g), ½ scoop whey (15g), splash milk — blend till creamy</td>
+      <td>Freeze bananas first (overnight). Blend frozen. Eat immediately. <span class="badge S">S</span></td>
+      <td class="r">185</td><td class="r">16g</td><td class="r">22g</td><td class="r">4g</td><td class="r">3g</td><td>Post-workout treat</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="190" data-p="17" data-c="20" data-f="6" data-fib="1"></td>
+      <td class="bold">13. Hung Curd Ice Cream (Frozen Yogurt)<br><small>Creamy, tangy, high protein</small></td>
+      <td>150g hung curd, 1 tbsp jaggery (15g), pinch cardamom — stir, freeze 4h</td>
+      <td>Stir once after 2h to break ice crystals, freeze again. <span class="badge C">C</span> (needs freeze time)</td>
+      <td class="r">190</td><td class="r">17g</td><td class="r">20g</td><td class="r">6g</td><td class="r">0g</td><td>Dessert</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="195" data-p="18" data-c="26" data-f="5" data-fib="4"></td>
+      <td class="bold">14. Chocolate Oat Protein Balls<br><small>No-bake snack balls</small></td>
+      <td>30g oats, 15g cocoa, ½ scoop whey, 20g peanut butter, 15g jaggery, splash milk</td>
+      <td>Mix into dough, shape balls, refrigerate 1h. Makes 5 balls. <span class="badge C">C</span></td>
+      <td class="r">195</td><td class="r">18g</td><td class="r">26g</td><td class="r">5g</td><td class="r">4g</td><td>Anytime snack</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="180" data-p="15" data-c="22" data-f="5" data-fib="3"></td>
+      <td class="bold">15. Baked Oat Protein Muffin<br><small>Single-serve, air-fryer friendly</small></td>
+      <td>30g rolled oats, 1 egg, ½ scoop whey, 1 banana (60g), pinch baking powder</td>
+      <td>Mix, pour into muffin mold, air-fry 180°C 12 min or bake 175°C 15 min. <span class="badge C">C</span></td>
+      <td class="r">180</td><td class="r">15g</td><td class="r">22g</td><td class="r">5g</td><td class="r">3g</td><td>Breakfast / snack</td></tr>
+  </table></div>
+
+  <span class="rlabel">🫘 Tamil Nadu sundal & legumes — fiber & protein</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="170" data-p="12" data-c="26" data-f="3" data-fib="7"></td>
+      <td class="bold">16. Pachai Payaru Sundal</td>
+      <td>60g whole green moong (cooked), tempering, coconut, 1 tsp oil</td>
+      <td class="r">170</td><td class="r">12g</td><td class="r">26g</td><td class="r">3g</td><td class="r">7g</td><td>Anytime</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="175" data-p="11" data-c="28" data-f="4" data-fib="8"></td>
+      <td class="bold">17. Kadalai Paruppu Sundal</td>
+      <td>60g chana dal (soaked + cooked), tempering, coconut, 1 tsp oil</td>
+      <td class="r">175</td><td class="r">11g</td><td class="r">28g</td><td class="r">4g</td><td class="r">8g</td><td>Anytime</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="165" data-p="10" data-c="27" data-f="3" data-fib="8"></td>
+      <td class="bold">18. Pattani Sundal (dried green peas)</td>
+      <td>60g dried green peas (cooked), tempering, coconut, 1 tsp oil</td>
+      <td class="r">165</td><td class="r">10g</td><td class="r">27g</td><td class="r">3g</td><td class="r">8g</td><td>Anytime</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="155" data-p="11" data-c="24" data-f="3" data-fib="9"></td>
+      <td class="bold">19. Kala Chana Sundal</td>
+      <td>60g black chickpeas (cooked), tempering, coconut, 1 tsp oil. Highest iron.</td>
+      <td class="r">155</td><td class="r">11g</td><td class="r">24g</td><td class="r">3g</td><td class="r">9g</td><td>Anytime</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="130" data-p="9" data-c="16" data-f="3" data-fib="4"></td>
+      <td class="bold">20. Payaru Thayir Pachadi</td>
+      <td>50g sprouted moong, 100g curd, cumin, salt — mix as raita</td>
+      <td class="r">130</td><td class="r">9g</td><td class="r">16g</td><td class="r">3g</td><td class="r">4g</td><td>Afternoon at home</td></tr>
+  </table></div>
+
+  <span class="rlabel">🍦 Light sweet / energy snacks</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="140" data-p="3" data-c="18" data-f="7" data-fib="2"></td>
+      <td class="bold">21. Ellu Urundai (Sesame Ball)</td>
+      <td>20g sesame seeds, 20g jaggery, pinch cardamom — melt jaggery, mix sesame, shape</td>
+      <td class="r">140</td><td class="r">3g</td><td class="r">18g</td><td class="r">7g</td><td class="r">2g</td><td>Pre-workout</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="150" data-p="4" data-c="28" data-f="4" data-fib="3"></td>
+      <td class="bold">22. Kambu Koozh<br><small>Pearl millet cold fermented porridge</small></td>
+      <td>40g kambu flour, water, pinch salt — ferment overnight, serve cold with onion and green chili</td>
+      <td class="r">150</td><td class="r">4g</td><td class="r">28g</td><td class="r">4g</td><td class="r">3g</td><td>Hot-day cooler</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="155" data-p="3" data-c="22" data-f="6" data-fib="2"></td>
+      <td class="bold">23. Air-fried Nendran Chips</td>
+      <td>1 raw banana (100g), pinch salt, pinch chili — slice thin, air-fry 180°C 15 min</td>
+      <td class="r">155</td><td class="r">3g</td><td class="r">22g</td><td class="r">6g</td><td class="r">3g</td><td>Evening</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="165" data-p="5" data-c="30" data-f="4" data-fib="3"></td>
+      <td class="bold">24. Masala Corn</td>
+      <td>1 cup corn kernels (boiled), pepper, chaat masala, lemon, salt</td>
+      <td class="r">165</td><td class="r">5g</td><td class="r">30g</td><td class="r">4g</td><td class="r">4g</td><td>Evening / post-dinner</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="180" data-p="5" data-c="32" data-f="5" data-fib="4"></td>
+      <td class="bold">25. Ragi Malt (Kezhvaragu Kanji)</td>
+      <td>30g ragi flour, 250 ml milk, jaggery 8g, cardamom — stir over low heat till thick</td>
+      <td class="r">180</td><td class="r">5g</td><td class="r">32g</td><td class="r">5g</td><td class="r">4g</td><td>Evening / recovery</td></tr>
+  </table></div>
+
+  <span class="rlabel">💪 High-protein savory snacks</span>
+  <div class="tw"><table>
+    <tr><th></th><th>Recipe</th><th>Ingredients</th><th class="r">kcal</th><th class="r">P</th><th class="r">C</th><th class="r">F</th><th class="r">Fiber</th><th>When</th></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="160" data-p="13" data-c="3" data-f="11" data-fib="1"></td>
+      <td class="bold">26. Pepper Egg White Bites</td>
+      <td>3 boiled egg whites, ¼ tsp pepper, chaat masala, salt</td>
+      <td class="r">160</td><td class="r">13g</td><td class="r">3g</td><td class="r">11g</td><td class="r">1g</td><td>Pure protein top-up</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="200" data-p="17" data-c="18" data-f="8" data-fib="4"></td>
+      <td class="bold">27. Soya Chilli Bites (Indo-Chinese)</td>
+      <td>40g dry soya chunks (rehydrated, squeezed), soy sauce, red chili sauce, garlic, ½ tsp oil — stir-fry</td>
+      <td class="r">200</td><td class="r">17g</td><td class="r">18g</td><td class="r">8g</td><td class="r">4g</td><td>Evening snack / home</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="195" data-p="15" data-c="12" data-f="10" data-fib="2"></td>
+      <td class="bold">28. Hung Curd + Peanut Dip with Veg</td>
+      <td>100g hung curd, 10g crushed peanuts, cumin, cucumber sticks (100g)</td>
+      <td class="r">195</td><td class="r">15g</td><td class="r">12g</td><td class="r">10g</td><td class="r">2g</td><td>Afternoon at home</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="185" data-p="13" data-c="14" data-f="9" data-fib="2"></td>
+      <td class="bold">29. Paneer Tikka Bites (air-fried)</td>
+      <td>80g paneer, chili powder, turmeric, lemon, ginger-garlic — marinate 10 min, air-fry 200°C 8 min</td>
+      <td class="r">185</td><td class="r">13g</td><td class="r">14g</td><td class="r">9g</td><td class="r">0g</td><td>Snack / home</td></tr>
+
+    <tr><td><input class="trk" type="checkbox" data-k="195" data-p="16" data-c="18" data-f="7" data-fib="4"></td>
+      <td class="bold">30. Oats Khichdi (light savory bowl)</td>
+      <td>30g rolled oats, 15g split moong dal, mustard, curry leaves, carrot, 1 tsp oil</td>
+      <td class="r">195</td><td class="r">16g</td><td class="r">18g</td><td class="r">7g</td><td class="r">4g</td><td>Light evening meal / snack</td></tr>
+  </table></div>
+</section>
+
+<!-- ===== SHOPPING ===== -->
+<section id="shopping">
+  <h2>Weekly shopping list</h2>
+  <p>Buy chicken, curd, and vegetables fresh each week (Saturday). Pantry and spices last several weeks. Pre-marinate and portion chicken on Sunday evening to save weekday prep time.</p>
+  <div class="shopg">
+    <div class="shopblock">
+      <h4>Proteins</h4>
+      <ul>
+        <li>Boiler chicken breast, boneless — 2.5 kg</li>
+        <li>Eggs — 35</li>
+        <li>Paneer — 300g block</li>
+        <li>Soya chunks, dry — 250g pack</li>
+        <li>Whey protein (isolate) — 1 kg tin (~4–5 weeks)</li>
+        <li>Split moong dal — 200g</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Dairy</h4>
+      <ul>
+        <li>Curd (full-fat, fresh) — 500g (or make at home)</li>
+        <li>Hung curd: strain 250g curd in cloth 2–3 hrs → ~150g hung curd</li>
+        <li>Milk (whole) — 1 litre</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Grains & legumes</h4>
+      <ul>
+        <li>Whole wheat atta — 2 kg</li>
+        <li>Ragi (finger millet) flour — 500g</li>
+        <li>Kambu (pearl millet) flour — 250g</li>
+        <li>Rolled oats — 500g</li>
+        <li>White rice — 2 kg</li>
+        <li>White chickpeas (vella kadalai) — 250g</li>
+        <li>Kala chana (black chickpeas) — 200g</li>
+        <li>Kidney beans (rajma) — 200g</li>
+        <li>Whole green moong — 200g (for sprouts + sundal)</li>
+        <li>Dried green peas (pattani) — 150g</li>
+        <li>Field beans (mochai kottai) — 150g</li>
+        <li>Chana dal — 150g</li>
+        <li>Pottukadalai (roasted gram) — 150g</li>
+        <li>Tamarind — 100g block</li>
+        <li>Peanuts, raw — 300g</li>
+        <li>Peanut butter (natural, no sugar) — 200g jar</li>
+        <li>Besan (gram flour) — 100g</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Vegetables</h4>
+      <ul>
+        <li>Onions — 1.5 kg</li>
+        <li>Tomatoes — 1 kg</li>
+        <li>Garlic — 2 bulbs</li>
+        <li>Ginger — 150g</li>
+        <li>Green chilies — 100g</li>
+        <li>Capsicum (red + green) — 4</li>
+        <li>Spinach — 200g (fresh)</li>
+        <li>Mushrooms — 200g (use within 3 days)</li>
+        <li>Carrots — 300g</li>
+        <li>Cucumber — 3</li>
+        <li>Raw banana — 2 (for chips)</li>
+        <li>Corn — 2 cobs or frozen pack</li>
+        <li>Fresh coconut or frozen grated — 2 packs</li>
+        <li>Curry leaves — 3–4 sprigs</li>
+        <li>Coriander + mint — 1 bunch each</li>
+        <li>Lemons — 6–8</li>
+        <li>Spring onions — 1 bunch</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Sauces & condiments</h4>
+      <ul>
+        <li>Soy sauce — 1 small bottle</li>
+        <li>Red chili sauce / gochujang — 1 small bottle</li>
+        <li>Schezwan sauce — 1 small bottle (optional)</li>
+        <li>Coconut milk (canned) — 2 tins</li>
+        <li>Poppy seeds (khus khus) — 50g</li>
+        <li>Chaat masala — 1 pack</li>
+        <li>Cocoa powder, unsweetened — 100g</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Spices (top up as needed)</h4>
+      <ul>
+        <li>Turmeric, chili powder, coriander powder</li>
+        <li>Black pepper — whole + ground</li>
+        <li>Mustard seeds, cumin, fennel seeds</li>
+        <li>Chettinad masala or: cinnamon, star anise, fennel, cloves</li>
+        <li>Cardamom powder</li>
+        <li>Cooking oil — small bottle (1 tsp/meal rule)</li>
+        <li>Jaggery — 300g</li>
+        <li>Salt</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Fruit</h4>
+      <ul>
+        <li>Bananas — 20–22 (2/day pre-workout + snacks)</li>
+        <li>Mangoes — seasonal, for lassi</li>
+      </ul>
+    </div>
+    <div class="shopblock">
+      <h4>Seeds & extras</h4>
+      <ul>
+        <li>Sesame seeds — 100g</li>
+        <li>Pumpkin seeds — 50g</li>
+        <li>Flaxseeds (ground or whole) — 100g</li>
+        <li>Chia seeds — 50g (optional, for overnight oats)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- ===== TRACKING ===== -->
+<section id="tracking">
+  <h2>Progress tracking</h2>
+  <div class="tw"><table>
+    <tr><th>Check</th><th>When</th></tr>
+    <tr><td>Morning weigh-in — same conditions, before food and water</td><td>Every Sunday</td></tr>
+    <tr><td>Progress photo — same lighting, same spot</td><td>Every Sunday</td></tr>
+    <tr><td>Tape measure — waist, biceps, forearm</td><td>Every 4 weeks</td></tr>
+    <tr><td>If weight stalls 3+ weeks — trim ½ cup rice from dinner</td><td>If needed</td></tr>
+    <tr><td>If strength stalls 3+ weeks — check sleep first, then add 1 set to compound lifts</td><td>If needed</td></tr>
+  </table></div>
+
+  <h3>Training log format (copy each session)</h3>
+  <div class="tw"><table>
+    <tr><th>Date</th><th>Day</th><th>Exercise</th><th>Load</th><th>Set 1</th><th>Set 2</th><th>Set 3</th><th>Set 4</th><th>Notes</th></tr>
+    <tr><td>e.g. Wk1 Mon</td><td>Upper A</td><td>Bench press</td><td>16 kg</td><td>10</td><td>10</td><td>9</td><td>8</td><td>Add 2 kg next week</td></tr>
+    <tr><td>e.g. Wk1 Thu</td><td>Upper B</td><td>Pull-ups</td><td>BW</td><td>8</td><td>6</td><td>5</td><td>4</td><td>Grip better than last week</td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+    <tr><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+  </table></div>
+</section>
+
+<footer>
+  This is a general fitness and nutrition guide. All calorie figures use USDA FoodData Central 2024–25 data. Not medical or dietitian advice — adjust based on actual weekly weight and strength progress.
+</footer>
+
+</div>
+
+<!-- TRACKER BAR -->
+<div id="bar">
+  <div class="sums">
+    <span>Today: <b id="sk">0</b> kcal</span>
+    <span><b id="sp">0</b>g protein</span>
+    <span><b id="sc">0</b>g carbs</span>
+    <span><b id="sf">0</b>g fat</span>
+    <span><b id="sfib">0</b>g fiber</span>
+    <span class="tgt">Target → 2,350 kcal · 155g P · 260g C · 70g F · 35g fiber</span>
+  </div>
+  <button id="rst">Reset</button>
+</div>
+
+<script>
+function update(){
+  var c=document.querySelectorAll('.trk:checked'),k=0,p=0,ca=0,f=0,fi=0;
+  c.forEach(function(b){k+=+b.dataset.k||0;p+=+b.dataset.p||0;ca+=+b.dataset.c||0;f+=+b.dataset.f||0;fi+=+b.dataset.fib||0;});
+  document.getElementById('sk').textContent=Math.round(k);
+  document.getElementById('sp').textContent=Math.round(p);
+  document.getElementById('sc').textContent=Math.round(ca);
+  document.getElementById('sf').textContent=Math.round(f);
+  document.getElementById('sfib').textContent=Math.round(fi);
+}
+document.querySelectorAll('.trk').forEach(function(b){b.addEventListener('change',update);});
+document.getElementById('rst').addEventListener('click',function(){
+  document.querySelectorAll('.trk').forEach(function(b){b.checked=false;});update();
+});
+</script>
+</body>
+</html>

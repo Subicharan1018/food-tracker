@@ -312,11 +312,11 @@ class HomeScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 10),
 
-            // Meal Slots from refeerece.html
+            // Meal Slots from Recomp_Manual_v3.html
             MealSlotCard(
               slotKey: 'breakfast',
               title: 'Breakfast',
-              subtitle: '4 whole eggs + 4 chapatis (~700 kcal / 37g P)',
+              subtitle: '3 chapatis + egg/oat side dish (~508 kcal / 38g P)',
               timeRange: '6:00 – 6:30 AM',
               entries: entries.where((e) => e.mealSlot == 'breakfast').toList(),
               onAddTap: () => _navigateLogFood(context, 'breakfast'),
@@ -326,7 +326,7 @@ class HomeScreen extends ConsumerWidget {
             MealSlotCard(
               slotKey: 'lunch',
               title: 'Lunch (Packed Dry Box)',
-              subtitle: 'Chicken/Soya/Sundal/Paneer + Rice + Poriyal (~530 kcal)',
+              subtitle: '2 chapatis + protein dry pack (~440 kcal / 42g P)',
               timeRange: '1:00 PM',
               entries: entries.where((e) => e.mealSlot == 'lunch').toList(),
               onAddTap: () => _navigateLogFood(context, 'lunch'),
@@ -336,7 +336,7 @@ class HomeScreen extends ConsumerWidget {
             MealSlotCard(
               slotKey: 'shake',
               title: 'Protein Shake (Bus Stop)',
-              subtitle: '1 scoop whey + water (~120 kcal / 24g P)',
+              subtitle: '1 scoop whey + 250 ml water (114 kcal / 27g P)',
               timeRange: '4:30 – 5:00 PM',
               entries: entries.where((e) => e.mealSlot == 'shake').toList(),
               onAddTap: () => _navigateLogFood(context, 'shake'),
@@ -346,7 +346,7 @@ class HomeScreen extends ConsumerWidget {
             MealSlotCard(
               slotKey: 'pre_workout',
               title: 'Pre-Workout Snack',
-              subtitle: '2 bananas on reaching home (~210 kcal / 3g P)',
+              subtitle: '2 bananas on reaching home (214 kcal / 2.6g P)',
               timeRange: '6:00 PM',
               entries: entries.where((e) => e.mealSlot == 'pre_workout').toList(),
               onAddTap: () => _navigateLogFood(context, 'pre_workout'),
@@ -355,8 +355,8 @@ class HomeScreen extends ConsumerWidget {
 
             MealSlotCard(
               slotKey: 'dinner',
-              title: 'Dinner (Country Chicken & Chapati)',
-              subtitle: '220g chicken + 3 chapatis (~820 kcal / 55g P)',
+              title: 'Dinner (White Rice + Chicken Curry)',
+              subtitle: '1 cup rice + 200g boiler chicken curry (~625 kcal / 68g P)',
               timeRange: '8:15 – 8:30 PM',
               entries: entries.where((e) => e.mealSlot == 'dinner').toList(),
               onAddTap: () => _navigateLogFood(context, 'dinner'),
@@ -365,8 +365,8 @@ class HomeScreen extends ConsumerWidget {
 
             MealSlotCard(
               slotKey: 'snack',
-              title: 'Extra Snacks / Additions',
-              subtitle: 'Handful peanuts, fruits, extra chapati',
+              title: 'Diet & High-Protein Snacks',
+              subtitle: '1–2 picks from 30 snack recipes (~150–300 kcal)',
               timeRange: 'Anytime',
               entries: entries.where((e) => e.mealSlot == 'snack').toList(),
               onAddTap: () => _navigateLogFood(context, 'snack'),
