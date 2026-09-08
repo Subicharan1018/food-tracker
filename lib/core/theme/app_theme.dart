@@ -1,29 +1,31 @@
 import 'package:flutter/material.dart';
 
 class AppColors {
-  // Neutral Scale (structural)
+  // Neutral Scale (carries ~95% of the UI)
   static const Color background = Color(0xFF0B0D10);
   static const Color surface = Color(0xFF151A21);
   static const Color card = Color(0xFF151A21);
+  static const Color surfaceElevated = Color(0xFF1E2632);
   static const Color cardElevated = Color(0xFF1E2632);
   static const Color border = Color(0xFF262E38);
   static const Color borderSubtle = Color(0xFF1E2632);
 
-  // The Strict 3-Color System
-  /// Primary Blue (#3B82F6): Primary buttons, active nav, default ring state, links, selected tabs, informational trend lines
-  static const Color primary = Color(0xFF3B82F6);
-
-  /// Positive Green (#22C55E): Strictly for "good / on-track" states (goal met, active streak, macro target achieved)
-  static const Color positive = Color(0xFF22C55E);
-
-  /// Attention Amber (#F59E0B): Strictly for "needs attention / limits exceeded" (over target, approaching limit, plateau cards)
-  static const Color attention = Color(0xFFF59E0B);
-
   // Text Neutral Scale
   static const Color textPrimary = Color(0xFFF2F4F7);
   static const Color textSecondary = Color(0xFF8B95A3);
-  static const Color textMuted = Color(0xFF8B95A3);
+  static const Color textMuted = Color(0xFF5B6472);
   static const Color textInverse = Color(0xFF0B0D10);
+
+  // The only two status verdict colors — never decorative
+  /// Positive Green (#22C55E): Goal met / on-track / active streak (a real verdict)
+  static const Color positive = Color(0xFF22C55E);
+
+  /// Attention Amber (#F59E0B): Exceeded limit / plateau attention (a real verdict)
+  static const Color attention = Color(0xFFF59E0B);
+
+  // Destructive icon-only affordance exception (e.g. trash/delete glyphs)
+  /// Destructive Red (#EF4444): Restricted to delete icons/dialogs only; never button fills or cards.
+  static const Color destructive = Color(0xFFEF4444);
 }
 
 class AppTypography {
@@ -85,13 +87,13 @@ class AppTheme {
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
-      primaryColor: AppColors.primary,
+      primaryColor: AppColors.textPrimary,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.primary,
-        secondary: AppColors.primary,
+        primary: AppColors.textPrimary,
+        secondary: AppColors.textSecondary,
         surface: AppColors.surface,
-        error: AppColors.attention,
-        onPrimary: Colors.white,
+        error: AppColors.textSecondary,
+        onPrimary: AppColors.textInverse,
         onSurface: AppColors.textPrimary,
       ),
       cardTheme: CardThemeData(
@@ -111,10 +113,24 @@ class AppTheme {
         titleTextStyle: AppTypography.titleLarge,
         iconTheme: IconThemeData(color: AppColors.textPrimary),
       ),
+      elevatedButtonTheme: ElevatedButtonThemeData(
+        style: ElevatedButton.styleFrom(
+          backgroundColor: AppColors.textPrimary,
+          foregroundColor: AppColors.textInverse,
+          elevation: 0,
+          textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      ),
+      floatingActionButtonTheme: const FloatingActionButtonThemeData(
+        backgroundColor: AppColors.textPrimary,
+        foregroundColor: AppColors.textInverse,
+        elevation: 2,
+      ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.primary,
-        unselectedItemColor: AppColors.textMuted,
+        selectedItemColor: AppColors.textPrimary,
+        unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
       ),
@@ -132,9 +148,48 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
         ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.border, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.textSecondary, width: 1.5),
+        ),
+        errorStyle: const TextStyle(color: AppColors.textSecondary, fontSize: 12),
         hintStyle: const TextStyle(color: AppColors.textMuted, fontSize: 14),
+      ),
+      switchTheme: SwitchThemeData(
+        thumbColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.textPrimary;
+          }
+          return AppColors.textSecondary;
+        }),
+        trackColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.surfaceElevated;
+          }
+          return AppColors.surface;
+        }),
+        trackOutlineColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.textPrimary.withValues(alpha: 0.5);
+          }
+          return AppColors.border;
+        }),
+      ),
+      checkboxTheme: CheckboxThemeData(
+        fillColor: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return AppColors.textPrimary;
+          }
+          return Colors.transparent;
+        }),
+        checkColor: WidgetStateProperty.all(AppColors.textInverse),
+        side: const BorderSide(color: AppColors.border, width: 1.5),
       ),
       dividerTheme: const DividerThemeData(
         color: AppColors.borderSubtle,

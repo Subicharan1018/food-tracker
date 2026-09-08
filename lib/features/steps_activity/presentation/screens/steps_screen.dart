@@ -71,7 +71,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
           content: Text(granted
               ? 'Connected to Health Connect! Steps synced.'
               : 'Health Connect permission not granted. Please enable in Health Connect.'),
-          backgroundColor: granted ? AppColors.positive.withOpacity(0.15) : AppColors.cardElevated,
+          backgroundColor: granted ? AppColors.positive.withValues(alpha: 0.15) : AppColors.cardElevated,
         ),
       );
     }
@@ -99,7 +99,10 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
             child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.textPrimary,
+              foregroundColor: AppColors.textInverse,
+            ),
             onPressed: () async {
               final newGoal = int.tryParse(ctrl.text);
               if (newGoal != null && newGoal > 0) {
@@ -115,8 +118,10 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                   );
                 }
               }
-              if (mounted) {
+              if (ctx.mounted) {
                 Navigator.pop(ctx);
+              }
+              if (mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('Step goal updated!')),
                 );
@@ -259,7 +264,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                       ),
                       Text(
                         'TAP TO SYNC / CONNECT',
-                        style: TextStyle(fontSize: 10, color: AppColors.primary, fontWeight: FontWeight.w700),
+                        style: TextStyle(fontSize: 10, color: AppColors.textSecondary, fontWeight: FontWeight.w700),
                       ),
                     ],
                   ),
@@ -272,10 +277,11 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                           Container(
                             padding: const EdgeInsets.all(8),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.15),
+                              color: AppColors.surfaceElevated,
                               borderRadius: BorderRadius.circular(10),
+                              border: Border.all(color: AppColors.border),
                             ),
-                            child: const Icon(Icons.favorite_rounded, color: AppColors.primary, size: 20),
+                            child: const Icon(Icons.favorite_rounded, color: AppColors.textPrimary, size: 20),
                           ),
                           const SizedBox(width: 12),
                           const Text(
@@ -289,9 +295,9 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.primary),
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary),
                               )
-                            : const Icon(Icons.sync_rounded, color: AppColors.primary, size: 22),
+                            : const Icon(Icons.sync_rounded, color: AppColors.textSecondary, size: 22),
                         onPressed: _isRefreshing ? null : _requestHealthConnectPermissions,
                       ),
                     ],
@@ -324,7 +330,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                       const SnackBar(content: Text('Evening step goal reminder set for 8:00 PM')),
                     );
                   },
-                  child: const Text('SET', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w700)),
+                  child: const Text('SET', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w700)),
                 ),
               ],
             ),
@@ -346,7 +352,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.attention.withOpacity(0.12),
+                    color: AppColors.attention.withValues(alpha: 0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(Icons.directions_walk_rounded, color: AppColors.attention, size: 24),
@@ -454,7 +460,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                               checkToShowHorizontalLine: (value) => value == stepGoal.toDouble(),
                               getDrawingHorizontalLine: (val) {
                                 return FlLine(
-                                  color: AppColors.textMuted.withOpacity(0.5),
+                                  color: AppColors.textMuted.withValues(alpha: 0.5),
                                   strokeWidth: 1.5,
                                   dashArray: [5, 5],
                                 );
@@ -483,14 +489,14 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                               final isMet = item.steps >= stepGoal;
                               return BarChartGroupData(
                                 x: idx,
-                                barRods: [
-                                  BarChartRodData(
-                                    toY: item.steps.toDouble(),
-                                    color: isMet ? AppColors.positive : AppColors.primary,
-                                    width: 22,
-                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
-                                  ),
-                                ],
+                                  barRods: [
+                                    BarChartRodData(
+                                      toY: item.steps.toDouble(),
+                                      color: isMet ? AppColors.positive : AppColors.textPrimary,
+                                      width: 22,
+                                      borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
+                                    ),
+                                  ],
                                 showingTooltipIndicators: [],
                               );
                             }),
@@ -532,10 +538,11 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.15),
+                    color: AppColors.surfaceElevated,
                     shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.border),
                   ),
-                  child: const Icon(Icons.star_rounded, color: AppColors.primary, size: 24),
+                  child: const Icon(Icons.star_rounded, color: AppColors.textPrimary, size: 24),
                 ),
               ],
             ),

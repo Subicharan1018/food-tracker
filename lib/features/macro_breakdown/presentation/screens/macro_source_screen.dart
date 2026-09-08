@@ -47,8 +47,8 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.primary,
-          labelColor: AppColors.primary,
+          indicatorColor: AppColors.textPrimary,
+          labelColor: AppColors.textPrimary,
           unselectedLabelColor: AppColors.textMuted,
           tabs: const [
             Tab(text: 'Protein Sources'),
@@ -120,7 +120,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Protein',
                       totalConsumed: totalProtein,
                       target: proteinTarget,
-                      color: AppColors.primary,
+                      color: totalProtein >= proteinTarget ? AppColors.positive : AppColors.textPrimary,
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.proteinG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -130,7 +130,9 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Carbohydrates',
                       totalConsumed: totalCarbs,
                       target: carbTarget,
-                      color: AppColors.primary,
+                      color: totalCarbs > carbTarget * 1.05
+                          ? AppColors.attention
+                          : (totalCarbs >= carbTarget * 0.95 ? AppColors.positive : AppColors.textPrimary),
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.carbsG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -140,7 +142,9 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Fat',
                       totalConsumed: totalFat,
                       target: fatTarget,
-                      color: AppColors.primary,
+                      color: totalFat > fatTarget * 1.05
+                          ? AppColors.attention
+                          : (totalFat >= fatTarget * 0.95 ? AppColors.positive : AppColors.textPrimary),
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.fatG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -150,7 +154,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.textPrimary)),
         error: (err, _) => Center(child: Text('Error loading macro sources: $err')),
       ),
     );
@@ -282,7 +286,7 @@ class _MacroListTab extends StatelessWidget {
                             Container(
                               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: color.withOpacity(0.12),
+                                color: color.withValues(alpha: 0.12),
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: Text(
@@ -346,14 +350,14 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.primary,
+      selectedColor: AppColors.surfaceElevated,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : AppColors.textSecondary,
+        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

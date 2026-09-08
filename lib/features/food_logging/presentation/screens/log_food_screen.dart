@@ -61,7 +61,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
       ),
       builder: (ctx) {
         return StatefulBuilder(
-          builder: (context, setModalState) {
+          builder: (modalCtx, setModalState) {
             final calories = food.calories * portionQty;
             final protein = food.proteinG * portionQty;
             final carbs = food.carbsG * portionQty;
@@ -72,7 +72,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                 left: 20,
                 right: 20,
                 top: 20,
-                bottom: MediaQuery.of(context).viewInsets.bottom + 24,
+                bottom: MediaQuery.of(modalCtx).viewInsets.bottom + 24,
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -114,7 +114,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.spaceAround,
                       children: [
-                        _MacroMini(label: 'Calories', value: '${calories.toInt()}', unit: 'kcal', color: AppColors.primary),
+                        _MacroMini(label: 'Calories', value: '${calories.toInt()}', unit: 'kcal', color: AppColors.textPrimary),
                         _MacroMini(label: 'Protein', value: protein.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
                         _MacroMini(label: 'Carbs', value: carbs.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
                         _MacroMini(label: 'Fat', value: fat.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),
@@ -139,7 +139,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline_rounded),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: portionQty > 0.25
                                 ? () => setModalState(() => portionQty -= 0.25)
                                 : null,
@@ -162,7 +162,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline_rounded),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => portionQty += 0.25),
                           ),
                         ],
@@ -182,10 +182,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: selected ? AppColors.primary : AppColors.card,
+                            color: selected ? AppColors.surfaceElevated : AppColors.card,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: selected ? AppColors.primary : AppColors.border,
+                              color: selected ? AppColors.textPrimary : AppColors.border,
                             ),
                           ),
                           child: Text(
@@ -193,7 +193,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: selected ? Colors.white : AppColors.textSecondary,
+                              color: selected ? AppColors.textPrimary : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -209,8 +209,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.textInverse,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
                         ),
@@ -255,8 +255,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                           ),
                         );
 
-                        if (mounted) {
+                        if (ctx.mounted) {
                           Navigator.pop(ctx);
+                        }
+                        if (mounted) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(
                               content: Text('Added ${food.name} to ${_selectedSlot.toUpperCase()}'),
@@ -338,7 +340,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
               child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
             ),
             ElevatedButton(
-              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.textPrimary,
+                foregroundColor: AppColors.textInverse,
+              ),
               onPressed: () async {
                 final name = nameCtrl.text.trim();
                 final kcal = double.tryParse(kcalCtrl.text) ?? 0.0;
@@ -368,8 +373,10 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   ),
                 );
 
-                if (mounted) {
+                if (ctx.mounted) {
                   Navigator.pop(ctx);
+                }
+                if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(content: Text('Logged $name!')),
                   );
@@ -393,8 +400,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
         actions: [
           TextButton.icon(
             onPressed: _showManualEntryDialog,
-            icon: const Icon(Icons.edit_note_rounded, color: AppColors.primary),
-            label: const Text('Manual Entry', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.w600)),
+            icon: const Icon(Icons.edit_note_rounded, color: AppColors.textSecondary),
+            label: const Text('Manual Entry', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
           ),
         ],
       ),
@@ -481,7 +488,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
           // Food items list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.primary))
+                ? const Center(child: CircularProgressIndicator(color: AppColors.textPrimary))
                 : _searchResults.isEmpty
                     ? Center(
                         child: Column(
@@ -493,9 +500,12 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             const SizedBox(height: 12),
                             ElevatedButton.icon(
                               onPressed: _showManualEntryDialog,
-                              icon: const Icon(Icons.add, color: Colors.white),
-                              label: const Text('Add Custom Food', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
-                              style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                              icon: const Icon(Icons.add, color: AppColors.textInverse),
+                              label: const Text('Add Custom Food', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.textPrimary,
+                                foregroundColor: AppColors.textInverse,
+                              ),
                             ),
                           ],
                         ),
@@ -515,10 +525,11 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             trailing: Container(
                               padding: const EdgeInsets.all(8),
                               decoration: BoxDecoration(
-                                color: AppColors.primary.withOpacity(0.12),
+                                color: AppColors.surfaceElevated,
                                 borderRadius: BorderRadius.circular(8),
+                                border: Border.all(color: AppColors.border),
                               ),
-                              child: const Icon(Icons.add_rounded, color: AppColors.primary, size: 20),
+                              child: const Icon(Icons.add_rounded, color: AppColors.textPrimary, size: 20),
                             ),
                             onTap: () => _showPortionDialog(item),
                           );
@@ -545,14 +556,14 @@ class _SlotChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.primary,
+      selectedColor: AppColors.surfaceElevated,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : AppColors.textSecondary,
+        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

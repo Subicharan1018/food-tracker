@@ -76,7 +76,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                       ),
                       child: Text(
                         recipe.mealSlot.toUpperCase(),
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.primary),
+                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textSecondary),
                       ),
                     ),
                   ],
@@ -94,7 +94,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.spaceAround,
                     children: [
-                      _RecipeStat(label: 'Calories', value: '${recipe.calories.toInt()} kcal', color: AppColors.primary),
+                      _RecipeStat(label: 'Calories', value: '${recipe.calories.toInt()} kcal', color: AppColors.textPrimary),
                       _RecipeStat(label: 'Protein', value: '${recipe.proteinG}g', color: AppColors.textPrimary),
                       _RecipeStat(label: 'Carbs', value: '${recipe.carbsG}g', color: AppColors.textPrimary),
                       _RecipeStat(label: 'Fat', value: '${recipe.fatG}g', color: AppColors.textPrimary),
@@ -107,9 +107,9 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: AppColors.attention.withOpacity(0.12),
+                      color: AppColors.attention.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.attention.withOpacity(0.3)),
+                      border: Border.all(color: AppColors.attention.withValues(alpha: 0.3)),
                     ),
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -136,7 +136,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('• ', style: TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+                        const Text('• ', style: TextStyle(color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
                         Expanded(child: Text(ing, style: const TextStyle(fontSize: 13, color: AppColors.textPrimary))),
                       ],
                     ),
@@ -155,8 +155,8 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   height: 50,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primary,
-                      foregroundColor: Colors.white,
+                      backgroundColor: AppColors.textPrimary,
+                      foregroundColor: AppColors.textInverse,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
                     onPressed: () async {
@@ -198,8 +198,10 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                         ),
                       );
 
-                      if (mounted) {
+                      if (ctx.mounted) {
                         Navigator.pop(ctx);
+                      }
+                      if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
                           SnackBar(content: Text('Logged ${recipe.name} to ${recipe.mealSlot.toUpperCase()}!')),
                         );
@@ -290,12 +292,13 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                                 Container(
                                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
-                                    color: AppColors.primary.withOpacity(0.12),
+                                    color: AppColors.surfaceElevated,
                                     borderRadius: BorderRadius.circular(6),
+                                    border: Border.all(color: AppColors.border),
                                   ),
                                   child: Text(
                                     '${r.calories.toInt()} kcal',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary),
+                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                                   ),
                                 ),
                               ],
@@ -313,7 +316,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                                 const SizedBox(width: 8),
                                 _MacroBadge(label: 'F', value: '${r.fatG}g', color: AppColors.textPrimary),
                                 const Spacer(),
-                                const Text('View Recipe & 1-Tap Log →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.primary)),
+                                const Text('View Recipe & 1-Tap Log →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
                               ],
                             ),
                           ],
@@ -323,7 +326,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.textPrimary)),
               error: (err, _) => Center(child: Text('Error: $err')),
             ),
           ),
@@ -389,14 +392,14 @@ class _ChipItem extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.primary,
+      selectedColor: AppColors.surfaceElevated,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? Colors.white : AppColors.textSecondary,
+        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.primary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

@@ -55,7 +55,10 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
             child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppColors.textPrimary,
+              foregroundColor: AppColors.textInverse,
+            ),
             onPressed: () {
               final newTarget = double.tryParse(targetCtrl.text);
               final newWeeks = int.tryParse(weeksCtrl.text);
@@ -65,7 +68,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
               });
               Navigator.pop(ctx);
             },
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text('Save', style: TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -98,7 +101,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text(weight.toStringAsFixed(1), style: AppTypography.displayLarge.copyWith(fontSize: 48, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                        Text(weight.toStringAsFixed(1), style: AppTypography.displayLarge.copyWith(fontSize: 48, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                         const Text(' kg', style: TextStyle(fontSize: 20, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -109,13 +112,13 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline_rounded, size: 32),
-                        color: AppColors.primary,
+                        color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => weight -= 0.1),
                       ),
                       const SizedBox(width: 24),
                       IconButton(
                         icon: const Icon(Icons.add_circle_outline_rounded, size: 32),
-                        color: AppColors.primary,
+                        color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => weight += 0.1),
                       ),
                     ],
@@ -125,7 +128,10 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.textInverse,
+                      ),
                       onPressed: () async {
                         final db = ref.read(databaseProvider);
                         final dateStr = ref.read(formattedSelectedDateProvider);
@@ -196,12 +202,13 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                               if (type == 'waist') valueCm = 70.0;
                               if (type == 'chest') valueCm = 95.0;
                             }),
-                            selectedColor: AppColors.primary,
+                            selectedColor: AppColors.surfaceElevated,
                             backgroundColor: AppColors.card,
+                            side: BorderSide(color: sel ? AppColors.textPrimary : AppColors.border),
                             labelStyle: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: sel ? Colors.white : AppColors.textSecondary,
+                              color: sel ? AppColors.textPrimary : AppColors.textSecondary,
                             ),
                             showCheckmark: false,
                           ),
@@ -216,7 +223,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                       crossAxisAlignment: CrossAxisAlignment.baseline,
                       textBaseline: TextBaseline.alphabetic,
                       children: [
-                        Text(valueCm.toStringAsFixed(1), style: AppTypography.displayLarge.copyWith(fontSize: 40, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                        Text(valueCm.toStringAsFixed(1), style: AppTypography.displayLarge.copyWith(fontSize: 40, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                         const Text(' cm', style: TextStyle(fontSize: 18, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                       ],
                     ),
@@ -227,13 +234,13 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     children: [
                       IconButton(
                         icon: const Icon(Icons.remove_circle_outline_rounded, size: 28),
-                        color: AppColors.primary,
+                        color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => valueCm -= 0.5),
                       ),
                       const SizedBox(width: 24),
                       IconButton(
                         icon: const Icon(Icons.add_circle_outline_rounded, size: 28),
-                        color: AppColors.primary,
+                        color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => valueCm += 0.5),
                       ),
                     ],
@@ -243,7 +250,10 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(backgroundColor: AppColors.primary),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.textInverse,
+                      ),
                       onPressed: () async {
                         final db = ref.read(databaseProvider);
                         final dateStr = ref.read(formattedSelectedDateProvider);
@@ -305,7 +315,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
         title: const Text('Weight Tracker'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.straighten_rounded, color: AppColors.primary),
+            icon: const Icon(Icons.straighten_rounded, color: AppColors.textSecondary),
             tooltip: 'Tape Measurements',
             onPressed: _showMeasurementDialog,
           ),
@@ -316,8 +326,8 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.textPrimary,
+        foregroundColor: AppColors.textInverse,
         elevation: 4,
         onPressed: () => _showWeighInDialog(currentWeight),
         child: const Icon(Icons.add_rounded, size: 30),
@@ -339,10 +349,11 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                   width: 48,
                   height: 48,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.15),
+                    color: AppColors.surfaceElevated,
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  child: const Icon(Icons.scale_rounded, color: AppColors.primary, size: 26),
+                  child: const Icon(Icons.scale_rounded, color: AppColors.textPrimary, size: 26),
                 ),
                 const SizedBox(width: 14),
                 Expanded(
@@ -386,7 +397,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     const Text('Weight Trend (7-Day Avg)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    Text('Current: ${currentWeight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 12, color: AppColors.primary, fontWeight: FontWeight.w600)),
+                    Text('Current: ${currentWeight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
                   ],
                 ),
                 const SizedBox(height: 20),
@@ -435,12 +446,12 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                               LineChartBarData(
                                 spots: weighIns.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.weightKg)).toList(),
                                 isCurved: true,
-                                color: AppColors.primary,
+                                color: AppColors.textPrimary,
                                 barWidth: 3,
                                 dotData: const FlDotData(show: true),
                                 belowBarData: BarAreaData(
                                   show: true,
-                                  color: AppColors.primary.withOpacity(0.08),
+                                  color: AppColors.textPrimary.withValues(alpha: 0.06),
                                 ),
                               ),
                             ],
@@ -458,13 +469,13 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: suggestion.type == AdherenceSuggestionType.trimCalories
-                    ? AppColors.attention.withOpacity(0.12)
-                    : AppColors.positive.withOpacity(0.12),
+                    ? AppColors.attention.withValues(alpha: 0.12)
+                    : AppColors.positive.withValues(alpha: 0.12),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
                   color: suggestion.type == AdherenceSuggestionType.trimCalories
-                      ? AppColors.attention.withOpacity(0.4)
-                      : AppColors.positive.withOpacity(0.4),
+                      ? AppColors.attention.withValues(alpha: 0.4)
+                      : AppColors.positive.withValues(alpha: 0.4),
                 ),
               ),
               child: Column(
@@ -527,7 +538,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     children: [
                       const Text(
                         'Build Your Progress Gallery',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.primary),
+                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                       ),
                       const SizedBox(height: 4),
                       const Text(
@@ -537,8 +548,8 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                       const SizedBox(height: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.textPrimary,
+                          foregroundColor: AppColors.textInverse,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
@@ -557,11 +568,11 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                   width: 60,
                   height: 60,
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.12),
+                    color: AppColors.surfaceElevated,
                     borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+                    border: Border.all(color: AppColors.border),
                   ),
-                  child: const Icon(Icons.photo_library_rounded, color: AppColors.primary, size: 30),
+                  child: const Icon(Icons.photo_library_rounded, color: AppColors.textPrimary, size: 30),
                 ),
               ],
             ),
@@ -574,7 +585,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: const [
               Text('Timeline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              Text('View Progress Gallery >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.primary)),
+              Text('View Progress Gallery >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
             ],
           ),
           const SizedBox(height: 12),
@@ -605,10 +616,10 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                 child: Row(
                   children: [
                     Container(
-                      width: 10,
-                      height: 10,
+                      width: 8,
+                      height: 8,
                       decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                        color: AppColors.textSecondary,
                         shape: BoxShape.circle,
                       ),
                     ),

@@ -171,18 +171,18 @@ class MealSlotCard extends StatelessWidget {
               width: double.infinity,
               child: OutlinedButton.icon(
                 onPressed: onAddTap,
-                icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.primary),
+                icon: const Icon(Icons.add_rounded, size: 18, color: AppColors.textPrimary),
                 label: Text(
                   'Add to $title',
                   style: const TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.primary,
+                    color: AppColors.textPrimary,
                   ),
                 ),
                 style: OutlinedButton.styleFrom(
                   side: const BorderSide(color: AppColors.border),
-                  backgroundColor: AppColors.cardElevated.withOpacity(0.5),
+                  backgroundColor: AppColors.cardElevated.withValues(alpha: 0.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),

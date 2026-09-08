@@ -24,7 +24,7 @@ class CalorieRing extends StatelessWidget {
         : 0.0;
 
     // 95% - 105% buffer window matching macro tolerance:
-    // < 95%: Primary Blue (in progress)
+    // < 95%: Monochrome White (in progress)
     // 95% - 105%: Positive Green (target met / on-track)
     // > 105%: Attention Amber (exceeded)
     final isOver = targetCalories > 0 && consumedCalories > (targetCalories * 1.05);
@@ -34,7 +34,7 @@ class CalorieRing extends StatelessWidget {
 
     final Color ringColor = isOver
         ? AppColors.attention
-        : (isOnTrack ? AppColors.positive : AppColors.primary);
+        : (isOnTrack ? AppColors.positive : AppColors.textPrimary);
 
     final String subtitle = isOver
         ? 'kcal over'

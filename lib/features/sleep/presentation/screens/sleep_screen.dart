@@ -196,7 +196,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -246,7 +246,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                                 style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w700,
-                                  color: AppColors.primary,
+                                  color: AppColors.textPrimary,
                                 ),
                               ),
                             ),
@@ -264,8 +264,8 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                     height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.textInverse,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),

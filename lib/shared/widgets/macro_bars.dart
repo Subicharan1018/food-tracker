@@ -98,19 +98,19 @@ class _MacroCard extends StatelessWidget {
   });
 
   Color _resolveColor() {
-    if (target <= 0) return AppColors.primary;
-    // Special-cased Protein: Blue in-progress, Green when reached or exceeded. NEVER turns Amber.
+    if (target <= 0) return AppColors.textPrimary;
+    // Special-cased Protein: White in-progress, Green when reached or exceeded. NEVER turns Amber.
     if (isProtein) {
-      return consumed >= target ? AppColors.positive : AppColors.primary;
+      return consumed >= target ? AppColors.positive : AppColors.textPrimary;
     }
-    // Carbs, Fat, Fiber: Blue in-progress, Green 95-105%, Amber over 105%
+    // Carbs, Fat, Fiber: White in-progress, Green 95-105%, Amber over 105%
     if (consumed > target * 1.05) {
       return AppColors.attention;
     }
     if (consumed >= target * 0.95) {
       return AppColors.positive;
     }
-    return AppColors.primary;
+    return AppColors.textPrimary;
   }
 
   @override

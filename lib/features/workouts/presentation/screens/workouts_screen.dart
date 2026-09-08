@@ -133,7 +133,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                         decoration: BoxDecoration(
                           color: AppColors.card,
                           borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.primary),
+                          border: Border.all(color: AppColors.textPrimary),
                         ),
                         child: Row(
                           children: [
@@ -147,7 +147,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                             ),
                             TextButton(
                               onPressed: () => setModalState(() => selectedActivity = null),
-                              child: const Text('Change', style: TextStyle(color: AppColors.primary)),
+                              child: const Text('Change', style: TextStyle(color: AppColors.textSecondary)),
                             ),
                           ],
                         ),
@@ -165,13 +165,13 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                           children: [
                             IconButton(
                               icon: const Icon(Icons.remove_circle_outline),
-                              color: AppColors.primary,
+                              color: AppColors.textPrimary,
                               onPressed: durationMin > 5 ? () => setModalState(() => durationMin -= 5) : null,
                             ),
                             Text('$durationMin min', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                             IconButton(
                               icon: const Icon(Icons.add_circle_outline),
-                              color: AppColors.primary,
+                              color: AppColors.textPrimary,
                               onPressed: () => setModalState(() => durationMin += 5),
                             ),
                           ],
@@ -194,12 +194,13 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                               label: Text(lvl.toUpperCase()),
                               selected: sel,
                               onSelected: (_) => setModalState(() => intensity = lvl),
-                              selectedColor: AppColors.primary,
+                              selectedColor: AppColors.surfaceElevated,
                               backgroundColor: AppColors.card,
+                              side: BorderSide(color: sel ? AppColors.textPrimary : AppColors.border),
                               labelStyle: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: sel ? Colors.white : AppColors.textSecondary,
+                                color: sel ? AppColors.textPrimary : AppColors.textSecondary,
                               ),
                               showCheckmark: false,
                             ),
@@ -225,11 +226,11 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text('Estimated Calorie Burn', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                                Text('$caloriesBurned kcal', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.primary)),
+                                Text('$caloriesBurned kcal', style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w900, color: AppColors.textPrimary)),
                               ],
                             ),
                           ),
-                          const Icon(Icons.local_fire_department_rounded, color: AppColors.primary, size: 28),
+                          const Icon(Icons.local_fire_department_rounded, color: AppColors.textPrimary, size: 28),
                         ],
                       ),
                     ),
@@ -242,8 +243,8 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.primary,
-                          foregroundColor: Colors.white,
+                          backgroundColor: AppColors.textPrimary,
+                          foregroundColor: AppColors.textInverse,
                         ),
                         onPressed: () async {
                           final db = ref.read(databaseProvider);
@@ -360,11 +361,11 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                           Container(
                             width: 52,
                             height: 52,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.15),
+                            decoration: const BoxDecoration(
+                              color: AppColors.surfaceElevated,
                               shape: BoxShape.circle,
                             ),
-                            child: const Icon(Icons.directions_run_rounded, color: AppColors.primary, size: 28),
+                            child: const Icon(Icons.directions_run_rounded, color: AppColors.textPrimary, size: 28),
                           ),
                           const SizedBox(width: 14),
                           Expanded(
@@ -387,16 +388,16 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                             ),
                           ),
                           IconButton(
-                            icon: const Icon(Icons.bar_chart_rounded, color: AppColors.primary),
+                            icon: const Icon(Icons.bar_chart_rounded, color: AppColors.textSecondary),
                             onPressed: () {},
                           ),
                           Container(
                             decoration: BoxDecoration(
-                              color: AppColors.primary,
+                              color: AppColors.textPrimary,
                               borderRadius: BorderRadius.circular(8),
                             ),
                             child: IconButton(
-                              icon: const Icon(Icons.add_rounded, color: Colors.white, size: 22),
+                              icon: const Icon(Icons.add_rounded, color: AppColors.textInverse, size: 22),
                               onPressed: _showActivityLoggerDialog,
                             ),
                           ),
@@ -424,7 +425,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: const Center(
-                              child: Icon(Icons.watch_rounded, color: AppColors.primary, size: 22),
+                              child: Icon(Icons.watch_rounded, color: AppColors.textSecondary, size: 22),
                             ),
                           ),
                           const SizedBox(width: 14),
@@ -471,7 +472,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: const [
                         Text('My Workout Routine', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                        Text('VIEW ALL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.primary)),
+                        Text('VIEW ALL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                       ],
                     ),
                     const SizedBox(height: 10),
@@ -501,7 +502,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                 color: AppColors.card,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: routine.isCustom ? AppColors.primary.withOpacity(0.4) : AppColors.border,
+                                  color: routine.isCustom ? AppColors.textPrimary.withValues(alpha: 0.4) : AppColors.border,
                                 ),
                               ),
                               child: Column(
@@ -510,7 +511,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                 children: [
                                   Icon(
                                     routine.icon,
-                                    color: routine.isCustom ? AppColors.primary : AppColors.textMuted,
+                                    color: routine.isCustom ? AppColors.textPrimary : AppColors.textMuted,
                                     size: 24,
                                   ),
                                   Column(
@@ -529,7 +530,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                         overflow: TextOverflow.ellipsis,
                                         style: TextStyle(
                                           fontSize: 11,
-                                          color: routine.isCustom ? AppColors.primary : AppColors.textSecondary,
+                                          color: routine.isCustom ? AppColors.textPrimary : AppColors.textSecondary,
                                         ),
                                       ),
                                     ],
@@ -552,9 +553,9 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: AppColors.primary,
-                  labelColor: AppColors.primary,
-                  unselectedLabelColor: AppColors.textMuted,
+                  indicatorColor: AppColors.textPrimary,
+                  labelColor: AppColors.textPrimary,
+                  unselectedLabelColor: AppColors.textSecondary,
                   tabs: const [
                     Tab(text: 'Recomp Split'),
                     Tab(text: 'Activity History'),
@@ -579,8 +580,8 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.primary,
-        foregroundColor: Colors.white,
+        backgroundColor: AppColors.textPrimary,
+        foregroundColor: AppColors.textInverse,
         icon: const Icon(Icons.add_rounded),
         label: const Text('Log Activity', style: TextStyle(fontWeight: FontWeight.w700)),
         onPressed: _showActivityLoggerDialog,
@@ -711,12 +712,12 @@ class _RecompSplitTab extends ConsumerWidget {
           leading: Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: AppColors.primary.withOpacity(0.12),
+              color: AppColors.surfaceElevated,
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
               dayPlan.day,
-              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.primary, fontSize: 14),
+              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
             ),
           ),
           title: Text(dayPlan.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
@@ -749,7 +750,7 @@ class _RecompSplitTab extends ConsumerWidget {
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
                           backgroundColor: AppColors.cardElevated,
-                          foregroundColor: AppColors.primary,
+                          foregroundColor: AppColors.textPrimary,
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                         ),
@@ -795,13 +796,13 @@ class _RecompSplitTab extends ConsumerWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: weight >= 2.0 ? () => setModalState(() => weight -= 2.0) : null,
                           ),
                           Text('${weight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => weight += 2.0),
                           ),
                         ],
@@ -816,13 +817,13 @@ class _RecompSplitTab extends ConsumerWidget {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: reps > 1 ? () => setModalState(() => reps -= 1) : null,
                           ),
                           Text('$reps reps', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline),
-                            color: AppColors.primary,
+                            color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => reps += 1),
                           ),
                         ],
@@ -835,8 +836,8 @@ class _RecompSplitTab extends ConsumerWidget {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primary,
-                        foregroundColor: Colors.white,
+                        backgroundColor: AppColors.textPrimary,
+                        foregroundColor: AppColors.textInverse,
                       ),
                       onPressed: () async {
                         final db = ref.read(databaseProvider);
@@ -896,8 +897,8 @@ class _WorkoutHistoryTab extends StatelessWidget {
             const SizedBox(height: 12),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.primary,
-                foregroundColor: Colors.white,
+                backgroundColor: AppColors.textPrimary,
+                foregroundColor: AppColors.textInverse,
               ),
               onPressed: onLogActivityTap,
               icon: const Icon(Icons.add),
@@ -926,10 +927,10 @@ class _WorkoutHistoryTab extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withOpacity(0.12),
+                  color: AppColors.surfaceElevated,
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(Icons.directions_run_rounded, color: AppColors.primary, size: 24),
+                child: const Icon(Icons.directions_run_rounded, color: AppColors.textSecondary, size: 24),
               ),
               const SizedBox(width: 14),
               Expanded(
@@ -945,7 +946,7 @@ class _WorkoutHistoryTab extends StatelessWidget {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
-                  Text('${w.caloriesBurned.toInt()} kcal', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.primary)),
+                  Text('${w.caloriesBurned.toInt()} kcal', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary)),
                   const Text('burned', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
                 ],
               ),

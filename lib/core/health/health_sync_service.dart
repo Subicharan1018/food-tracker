@@ -19,6 +19,7 @@ class HealthSyncService {
   final Health _health = Health();
   bool _isConfigured = false;
   bool _hasPermissions = false;
+  bool get hasPermissions => _hasPermissions;
 
   static final List<HealthDataType> _dataTypes = [
     HealthDataType.STEPS,

@@ -33,7 +33,7 @@ class WaterTrackingCard extends StatelessWidget {
             children: [
               Row(
                 children: const [
-                  Icon(Icons.water_drop_rounded, color: AppColors.primary, size: 20),
+                  Icon(Icons.water_drop_rounded, color: AppColors.textPrimary, size: 20),
                   SizedBox(width: 8),
                   Text(
                     'Water & Hydration',
@@ -47,10 +47,10 @@ class WaterTrackingCard extends StatelessWidget {
               ),
               Text(
                 '${(progress * 100).toInt()}%',
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: progress >= 1.0 ? AppColors.positive : AppColors.textSecondary,
                 ),
               ),
             ],
@@ -115,7 +115,9 @@ class WaterTrackingCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.cardElevated,
-              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+              valueColor: AlwaysStoppedAnimation<Color>(
+                progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
+              ),
               minHeight: 8,
             ),
           ),
@@ -139,16 +141,16 @@ class _QuickWaterButton extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
         decoration: BoxDecoration(
-          color: AppColors.primary.withOpacity(0.12),
+          color: AppColors.surfaceElevated,
           borderRadius: BorderRadius.circular(10),
-          border: Border.all(color: AppColors.primary.withOpacity(0.3)),
+          border: Border.all(color: AppColors.border),
         ),
         child: Text(
           label,
           style: const TextStyle(
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            color: AppColors.primary,
+            color: AppColors.textPrimary,
           ),
         ),
       ),

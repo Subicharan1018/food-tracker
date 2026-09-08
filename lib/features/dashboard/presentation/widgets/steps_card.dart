@@ -42,7 +42,7 @@ class StepsCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.directions_walk_rounded,
-                    color: progress >= 1.0 ? AppColors.positive : AppColors.primary,
+                    color: progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -62,15 +62,16 @@ class StepsCard extends StatelessWidget {
                 child: Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.12),
+                    color: AppColors.surfaceElevated,
                     borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border),
                   ),
                   child: const Text(
                     '+1,000 steps',
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.w700,
-                      color: AppColors.primary,
+                      color: AppColors.textPrimary,
                     ),
                   ),
                 ),
@@ -125,7 +126,7 @@ class StepsCard extends StatelessWidget {
                       value: progress,
                       backgroundColor: AppColors.cardElevated,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        progress >= 1.0 ? AppColors.positive : AppColors.primary,
+                        progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
                       ),
                       strokeWidth: 5,
                     ),

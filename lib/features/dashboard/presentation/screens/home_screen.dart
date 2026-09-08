@@ -151,7 +151,7 @@ class HomeScreen extends ConsumerWidget {
           IconButton(
             constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
             padding: const EdgeInsets.only(right: 8),
-            icon: const Icon(Icons.pie_chart_rounded, color: AppColors.primary),
+            icon: const Icon(Icons.pie_chart_rounded, color: AppColors.textPrimary),
             tooltip: 'Macro Source Breakdown',
             onPressed: () {
               Navigator.push(
@@ -163,8 +163,8 @@ class HomeScreen extends ConsumerWidget {
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.primary,
-        backgroundColor: AppColors.card,
+        color: AppColors.textPrimary,
+        backgroundColor: AppColors.cardElevated,
         onRefresh: () async {
           ref.invalidate(diaryEntriesProvider);
           ref.invalidate(dailyWaterProvider);
@@ -241,7 +241,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.hub_rounded, color: AppColors.primary, size: 20),
+                    const Icon(Icons.hub_rounded, color: AppColors.textPrimary, size: 20),
                     const SizedBox(width: 10),
                     Expanded(
                       child: Column(
