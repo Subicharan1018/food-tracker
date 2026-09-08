@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/legacy.dart';
 import 'package:intl/intl.dart';
 import '../auth/firebase_auth_rest_service.dart';
 import '../config/firebase_config.dart';
