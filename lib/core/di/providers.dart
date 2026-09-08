@@ -7,6 +7,8 @@ import '../local_db/app_database.dart';
 import '../local_db/seed_data.dart';
 import '../network/google_firestore_sync_service.dart';
 
+import '../sync/sync_scheduler.dart';
+
 // Services
 final healthSyncServiceProvider = Provider<HealthSyncService>((ref) {
   final service = HealthSyncService();
@@ -27,7 +29,27 @@ final firestoreSyncServiceProvider = Provider<GoogleFirestoreSyncService>((ref) 
   );
 });
 
-// Sync state provider: tracks live sync status (idle, syncing, success, error)
+// Single Sync Scheduler Provider
+final syncSchedulerProvider = ChangeNotifierProvider<SyncScheduler>((ref) {
+  final syncService = ref.watch(firestoreSyncServiceProvider);
+  final auth = ref.watch(firebaseAuthRestServiceProvider);
+  final db = ref.watch(databaseProvider);
+  final scheduler = SyncScheduler(
+    syncService: syncService,
+    authService: auth,
+    db: db,
+  );
+  db.attachSyncScheduler(scheduler);
+  return scheduler;
+});
+
+// Live Sync Status Provider
+final syncStatusProvider = Provider<SyncSchedulerStatus>((ref) {
+  final scheduler = ref.watch(syncSchedulerProvider);
+  return scheduler.status;
+});
+
+// Backward-compatible SyncState provider
 class SyncState {
   final bool isSyncing;
   final SyncResult? lastResult;
@@ -37,27 +59,29 @@ class SyncState {
 }
 
 final syncStatusNotifierProvider = StateNotifierProvider<SyncStatusNotifier, SyncState>((ref) {
-  final service = ref.watch(firestoreSyncServiceProvider);
-  final db = ref.watch(databaseProvider);
-  return SyncStatusNotifier(service, db);
+  final scheduler = ref.watch(syncSchedulerProvider);
+  return SyncStatusNotifier(scheduler);
 });
 
 class SyncStatusNotifier extends StateNotifier<SyncState> {
-  final GoogleFirestoreSyncService _service;
-  final AppDatabase _db;
+  final SyncScheduler _scheduler;
 
-  SyncStatusNotifier(this._service, this._db) : super(const SyncState());
+  SyncStatusNotifier(this._scheduler)
+      : super(SyncState(
+          isSyncing: _scheduler.status.isSyncing,
+          lastResult: _scheduler.status.lastResult,
+          error: _scheduler.status.error,
+        ));
 
-  Future<SyncResult> triggerSync() async {
+  Future<SyncResult?> triggerSync() async {
     state = const SyncState(isSyncing: true);
-    try {
-      final res = await _service.syncAll(_db);
-      state = SyncState(isSyncing: false, lastResult: res);
-      return res;
-    } catch (e) {
-      state = SyncState(isSyncing: false, error: e.toString());
-      rethrow;
-    }
+    final res = await _scheduler.syncNow();
+    state = SyncState(
+      isSyncing: false,
+      lastResult: res,
+      error: res != null && !res.success ? res.errorMessage : null,
+    );
+    return res;
   }
 }
 

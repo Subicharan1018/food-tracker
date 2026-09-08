@@ -14,7 +14,11 @@ void main() {
   late GoogleFirestoreSyncService syncService;
 
   setUp(() {
-    FlutterSecureStorage.setMockInitialValues({});
+    FlutterSecureStorage.setMockInitialValues({
+      'firebase_id_token': 'valid_test_id_token',
+      'firebase_user_id': 'test_user_id',
+      'firebase_token_expiry': DateTime.now().add(const Duration(hours: 1)).toIso8601String(),
+    });
     db = AppDatabase(NativeDatabase.memory());
     authService = FirebaseAuthRestService(apiKey: 'TEST_KEY');
     syncService = GoogleFirestoreSyncService(
@@ -34,7 +38,7 @@ void main() {
       expect(syncService.userId, 'test_user_id');
 
       final token = await authService.getValidIdToken();
-      expect(token.isNotEmpty, true);
+      expect(token != null && token.isNotEmpty, true);
     });
 
     test('Identifies and extracts dirty records across multiple collections', () async {

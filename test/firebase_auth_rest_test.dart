@@ -15,16 +15,18 @@ void main() {
       expect(service.apiKey, 'TEST_API_KEY');
     });
 
-    test('Returns valid fallback session when offline or endpoint unreachable', () async {
+    test('Returns typed AuthFailure when offline or endpoint unreachable (no mock tokens)', () async {
       final service = FirebaseAuthRestService(apiKey: 'TEST_API_KEY');
-      final session = await service.signInAnonymously();
+      final result = await service.signInAnonymously();
 
-      expect(session, isNotNull);
-      expect(session!.userId, 'default_user');
-      expect(session.idToken, 'mock_firebase_id_token');
+      expect(result, isA<AuthFailure>());
+      final failure = result as AuthFailure;
+      expect(failure.reason.isNotEmpty, true);
+      expect(failure.message.isNotEmpty, true);
 
+      // getValidIdToken returns null instead of a fake mock token
       final token = await service.getValidIdToken();
-      expect(token, 'mock_firebase_id_token');
+      expect(token, isNull);
     });
 
     test('First sync on a fresh install returns epoch 0 to trigger full pull', () async {
@@ -42,3 +44,4 @@ void main() {
     });
   });
 }
+

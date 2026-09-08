@@ -31,7 +31,7 @@ class GoogleFirestoreSyncService {
   GoogleFirestoreSyncService({
     Dio? dio,
     FirebaseAuthRestService? authService,
-    this.projectId = 'food-tracker-vigor',
+    this.projectId = 'food-tracker-b8a23',
     this.userId = 'default_user',
     this.apiKey,
   })  : _dio = dio ?? Dio(),
@@ -40,8 +40,9 @@ class GoogleFirestoreSyncService {
   String get _baseUrl =>
       'https://firestore.googleapis.com/v1/projects/$projectId/databases/(default)/documents';
 
-  Future<Map<String, String>> _getAuthHeaders() async {
+  Future<Map<String, String>?> _getAuthHeaders() async {
     final token = await _authService.getValidIdToken();
+    if (token == null || token.isEmpty) return null;
     return {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer $token',
@@ -51,10 +52,16 @@ class GoogleFirestoreSyncService {
   /// Test connection to Google Cloud Firestore project with authentication
   Future<bool> testConnection() async {
     try {
-      userId = await _authService.getUserId();
+      final authState = await _authService.getAuthState();
+      if (authState is AuthFailure) {
+        debugPrint('Firestore test connection aborted: ${authState.message}');
+        return false;
+      }
+      userId = (authState as AuthSuccess).userId;
       final headers = await _getAuthHeaders();
-      final url = '$_baseUrl/users/$userId';
+      if (headers == null) return false;
 
+      final url = '$_baseUrl/users/$userId';
       final response = await _dio.get(
         url,
         queryParameters: apiKey != null ? {'key': apiKey} : null,
@@ -65,7 +72,6 @@ class GoogleFirestoreSyncService {
           receiveTimeout: const Duration(seconds: 5),
         ),
       );
-      // 200 (found) or 404 (project reachable, user doc not yet created) both indicate reachability!
       return response.statusCode == 200 || response.statusCode == 404;
     } catch (e) {
       debugPrint('Firestore test connection error: $e');
@@ -73,18 +79,29 @@ class GoogleFirestoreSyncService {
     }
   }
 
-  /// Full Two-Way Sync: Pushes all local dirty rows, pulls remote updates via :runQuery
+  /// Full Two-Way Sync: Pushes all local dirty rows, pulls remote updates via scoped queries
   Future<SyncResult> syncAll(AppDatabase db) async {
     int totalPushed = 0;
     int totalPulled = 0;
 
     try {
-      userId = await _authService.getUserId();
+      final authState = await _authService.getAuthState();
+      if (authState is AuthFailure) {
+        return SyncResult(
+          pushedCount: 0,
+          pulledCount: 0,
+          success: false,
+          errorMessage: authState.message,
+          timestamp: DateTime.now(),
+        );
+      }
 
-      // 1. PUSH local dirty records
+      userId = (authState as AuthSuccess).userId;
+
+      // 1. PUSH local dirty records across all subcollections
       totalPushed = await syncDirtyRecords(db);
 
-      // 2. PULL remote updates
+      // 2. PULL remote updates across all subcollections
       totalPulled = await pullRemoteChanges(db);
 
       // 3. Update sync timestamp upon success
@@ -109,10 +126,11 @@ class GoogleFirestoreSyncService {
     }
   }
 
-  /// Pushes all records across all 9 user collections marked isDirty == true
+  /// Pushes all records across all 8 user subcollections + profile marked isDirty == true
   Future<int> syncDirtyRecords(AppDatabase db) async {
     int count = 0;
     final headers = await _getAuthHeaders();
+    if (headers == null) return 0;
 
     // 1. Diary Entries
     final dirtyEntries = await db.getDirtyDiaryEntries();
@@ -171,7 +189,35 @@ class GoogleFirestoreSyncService {
       count += syncedWorkoutIds.length;
     }
 
-    // 3. Weigh-Ins
+    // 3. Workout Set Logs
+    final dirtySetLogs = await db.getDirtyWorkoutSetLogs();
+    final syncedSetLogIds = <String>[];
+    for (final s in dirtySetLogs) {
+      final docUrl = '$_baseUrl/users/$userId/workout_set_logs/${s.id}';
+      final payload = {
+        "fields": {
+          "id": {"stringValue": s.id},
+          "sessionId": {"stringValue": s.sessionId},
+          "date": {"stringValue": s.date},
+          "exerciseName": {"stringValue": s.exerciseName},
+          "setIndex": {"integerValue": s.setIndex.toString()},
+          "weightKg": {"doubleValue": s.weightKg},
+          "reps": {"integerValue": s.reps.toString()},
+          "targetReps": {"stringValue": s.targetReps ?? ''},
+          "completed": {"booleanValue": s.completed},
+          "loggedAt": {"stringValue": s.loggedAt.toIso8601String()},
+          "updatedAt": {"stringValue": s.loggedAt.toIso8601String()},
+        }
+      };
+      final ok = await _patchDocument(docUrl, payload, headers);
+      if (ok) syncedSetLogIds.add(s.id);
+    }
+    if (syncedSetLogIds.isNotEmpty) {
+      await db.markWorkoutSetLogsClean(syncedSetLogIds);
+      count += syncedSetLogIds.length;
+    }
+
+    // 4. Weigh-Ins
     final dirtyWeighIns = await db.getDirtyWeighIns();
     final syncedWeighInIds = <String>[];
     for (final win in dirtyWeighIns) {
@@ -194,7 +240,7 @@ class GoogleFirestoreSyncService {
       count += syncedWeighInIds.length;
     }
 
-    // 4. Measurements (keyed on measurement id - never collides across same date)
+    // 5. Measurements
     final dirtyMeasurements = await db.getDirtyMeasurements();
     final syncedMeasurementIds = <String>[];
     for (final m in dirtyMeasurements) {
@@ -217,7 +263,7 @@ class GoogleFirestoreSyncService {
       count += syncedMeasurementIds.length;
     }
 
-    // 5. Water Logs
+    // 6. Water Logs
     final dirtyWater = await db.getDirtyWaterLogs();
     final syncedWaterIds = <String>[];
     for (final wl in dirtyWater) {
@@ -239,7 +285,7 @@ class GoogleFirestoreSyncService {
       count += syncedWaterIds.length;
     }
 
-    // 6. Custom Foods
+    // 7. Custom Foods
     final dirtyFoods = await db.getDirtyCustomFoods();
     final syncedFoodIds = <String>[];
     for (final cf in dirtyFoods) {
@@ -266,7 +312,7 @@ class GoogleFirestoreSyncService {
       count += syncedFoodIds.length;
     }
 
-    // 7. User Profile
+    // 8. User Profile
     final user = await db.getUserProfile();
     if (user != null) {
       final docUrl = '$_baseUrl/users/$userId';
@@ -288,7 +334,7 @@ class GoogleFirestoreSyncService {
       if (ok) count++;
     }
 
-    // 8. Recipes
+    // 9. Recipes
     final recipes = await db.getAllRecipes();
     for (final r in recipes) {
       final docUrl = '$_baseUrl/users/$userId/recipes/${r.id}';
@@ -313,10 +359,12 @@ class GoogleFirestoreSyncService {
     return count;
   }
 
-  /// Pulls remote changes using :runQuery where updatedAt > lastSyncTimestamp (or all on fresh install)
+  /// Pulls remote changes using scoped user subcollection queries with GET fallback
   Future<int> pullRemoteChanges(AppDatabase db) async {
     int count = 0;
     final headers = await _getAuthHeaders();
+    if (headers == null) return 0;
+
     final lastSync = await _authService.getLastSyncTimestamp();
     final isFreshInstall = lastSync == null || lastSync.millisecondsSinceEpoch == 0;
 
@@ -324,6 +372,7 @@ class GoogleFirestoreSyncService {
     try {
       final userRes = await _dio.get(
         '$_baseUrl/users/$userId',
+        queryParameters: apiKey != null ? {'key': apiKey} : null,
         options: Options(headers: headers, validateStatus: (s) => s != null && s < 500),
       );
       if (userRes.statusCode == 200 && userRes.data != null) {
@@ -354,7 +403,7 @@ class GoogleFirestoreSyncService {
       debugPrint('Pull user profile note: $e');
     }
 
-    // 2. Pull Diary Entries (:runQuery)
+    // 2. Pull Diary Entries
     final remoteDiaryDocs = await _queryCollection('diary_entries', isFreshInstall ? null : lastSync, headers);
     final diaryCompanions = <DiaryEntriesCompanion>[];
     for (final doc in remoteDiaryDocs) {
@@ -410,7 +459,34 @@ class GoogleFirestoreSyncService {
       count += workoutCompanions.length;
     }
 
-    // 4. Pull Weigh-Ins
+    // 4. Pull Workout Set Logs
+    final remoteSetLogs = await _queryCollection('workout_set_logs', isFreshInstall ? null : lastSync, headers);
+    final setLogCompanions = <WorkoutSetLogsCompanion>[];
+    for (final doc in remoteSetLogs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      setLogCompanions.add(
+        WorkoutSetLogsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          sessionId: Value(fields['sessionId']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          exerciseName: Value(fields['exerciseName']?['stringValue'] ?? ''),
+          setIndex: Value(_parseInt(fields['setIndex']) ?? 1),
+          weightKg: Value(_parseDouble(fields['weightKg']) ?? 0.0),
+          reps: Value(_parseInt(fields['reps']) ?? 10),
+          targetReps: Value(fields['targetReps']?['stringValue']),
+          completed: Value(fields['completed']?['booleanValue'] ?? true),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(false),
+        ),
+      );
+    }
+    if (setLogCompanions.isNotEmpty) {
+      await db.upsertWorkoutSetLogsBatch(setLogCompanions);
+      count += setLogCompanions.length;
+    }
+
+    // 5. Pull Weigh-Ins
     final remoteWeighIns = await _queryCollection('weigh_ins', isFreshInstall ? null : lastSync, headers);
     final weighInCompanions = <WeighInsCompanion>[];
     for (final doc in remoteWeighIns) {
@@ -433,7 +509,7 @@ class GoogleFirestoreSyncService {
       count += weighInCompanions.length;
     }
 
-    // 5. Pull Measurements
+    // 6. Pull Measurements
     final remoteMeasurements = await _queryCollection('measurements', isFreshInstall ? null : lastSync, headers);
     final measurementCompanions = <MeasurementsCompanion>[];
     for (final doc in remoteMeasurements) {
@@ -456,7 +532,7 @@ class GoogleFirestoreSyncService {
       count += measurementCompanions.length;
     }
 
-    // 6. Pull Water Logs
+    // 7. Pull Water Logs
     final remoteWater = await _queryCollection('water_logs', isFreshInstall ? null : lastSync, headers);
     final waterCompanions = <WaterLogsCompanion>[];
     for (final doc in remoteWater) {
@@ -477,7 +553,7 @@ class GoogleFirestoreSyncService {
       count += waterCompanions.length;
     }
 
-    // 7. Pull Custom Foods
+    // 8. Pull Custom Foods
     final remoteFoods = await _queryCollection('custom_foods', isFreshInstall ? null : lastSync, headers);
     final foodCompanions = <CustomFoodsCompanion>[];
     for (final doc in remoteFoods) {
@@ -504,47 +580,110 @@ class GoogleFirestoreSyncService {
       count += foodCompanions.length;
     }
 
+    // 9. Pull Recipes
+    final remoteRecipes = await _queryCollection('recipes', isFreshInstall ? null : lastSync, headers);
+    final recipeCompanions = <RecipesCompanion>[];
+    for (final doc in remoteRecipes) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      recipeCompanions.add(
+        RecipesCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          name: Value(fields['name']?['stringValue'] ?? ''),
+          mealSlot: Value(fields['mealSlot']?['stringValue'] ?? 'snack'),
+          calories: Value(_parseDouble(fields['calories']) ?? 0.0),
+          proteinG: Value(_parseDouble(fields['proteinG']) ?? 0.0),
+          carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
+          fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
+          ingredientsJson: Value(fields['ingredientsJson']?['stringValue'] ?? '[]'),
+          method: Value(fields['method']?['stringValue'] ?? ''),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (recipeCompanions.isNotEmpty) {
+      await db.insertRecipesBatch(recipeCompanions);
+      count += recipeCompanions.length;
+    }
+
     return count;
   }
 
+  /// Scoped collection query: uses :runQuery under users/$userId with GET fallback and client-side timestamp filter
   Future<List<Map<String, dynamic>>> _queryCollection(
     String collectionName,
     DateTime? since,
     Map<String, String> headers,
   ) async {
     final List<Map<String, dynamic>> results = [];
-    try {
-      final url = '$_baseUrl:runQuery';
-      final Map<String, dynamic> structuredQuery = {
-        "from": [{"collectionId": collectionName}],
-      };
+    final isFreshInstall = since == null || since.millisecondsSinceEpoch == 0;
 
-      if (since != null) {
-        structuredQuery["where"] = {
-          "fieldFilter": {
-            "field": {"fieldPath": "updatedAt"},
-            "op": "GREATER_THAN",
-            "value": {"stringValue": since.toIso8601String()}
+    // 1. Try structured :runQuery scoped to the user subcollection
+    if (!isFreshInstall) {
+      try {
+        final queryUrl = '$_baseUrl/users/$userId:runQuery';
+        final Map<String, dynamic> structuredQuery = {
+          "from": [{"collectionId": collectionName}],
+          "where": {
+            "fieldFilter": {
+              "field": {"fieldPath": "updatedAt"},
+              "op": "GREATER_THAN",
+              "value": {"stringValue": since.toIso8601String()}
+            }
           }
         };
-      }
 
-      final res = await _dio.post(
-        url,
-        data: jsonEncode({"structuredQuery": structuredQuery}),
+        final res = await _dio.post(
+          queryUrl,
+          data: jsonEncode({"structuredQuery": structuredQuery}),
+          queryParameters: apiKey != null ? {'key': apiKey} : null,
+          options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
+        );
+
+        if (res.statusCode == 200 && res.data is List) {
+          for (final item in res.data) {
+            if (item is Map<String, dynamic> && item['document'] != null) {
+              results.add(item['document'] as Map<String, dynamic>);
+            }
+          }
+          return results;
+        }
+      } catch (e) {
+        debugPrint('Structured query on $collectionName failed, falling back to GET: $e');
+      }
+    }
+
+    // 2. GET Fallback (for fresh install OR if structured :runQuery returned error / no composite index)
+    try {
+      final listUrl = '$_baseUrl/users/$userId/$collectionName';
+      final res = await _dio.get(
+        listUrl,
+        queryParameters: apiKey != null ? {'key': apiKey} : null,
         options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
       );
 
-      if (res.statusCode == 200 && res.data is List) {
-        for (final item in res.data) {
-          if (item is Map<String, dynamic> && item['document'] != null) {
-            results.add(item['document'] as Map<String, dynamic>);
+      if (res.statusCode == 200 && res.data != null && res.data['documents'] is List) {
+        for (final doc in res.data['documents']) {
+          if (doc is Map<String, dynamic> && doc['fields'] != null) {
+            // Client-side timestamp filter guard when since is specified
+            if (since != null && since.millisecondsSinceEpoch > 0) {
+              final fields = doc['fields'] as Map<String, dynamic>;
+              final updatedAtStr = fields['updatedAt']?['stringValue'];
+              if (updatedAtStr != null) {
+                final docUpdatedAt = DateTime.tryParse(updatedAtStr);
+                if (docUpdatedAt != null && !docUpdatedAt.isAfter(since)) {
+                  continue; // Discard older/stale documents
+                }
+              }
+            }
+            results.add(doc);
           }
         }
       }
     } catch (e) {
-      debugPrint('Query $collectionName error: $e');
+      debugPrint('GET collection $collectionName fallback error: $e');
     }
+
     return results;
   }
 
@@ -581,3 +720,4 @@ class GoogleFirestoreSyncService {
     return null;
   }
 }
+

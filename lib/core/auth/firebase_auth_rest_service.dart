@@ -3,17 +3,31 @@ import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
-class FirebaseAuthSession {
+sealed class AuthResult {
+  const AuthResult();
+}
+
+class AuthSuccess extends AuthResult {
   final String userId;
   final String idToken;
   final String refreshToken;
   final DateTime expiresAt;
 
-  FirebaseAuthSession({
+  const AuthSuccess({
     required this.userId,
     required this.idToken,
     required this.refreshToken,
     required this.expiresAt,
+  });
+}
+
+class AuthFailure extends AuthResult {
+  final String reason; // 'anonymous_auth_disabled', 'network_error', 'invalid_api_key', 'unauthenticated', 'auth_error'
+  final String message;
+
+  const AuthFailure({
+    required this.reason,
+    required this.message,
   });
 }
 
@@ -35,8 +49,9 @@ class FirebaseAuthRestService {
   })  : _dio = dio ?? Dio(),
         _storage = storage ?? const FlutterSecureStorage();
 
-  /// Silently sign in anonymously using Firebase Auth REST API
-  Future<FirebaseAuthSession?> signInAnonymously() async {
+  /// Silently sign in anonymously using Firebase Auth REST API.
+  /// Returns typed [AuthSuccess] or [AuthFailure]. Never returns a fake fallback token.
+  Future<AuthResult> signInAnonymously() async {
     try {
       final url =
           'https://identitytoolkit.googleapis.com/v1/accounts:signUp?key=$apiKey';
@@ -46,6 +61,8 @@ class FirebaseAuthRestService {
         options: Options(
           headers: {'Content-Type': 'application/json'},
           validateStatus: (status) => status != null && status < 500,
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
         ),
       );
 
@@ -62,36 +79,69 @@ class FirebaseAuthRestService {
         await _storage.write(key: _kUserId, value: localId);
         await _storage.write(key: _kTokenExpiry, value: expiresAt.toIso8601String());
 
-        return FirebaseAuthSession(
+        return AuthSuccess(
           userId: localId,
           idToken: idToken,
           refreshToken: refreshToken,
           expiresAt: expiresAt,
         );
       }
-    } catch (e) {
-      debugPrint('Anonymous auth error: $e');
-    }
 
-    // Fallback session for standalone/offline dev without blocking the app
-    const fallbackUid = 'default_user';
-    const fallbackToken = 'mock_firebase_id_token';
-    await _storage.write(key: _kUserId, value: fallbackUid);
-    await _storage.write(key: _kIdToken, value: fallbackToken);
-    return FirebaseAuthSession(
-      userId: fallbackUid,
-      idToken: fallbackToken,
-      refreshToken: 'mock_refresh_token',
-      expiresAt: DateTime.now().add(const Duration(days: 30)),
-    );
+      // Handle non-200 responses from Google Identity Toolkit
+      final errorData = response.data;
+      String errMessage = 'Authentication failed with status ${response.statusCode}';
+      String errCode = '';
+
+      if (errorData is Map && errorData['error'] != null) {
+        final err = errorData['error'];
+        errMessage = err['message']?.toString() ?? errMessage;
+        errCode = errMessage.toUpperCase();
+      } else if (errorData is String) {
+        try {
+          final parsed = jsonDecode(errorData);
+          if (parsed is Map && parsed['error'] != null) {
+            errMessage = parsed['error']['message']?.toString() ?? errMessage;
+            errCode = errMessage.toUpperCase();
+          }
+        } catch (_) {}
+      }
+
+      if (errCode.contains('OPERATION_NOT_ALLOWED') || errCode.contains('ADMIN_ONLY_OPERATION')) {
+        return const AuthFailure(
+          reason: 'anonymous_auth_disabled',
+          message: 'Anonymous sign-in is disabled in Firebase Console. Enable it in Authentication > Sign-in method.',
+        );
+      } else if (errCode.contains('API_KEY_INVALID') || errCode.contains('API KEY NOT VALID')) {
+        return const AuthFailure(
+          reason: 'invalid_api_key',
+          message: 'Firebase API key is invalid. Check FirebaseConfig.apiKey.',
+        );
+      }
+
+      return AuthFailure(
+        reason: 'auth_error',
+        message: errMessage,
+      );
+    } on DioException catch (e) {
+      debugPrint('Anonymous auth network error: $e');
+      return AuthFailure(
+        reason: 'network_error',
+        message: 'Network error connecting to Firebase Auth: ${e.message ?? e.toString()}',
+      );
+    } catch (e) {
+      debugPrint('Anonymous auth unexpected error: $e');
+      return AuthFailure(
+        reason: 'auth_error',
+        message: 'Unexpected authentication error: $e',
+      );
+    }
   }
 
   /// Proactive refresh of ID Token using refresh token
-  Future<String?> refreshIdToken() async {
+  Future<AuthResult> refreshIdToken() async {
     final refreshToken = await _storage.read(key: _kRefreshToken);
     if (refreshToken == null || refreshToken.isEmpty || refreshToken == 'mock_refresh_token') {
-      final session = await signInAnonymously();
-      return session?.idToken;
+      return signInAnonymously();
     }
 
     try {
@@ -102,6 +152,8 @@ class FirebaseAuthRestService {
         options: Options(
           headers: {'Content-Type': 'application/x-www-form-urlencoded'},
           validateStatus: (status) => status != null && status < 500,
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
         ),
       );
 
@@ -109,50 +161,75 @@ class FirebaseAuthRestService {
         final data = response.data is String ? jsonDecode(response.data) : response.data;
         final newIdToken = data['id_token'] as String;
         final newRefreshToken = data['refresh_token'] as String;
+        final userId = data['user_id'] as String? ?? await _storage.read(key: _kUserId) ?? '';
         final expiresIn = int.tryParse(data['expires_in']?.toString() ?? '3600') ?? 3600;
         final expiresAt = DateTime.now().add(Duration(seconds: expiresIn));
 
         await _storage.write(key: _kIdToken, value: newIdToken);
         await _storage.write(key: _kRefreshToken, value: newRefreshToken);
         await _storage.write(key: _kTokenExpiry, value: expiresAt.toIso8601String());
-        return newIdToken;
+
+        return AuthSuccess(
+          userId: userId,
+          idToken: newIdToken,
+          refreshToken: newRefreshToken,
+          expiresAt: expiresAt,
+        );
       }
     } catch (e) {
       debugPrint('Token refresh error: $e');
     }
 
-    // If refresh fails, sign in anonymously again
-    final fresh = await signInAnonymously();
-    return fresh?.idToken;
+    // If refresh fails, attempt fresh anonymous sign-in
+    return signInAnonymously();
   }
 
-  /// Returns valid, unexpired ID token (proactively refreshing if within 5 mins of expiry)
-  Future<String> getValidIdToken() async {
+  /// Returns current [AuthResult], proactively refreshing if within 5 mins of expiry
+  Future<AuthResult> getAuthState() async {
     final storedToken = await _storage.read(key: _kIdToken);
+    final storedUserId = await _storage.read(key: _kUserId);
     final expiryStr = await _storage.read(key: _kTokenExpiry);
+    final refreshToken = await _storage.read(key: _kRefreshToken);
 
-    if (storedToken == null || storedToken.isEmpty || expiryStr == null) {
-      final session = await signInAnonymously();
-      return session?.idToken ?? 'mock_firebase_id_token';
+    if (storedToken == null ||
+        storedToken.isEmpty ||
+        storedToken == 'mock_firebase_id_token' ||
+        storedUserId == null ||
+        storedUserId.isEmpty ||
+        expiryStr == null) {
+      return signInAnonymously();
     }
 
     final expiry = DateTime.tryParse(expiryStr) ?? DateTime.now();
     // If within 5 minutes of expiring, refresh now
     if (DateTime.now().isAfter(expiry.subtract(const Duration(minutes: 5)))) {
-      final refreshed = await refreshIdToken();
-      return refreshed ?? storedToken;
+      return refreshIdToken();
     }
 
-    return storedToken;
+    return AuthSuccess(
+      userId: storedUserId,
+      idToken: storedToken,
+      refreshToken: refreshToken ?? '',
+      expiresAt: expiry,
+    );
   }
 
-  Future<String> getUserId() async {
-    final storedId = await _storage.read(key: _kUserId);
-    if (storedId != null && storedId.isNotEmpty) {
-      return storedId;
+  /// Returns valid, unexpired ID token if authenticated, or null if unauthenticated
+  Future<String?> getValidIdToken() async {
+    final state = await getAuthState();
+    if (state is AuthSuccess) {
+      return state.idToken;
     }
-    final session = await signInAnonymously();
-    return session?.userId ?? 'default_user';
+    return null;
+  }
+
+  /// Returns active Firebase User ID if authenticated, or null
+  Future<String?> getUserId() async {
+    final state = await getAuthState();
+    if (state is AuthSuccess) {
+      return state.userId;
+    }
+    return null;
   }
 
   Future<DateTime?> getLastSyncTimestamp() async {
@@ -166,5 +243,12 @@ class FirebaseAuthRestService {
 
   Future<void> updateLastSyncTimestamp(DateTime time) async {
     await _storage.write(key: _kLastSync, value: time.toIso8601String());
+  }
+
+  Future<void> clearAuth() async {
+    await _storage.delete(key: _kIdToken);
+    await _storage.delete(key: _kRefreshToken);
+    await _storage.delete(key: _kUserId);
+    await _storage.delete(key: _kTokenExpiry);
   }
 }

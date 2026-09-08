@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import '../sync/sync_scheduler.dart';
 
 part 'app_database.g.dart';
 
@@ -231,7 +232,13 @@ class Recipes extends Table {
   Recipes,
 ])
 class AppDatabase extends _$AppDatabase {
-  AppDatabase([QueryExecutor? e]) : super(e ?? _openConnection());
+  SyncScheduler? syncScheduler;
+
+  AppDatabase([QueryExecutor? e, this.syncScheduler]) : super(e ?? _openConnection());
+
+  void attachSyncScheduler(SyncScheduler scheduler) {
+    syncScheduler = scheduler;
+  }
 
   @override
   int get schemaVersion => 1;
@@ -250,8 +257,10 @@ class AppDatabase extends _$AppDatabase {
   Future<User?> getUserProfile() =>
       (select(users)..where((u) => u.id.equals('default_user'))).getSingleOrNull();
 
-  Future<void> saveUserProfile(UsersCompanion companion) =>
-      into(users).insertOnConflictUpdate(companion);
+  Future<void> saveUserProfile(UsersCompanion companion) async {
+    await into(users).insertOnConflictUpdate(companion);
+    syncScheduler?.scheduleSync();
+  }
 
   // Food Items
   Future<List<FoodItem>> searchFoodItems(String query) {
@@ -283,11 +292,17 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
-  Future<int> addDiaryEntry(DiaryEntriesCompanion entry) =>
-      into(diaryEntries).insert(entry);
+  Future<int> addDiaryEntry(DiaryEntriesCompanion entry) async {
+    final res = await into(diaryEntries).insert(entry);
+    syncScheduler?.scheduleSync();
+    return res;
+  }
 
   Future<bool> deleteDiaryEntry(String id) async {
     final count = await (delete(diaryEntries)..where((e) => e.id.equals(id))).go();
+    if (count > 0) {
+      syncScheduler?.scheduleSync();
+    }
     return count > 0;
   }
 
@@ -307,7 +322,10 @@ class AppDatabase extends _$AppDatabase {
         .map((logs) => logs.fold<int>(0, (sum, l) => sum + l.mlAdded));
   }
 
-  Future<void> addWaterLog(WaterLogsCompanion log) => into(waterLogs).insert(log);
+  Future<void> addWaterLog(WaterLogsCompanion log) async {
+    await into(waterLogs).insert(log);
+    syncScheduler?.scheduleSync();
+  }
 
   // Activities & Workouts
   Future<List<Activity>> searchActivities(String query) {
@@ -331,13 +349,16 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
-  Future<void> addWorkoutSession(WorkoutSessionsCompanion session) =>
-      into(workoutSessions).insert(session);
+  Future<void> addWorkoutSession(WorkoutSessionsCompanion session) async {
+    await into(workoutSessions).insert(session);
+    syncScheduler?.scheduleSync();
+  }
 
   Future<void> addWorkoutSetLogs(List<WorkoutSetLogsCompanion> sets) async {
     await batch((b) {
       b.insertAll(workoutSetLogs, sets);
     });
+    syncScheduler?.scheduleSync();
   }
 
   Stream<List<WorkoutSetLog>> watchSetLogsForDate(String dateStr) {
@@ -355,8 +376,10 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
-  Future<void> addWeighIn(WeighInsCompanion weighIn) =>
-      into(weighIns).insertOnConflictUpdate(weighIn);
+  Future<void> addWeighIn(WeighInsCompanion weighIn) async {
+    await into(weighIns).insertOnConflictUpdate(weighIn);
+    syncScheduler?.scheduleSync();
+  }
 
   Stream<List<Measurement>> watchMeasurements(String type) {
     return (select(measurements)
@@ -365,8 +388,10 @@ class AppDatabase extends _$AppDatabase {
         .watch();
   }
 
-  Future<void> addMeasurement(MeasurementsCompanion measurement) =>
-      into(measurements).insertOnConflictUpdate(measurement);
+  Future<void> addMeasurement(MeasurementsCompanion measurement) async {
+    await into(measurements).insertOnConflictUpdate(measurement);
+    syncScheduler?.scheduleSync();
+  }
 
   // Recipes
   Stream<List<Recipe>> watchRecipes() => select(recipes).watch();
@@ -376,6 +401,7 @@ class AppDatabase extends _$AppDatabase {
     await batch((b) {
       b.insertAllOnConflictUpdate(recipes, items);
     });
+    syncScheduler?.scheduleSync();
   }
 
   // Streaks
@@ -401,6 +427,13 @@ class AppDatabase extends _$AppDatabase {
   Future<void> markWorkoutSessionsClean(List<String> ids) =>
       (update(workoutSessions)..where((w) => w.id.isIn(ids)))
           .write(const WorkoutSessionsCompanion(isDirty: Value(false)));
+
+  Future<List<WorkoutSetLog>> getDirtyWorkoutSetLogs() =>
+      (select(workoutSetLogs)..where((w) => w.isDirty.equals(true))).get();
+
+  Future<void> markWorkoutSetLogsClean(List<String> ids) =>
+      (update(workoutSetLogs)..where((w) => w.id.isIn(ids)))
+          .write(const WorkoutSetLogsCompanion(isDirty: Value(false)));
 
   Future<List<WeighIn>> getDirtyWeighIns() =>
       (select(weighIns)..where((w) => w.isDirty.equals(true))).get();
@@ -440,6 +473,12 @@ class AppDatabase extends _$AppDatabase {
   Future<void> upsertWorkoutsBatch(List<WorkoutSessionsCompanion> sessions) async {
     await batch((b) {
       b.insertAllOnConflictUpdate(workoutSessions, sessions);
+    });
+  }
+
+  Future<void> upsertWorkoutSetLogsBatch(List<WorkoutSetLogsCompanion> sets) async {
+    await batch((b) {
+      b.insertAllOnConflictUpdate(workoutSetLogs, sets);
     });
   }
 
