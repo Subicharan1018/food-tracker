@@ -53,3 +53,17 @@ coverage/
 # Symbols
 app.*.symbols
 
+# Backend / Python
+.env
+venv/
+uvicorn.log
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+dist/
+*.service.local
+service-account.json
+
+

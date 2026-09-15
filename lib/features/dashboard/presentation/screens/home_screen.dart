@@ -15,6 +15,9 @@ import '../widgets/meal_slot_card.dart';
 import '../widgets/water_card.dart';
 import '../widgets/steps_card.dart';
 import '../widgets/streak_card.dart';
+import '../../../ai_digest/weekly_digest_card.dart';
+import '../../../ai_planner/meal_plan_card.dart';
+import '../../../workouts/progression_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -25,6 +28,94 @@ class HomeScreen extends ConsumerWidget {
       MaterialPageRoute(
         builder: (_) => LogFoodScreen(initialMealSlot: mealSlot),
       ),
+    );
+  }
+
+  void _requestMealPlan(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) {
+        return Consumer(
+          builder: (ctx, modalRef, _) {
+            final user = modalRef.watch(userProfileProvider).value;
+            final userId = user?.id ?? 'default_user';
+            final planAsync = modalRef.watch(mealPlanProvider(userId));
+
+            return Container(
+              decoration: const BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(20),
+              child: SafeArea(
+                child: planAsync.when(
+                  data: (data) {
+                    final items = (data['plan'] as List<dynamic>?) ?? [];
+                    return SingleChildScrollView(
+                      child: MealPlanCard(
+                        planItems: items,
+                        rawText: data['raw_text']?.toString(),
+                        onDismiss: () => Navigator.pop(ctx),
+                      ),
+                    );
+                  },
+                  loading: () => const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        CircularProgressIndicator(color: AppColors.positive),
+                        SizedBox(height: 20),
+                        Text(
+                          'Kinetik is planning your evening... (~60 seconds)',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        SizedBox(height: 8),
+                        Text(
+                          'Analyzing today\'s macros, remaining protein, and pantry recipes',
+                          style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+                  ),
+                  error: (err, _) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 30),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(Icons.cloud_off_rounded, color: AppColors.destructive, size: 40),
+                        const SizedBox(height: 14),
+                        const Text(
+                          'Server unavailable. Check your connection.',
+                          style: TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        ElevatedButton(
+                          style: ElevatedButton.styleFrom(backgroundColor: AppColors.surfaceElevated),
+                          onPressed: () {
+                            modalRef.invalidate(mealPlanProvider(userId));
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
     );
   }
 
@@ -372,6 +463,42 @@ class HomeScreen extends ConsumerWidget {
               onAddTap: () => _navigateLogFood(context, 'snack'),
               onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
             ),
+
+            const SizedBox(height: 16),
+
+            // AI Meal Planning Action Button
+            SizedBox(
+              width: double.infinity,
+              height: 52,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.auto_awesome_rounded, color: Colors.black, size: 20),
+                label: const Text(
+                  'Plan my evening',
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: Colors.black,
+                  ),
+                ),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.positive,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                onPressed: () => _requestMealPlan(context, ref),
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // AI Weekly Digest on Sunday/Monday
+            const WeeklyDigestCard(),
+
+            const SizedBox(height: 16),
+
+            // AI Workout Progression Card on Weekends
+            const WorkoutProgressionCard(),
+
+            const SizedBox(height: 20),
           ],
         ),
       ),

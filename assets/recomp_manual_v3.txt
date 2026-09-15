@@ -1,0 +1,1466 @@
+Recomp Blueprint — Training + Tamil Nadu Diet
+
+  
+
+    Overview
+    Macros & Why
+    Training
+    Meal Plan
+    Breakfast
+    Lunch
+    Dinner
+    Snacks
+    Shopping
+    Tracking
+  
+
+  Home training + Tamil Nadu food system · Blueprint v3
+  
+
+## Recomp Blueprint — Phase 1
+
+  
+Goal: recomp — build muscle + get slightly leaner at the same weight. Home equipment only. Built around a 7 AM–6 PM college day. Boiler chicken only. Chapati + side dish at breakfast and lunch, rice + chicken always at dinner. Equipment: long barbell (7 kg bare, ~26 kg max loaded), EZ curl bar (2 kg), adjustable dumbbells (~9.5 kg/hand max), resistance band, pull-up bar, adjustable incline/decline bench, yoga mat, elliptical, 003cstrong003eair fryer003c/strong003e.
+
+  
+
+    
+160 cmHeight
+    
+62 kgWeight
+    
+35 cmBiceps
+    
+30 cmForearm
+    
+77 cmWaist
+    
+8Pull-ups max
+    
+~20Push-ups max
+  
+
+  
+
+## Daily schedule
+
+  
+
+    
+6:00 AMWake, cook
+    
+6:30 AMBreakfast — chapati + side
+    
+7:00 AMLeave
+    
+1:00 PMLunch — packed box
+    
+4:30 PMWhey shake at bus stop
+    
+6:00 PMHome — 2 bananas
+    
+7:00 PMTrain
+    
+8:15 PMDinner — rice + chicken
+  
+
+  
+How to use this blueprint: Every recipe has a checkbox and exact macro data. Check off what you eat today — the bottom bar live-tracks kcal, protein, carbs, fat, and fiber against daily targets. S = Simple (weekday-ready, ≤15 min active prep)   C = Complex (for weekends when there's time). Reset the bar by clicking Reset or reloading the page each morning — nothing is saved between sessions.
+
+  
+
+## Macro targets & calorie reasoning
+
+  
+
+    
+2,350kcal / day
+    
+155 gProtein (2.5g/kg)
+    
+260 gCarbs
+    
+70 gFat
+    
+35 gFiber
+    
+1,200 mgCalcium (milk / curd)
+  
+
+  
+
+  
+    
+ | Calculation step | Value
+
+    
+ | BMR — Mifflin-St Jeor (160 cm, 62 kg, ~20 yr male) | 1,526 kcal
+
+    
+ | Activity multiplier — college day: 1h commute each way, walking campus, 11h out; sedentary with walking episodes → 1.375 | 2,098 kcal
+
+    
+ | Training burn averaged across 7 days (4 weight sessions, 2 HIIT finishers, 1 Zone-2, 1 walk) | +240 kcal/day avg
+
+    
+ | Estimated maintenance | ~2,340 kcal
+
+    
+ | Meal-by-meal sum (chapati × 3, chicken 200g, eggs × 4, rice 1 cup, whey, 2 bananas, side dishes) independently cross-checked | ~2,350 kcal
+
+    
+ | Target: maintenance (not deficit) — waist-height ratio 0.48, visible abs, very little spare fat; cutting now kills muscle gain | 2,350 kcal
+
+  
+  
+
+  
+
+## Ingredient macro reference (USDA FoodData Central, per 100g)
+
+  
+These are the numbers used to build every recipe calorie count below. All verified against USDA FoodData Central 2024–25 release.
+
+  
+
+  
+    
+ | Ingredient | kcal | P (g) | C (g) | F (g) | Fiber (g) | State
+
+    
+ | Whole egg | 155 | 13 | 1.1 | 11 | 0 | Raw, ~55g each → 85 kcal, 7.2g P
+
+    
+ | Egg white | 52 | 11 | 0.7 | 0.2 | 0 | Raw, ~30g each → 16 kcal, 3.3g P
+
+    
+ | Boiler chicken breast, cooked | 165 | 31 | 0 | 3.6 | 0 | Cooked, no skin — 200g = 330 kcal, 62g P
+
+    
+ | Chapati / roti (medium, 40g, no oil) | 112 | 3.2 | 21 | 0.5 | 2.4 | Home-made whole wheat, no added fat
+
+    
+ | White rice, cooked | 130 | 2.7 | 28 | 0.3 | 0.4 | Per 100g cooked; 1 cup (200g) = 260 kcal
+
+    
+ | Rolled oats, dry | 389 | 13 | 67 | 7 | 10 | 40g serving = 156 kcal, 5.2g P
+
+    
+ | Curd / dahi (Indian, whole milk) | 65 | 3.5 | 4.7 | 3.3 | 0 | 100g = 65 kcal
+
+    
+ | Hung curd / thick curd (strained) | 98 | 11 | 3.4 | 4.3 | 0 | Protein doubles vs regular curd after straining
+
+    
+ | Greek yogurt, full-fat | 97 | 8.8 | 3.6 | 4.1 | 0 | If using branded Greek yogurt
+
+    
+ | Paneer (full-fat) | 265 | 18 | 3.4 | 20 | 0 | 100g = 265 kcal
+
+    
+ | Soya chunks, dry | 345 | 52 | 33 | 0.5 | 14 | 50g dry → ~110g rehydrated
+
+    
+ | Chickpeas, cooked | 164 | 8.9 | 27 | 2.6 | 7.6 | Per 100g cooked
+
+    
+ | Kidney beans (rajma), cooked | 127 | 8.7 | 23 | 0.5 | 7.4 | Per 100g cooked
+
+    
+ | Whole green moong, cooked | 105 | 7.0 | 19 | 0.4 | 7.6 | Per 100g cooked
+
+    
+ | Peanuts, roasted | 567 | 26 | 16 | 49 | 8.5 | 15g serving = 85 kcal
+
+    
+ | Whey protein (isolate) | 380 | 90 | 4 | 1 | 0 | 1 scoop ~30g = 114 kcal, 27g P
+
+    
+ | Banana | 89 | 1.1 | 23 | 0.3 | 2.6 | 1 medium (~120g) = 107 kcal
+
+    
+ | Cooking oil (any) | 884 | 0 | 0 | 100 | 0 | 1 tsp (4g) = 35 kcal — stick to 1 tsp max/meal
+
+    
+ | Coconut (fresh grated) | 354 | 3.3 | 15 | 33 | 9 | 2 tbsp (15g) = 53 kcal
+
+  
+  
+  
+Source: USDA FoodData Central 2024–25 release · Chapati: Clearcals 2026 (cross-validated with USDA FDC #174075) · Curd: SnapCalorie 2026 · Hung curd: Indian curd strained ~2 hours removes ~40% water, concentrating protein to ~11g/100g
+
+  
+
+## Training plan — researched & corrected
+
+  
+What changed from v2 and why: The previous plan had each muscle hit only once per week (Push Mon, Pull Tue, Legs Thu). Research consensus is that hitting each muscle group 2× per week produces significantly more hypertrophy than 1× per week at the same total volume (Schoenfeld et al. 2016, replicated multiple times). With the available equipment (max 26 kg barbell, 9.5 kg per-hand dumbbells), an Upper/Lower 4-day split hits this frequency, keeps individual sessions manageable, and leaves Mon/Wed/Fri for conditioning — matching the original schedule intent.
+
+  
+
+  
+    
+ | Day | Focus | Muscle groups hit 2× this week | Duration
+
+    
+ | Mon | Upper A (push emphasis) | Chest, shoulders, triceps, back, biceps | 50–60 min
+
+    
+ | Tue | Lower A + core | Quads, hamstrings, calves, glutes, abs | 50–60 min
+
+    
+ | Wed | Zone 2 conditioning | Heart, lungs, active recovery | 30–35 min
+
+    
+ | Thu | Upper B (pull emphasis) | Back, biceps, chest, shoulders, triceps | 50–60 min
+
+    
+ | Fri | Lower B + HIIT + core | Quads, hamstrings, glutes, abs | 50 min
+
+    
+ | Sat | Active recovery walk | — | 20–30 min
+
+    
+ | Sun | Full rest + meal prep | — | —
+
+  
+  
+
+  
+
+    Compound (squat, bench, rows) → 90–120s rest
+    Accessory (DB curls, press) → 60–75s
+    Isolation (lateral raise, wrist) → 30–45s
+    Core → 45–60s
+    HIIT interval → 30s built-in
+  
+
+  
+    Mon — Upper A  Push emphasis · chest, shoulders, triceps primary
+    
+
+    
+
+      
+ | Exercise | Sets × Reps | Load / Setup | Rest | Cue
+
+      
+ | Barbell bench press | 4 × 8–10 | Long bar (~16–22 kg to start). 3-sec lowering. Last set: stop 1 rep before failure. | 120s | Retract shoulder blades, bar touches mid-chest
+
+      
+ | Incline DB press | 3 × 10–12 | Bench at 30–45°, dumbbells ~8–9 kg/hand | 90s | Don't flare elbows >75° from torso
+
+      
+ | Overhead press (seated) | 3 × 10–12 | EZ bar or long bar, bench upright | 90s | Chin back on the way up, don't arch lower back
+
+      
+ | Barbell bent-over row | 3 × 10–12 | Long bar, hinge to ~45°, pull to lower ribs | 90s | Row for back, not biceps — lead with elbow
+
+      
+ | EZ bar skullcrusher | 3 × 12–15 | Light load on EZ bar, elbows stay fixed | 60s | Keep upper arms perpendicular to floor
+
+      
+ | DB lateral raise | 3 × 15 | 2–3 kg/hand only, strict form | 45s | Slight forward lean, lead with pinkies
+
+      
+ | Push-up burnout | 1 × failure | Bodyweight; feet on bench when easy | — | Full ROM — chest touches floor each rep
+
+    
+    
+  
+
+  
+    Tue — Lower A  Quad emphasis · squat pattern
+    
+
+    
+
+      
+ | Exercise | Sets × Reps | Load / Setup | Rest | Cue
+
+      
+ | Barbell back squat | 4 × 8–10 | Long bar on upper back, up to ~22–26 kg. Squat to parallel or below. | 120s | Knees track over toes, chest stays up
+
+      
+ | Romanian deadlift | 3 × 10–12 | Long bar, hinge from hips, soft knee bend | 90s | Bar skims legs, feel hamstring stretch
+
+      
+ | DB walking lunge | 3 × 12/leg | Dumbbells ~8–9 kg/hand | 75s | Rear knee almost touches floor each rep
+
+      
+ | Standing calf raise | 4 × 20–25 | Bodyweight, hold dumbbell once easy, full range | 45s | Pause 1s at top and bottom each rep
+
+      
+ | Plank | 3 × 45–60s | Mat, neutral spine | 45s | Squeeze glutes and abs simultaneously
+
+      
+ | Hanging leg raises | 3 × 10–15 | Pull-up bar | 60s | No swing — control the lowering
+
+    
+    
+  
+
+  
+    Wed — Zone 2 conditioning  Aerobic base, active recovery
+    
+
+    
+Elliptical at Level 2–3, 30 min continuous, conversational pace (can hold a sentence without gasping). Heart rate target: 120–140 bpm. This is not HIIT — it flushes soreness and builds aerobic base without eating into recovery for Thu/Fri lifting.
+
+    
+  
+
+  
+    Thu — Upper B  Pull emphasis · back, biceps primary
+    
+
+    
+
+      
+ | Exercise | Sets × Reps | Load / Setup | Rest | Cue
+
+      
+ | Pull-ups | 4 × max (stop 2 short of failure) | Dead hang start, chin clears bar. Log every set: e.g. 8/6/5/4 | 120s | Don't kip; scapular retraction at the top
+
+      
+ | DB bicep curl (supinated) | 3 × 10–12 | Dumbbells ~8–9 kg/hand | 60s | Full extension at bottom — don't cut ROM
+
+      
+ | Hammer curl | 3 × 10–12 | EZ bar or neutral-grip DBs | 60s | Builds brachialis — adds arm thickness
+
+      
+ | Resistance band pull-apart | 3 × 20 | Band at chest height, arms straight | 30s | Rear deltoid and rotator cuff health
+
+      
+ | Incline DB chest press (lighter) | 3 × 12–15 | Lower load than Mon — maintain volume, not max load | 75s | This is Upper B — chest still gets frequency
+
+      
+ | Overhead press (standing) | 3 × 10–12 | EZ bar or light bar, strict form | 90s | Brace core; don't lean back
+
+      
+ | Wrist curl + reverse curl | 2+2 × 15–20 | Light dumbbell, wrist only moves | 30s | Forearm strength — matches your current 30 cm forearm goal
+
+    
+    
+  
+
+  
+    Fri — Lower B + HIIT + Core  Hinge pattern emphasis + conditioning
+    
+
+    
+
+      
+ | Exercise | Sets × Reps | Load / Setup | Rest | Cue
+
+      
+ | Goblet squat | 3 × 15–20 | Single dumbbell ~15–19 kg at chest — quad endurance | 75s | Elbows inside knees at bottom
+
+      
+ | Sumo DB deadlift | 3 × 10–12 | One heavy dumbbell held with both hands, wide stance | 90s | Hinge at hips, not a squat
+
+      
+ | Reverse lunge | 3 × 12/leg | Bodyweight or light dumbbells | 60s | Variation from Tue's walking lunge
+
+      
+ | Calf raise single-leg | 3 × 15/leg | Hold wall for balance, bodyweight | 30s | More load per calf than both-leg version
+
+      
+ | HIIT — elliptical | 6–8 rounds | 2 min warm-up (L2) → 30s sprint (L6–7) : 30s recovery (L1). Total ~10 min | Built-in | Sprint is actually sprinting — feel it
+
+      
+ | Plank holds | 3 × max | Mat | 60s | Goal: eventually 2 min continuous
+
+      
+ | Bicycle crunch | 3 × 20 | Mat, controlled rotation | 45s | Don't yank neck — rotate from core
+
+    
+    
+  
+
+  
+    Sat — Active recovery  Walk + grocery run
+    
+
+20–30 min easy walk. Buy the week's chicken, curd, and vegetables fresh. Pre-marinate chicken for the week and store in the fridge.
+
+  
+
+  
+    Sun — Full rest + meal prep  Recovery + cook batch
+    
+
+7+ hrs sleep. Batch-prep: cook and portion chicken for weekday lunches, soak legumes overnight, pre-measure oil into 1-tsp portions for the week. Weekly weigh-in + progress photo — same time, same lighting every week.
+
+  
+
+  
+
+## Progression rules
+
+  
+
+    
+ | Condition | Action
+
+    
+ | Form is rough on any lift | Stay at current load — form first, always
+
+    
+ | Hit top of rep range on all sets, 2 sessions in a row | Add smallest plate available (2 kg) next session
+
+    
+ | Bar maxed (26 kg) and reps still easy | Add 3-sec lowering → then 2-sec pause → then extra set → then single-arm/single-leg variant
+
+    
+ | Pull-ups: 4 × 10 strict reps clean | Add +2 kg via loaded backpack (books/water bottles)
+
+    
+ | Push-ups: 3 × 25 easy | Feet on bench (decline) → one-arm negative → archer push-up
+
+    
+ | 3+ weeks without strength progress | Check sleep and calorie intake first before adding volume
+
+  
+
+  
+Is the workout enough? Yes — for someone with 3 months of prior gym experience, now back after a gap: 4 resistance sessions/week hitting each muscle 2×, plus 2 conditioning sessions, is well above the minimum effective dose for hypertrophy. Volume per muscle group is 10–14 sets/week, which sits squarely in the optimal range (10–20 sets/week per Schoenfeld 2017). The limiting factor now is execution quality and progressive overload, not adding more sessions.
+
+  
+
+## Daily meal overview
+
+  
+
+    
+ | Time | Meal | Format | ~kcal | ~P | ~C | ~F
+
+    
+ | 6:30 AM | Breakfast | 3 chapatis + egg/oat side (pick 1 of 20) | 450–520 | 28–38g | 55–70g | 12–18g
+
+    
+ | 1:00 PM | Lunch | 2 chapatis + protein side (pick 1 of 20) — dry pack | 380–460 | 28–42g | 42–55g | 8–16g
+
+    
+ | 4:30 PM | Whey shake | 1 scoop whey + 250 ml water | 114 | 27g | 4g | 1g
+
+    
+ | 6:00 PM | 2 bananas | Pre-workout carbs | 214 | 2.6g | 55g | 0.7g
+
+    
+ | 8:15 PM | Dinner | 1 cup rice + 200g boiler chicken curry (pick 1 of 20) | 590–660 | 64–66g | 60–70g | 10–16g
+
+    
+ | Anytime | Snacks | 1–2 picks from the 30-recipe list | 150–300 | varies | varies | varies
+
+    
+ | Daily base total (no snacks) |  | ~1,970 | ~150g | ~230g | ~48g
+
+    
+ | + 1–2 snacks to reach target |  | ~2,350 | ~155g | ~260g | ~70g
+
+  
+
+  
+Lunch packing rule (important): Lunch sits in the bag 6–7 hrs unrefrigerated in Tamil Nadu heat. No curd, no fresh dairy, no wet gravies at lunch. The dry side dishes below are specifically chosen for this. Curd and yogurt appear freely at breakfast (home) and dinner (home) — only lunch excludes them for safety. All oat/yogurt breakfasts are eaten at home before leaving.
+
+  
+
+## Breakfast — 20 recipes
+
+  
+Always 3 chapatis as base (3 × 112 kcal = 336 kcal · 9.6g P · 63g C · 1.5g F · 7.2g fiber). Macros shown are side dish + chapati total. S = simple weekday (≤15 min). C = weekend / prep-ahead. No curd at breakfast since you leave at 7 AM and there's no time to ferment — yogurt/hung curd added to recipes that eat well warm and fast.
+
+  
+DMart ingredients used across breakfasts: rolled oats (Quaker/DMart Premia), garam masala, tandoori masala, kashmiri chili powder, Italian herbs/oregano, soy sauce, pasta, tomato ketchup, chilli sauce — all available at DMart/DMart Ready Tamil Nadu.
+
+  
+
+    
+ |  | Recipe | Ingredients (side dish) | Method | kcal | P | C | F | Fiber
+
+    
+    
+ | 
+       | 1. Vengaya Muttai Poriyal SOnion egg scramble
+       | 4 eggs, 1 onion, 1 green chili, curry leaves, 1 tsp oil
+       | Sauté onion 2 min, crack in eggs, scramble. Done in 6 min.
+       | 508 | 38g | 68g | 15g | 8g
+
+    
+ | 
+       | 2. Milagu Omelette SCracked-pepper flat omelette
+       | 4 eggs, ½ tsp black pepper, 1 onion, 2 tbsp coriander, 1 tsp oil
+       | Whisk all, pour into pan, cook flat 2 min/side.
+       | 508 | 38g | 68g | 15g | 8g
+
+    
+ | 
+       | 3. Thakkali Muttai STomato egg scramble
+       | 4 eggs, 2 tomatoes, ½ tsp turmeric, ½ tsp chili pwd, 1 tsp oil
+       | Cook tomatoes to a jam (4 min), scramble eggs through.
+       | 508 | 38g | 69g | 15g | 9g
+
+    
+ | 
+       | 4. Poondu Milagai Muttai SGarlic chili scramble
+       | 4 eggs, 5 garlic cloves (minced), 2 green chilies, 1 tsp oil
+       | Sauté garlic golden (don't burn), add eggs, scramble.
+       | 508 | 38g | 68g | 15g | 8g
+
+    
+    
+ | 
+       | 5. Anda Bhurji (Mumbai-style) SSpiced scrambled egg
+       | 4 eggs, 1 onion, 1 tomato, ½ tsp garam masala, ½ tsp cumin, 2 green chilies, ginger (½ inch), 1 tsp oil
+       | Sauté cumin + onion + ginger, add tomato, cook down, scramble eggs with garam masala.
+       | 536 | 40g | 70g | 16g | 9g
+
+    
+ | 
+       | 6. Air-Fryer Tandoori Egg SSoft-boiled eggs coated in tandoori marinade
+       | 4 eggs (boiled 7 min, peeled), 1 tbsp hung curd, 1 tsp tandoori masala (DMart: MDH / Everest brand), 1 tsp kashmiri chili pwd, ½ tsp oil
+       | Score eggs with a knife, coat in curd + tandoori masala, air-fry 200°C 6 min. Smoky char on outside, jammy inside.
+       | 544 | 40g | 70g | 17g | 8g
+
+    
+ | 
+       | 7. Egg Keema (minced egg curry) SCrumbled egg in thick masala — North Indian street style
+       | 4 eggs (boiled, roughly crumbled), 1 onion, 1 tomato, ½ tsp garam masala, ½ tsp chili pwd, 1 tsp oil
+       | Build masala, add crumbled eggs, toss and cook 3 min until coated.
+       | 520 | 39g | 70g | 15g | 8g
+
+    
+    
+ | 
+       | 8. Masala Oats + Boiled Egg SSavory oats — weekday staple
+       | 40g rolled oats, 250 ml water, 1 onion, 1 tomato, ½ tsp cumin, 2 boiled eggs
+       | Boil water, add oats + veg + spice, stir 5 min to porridge. Egg on side.
+       | 492 | 36g | 78g | 14g | 13g
+
+    
+ | 
+       | 9. Overnight Oats + Whey SZero morning effort — prep the night before
+       | 40g rolled oats, 200 ml whole milk, ½ scoop whey (15g), 1 mashed banana
+       | Mix everything in a jar the night before, refrigerate. Eat cold straight from jar.
+       | 476 | 33g | 78g | 14g | 14g
+
+    
+ | 
+       | 10. Oats Upma + Egg SSouth Indian upma style with oats
+       | 50g rolled oats, mustard seeds, curry leaves, 1 onion, 1 carrot (grated), 2 scrambled eggs, 1 tsp oil
+       | Temper, sauté veg, add oats + water (1:2), stir to upma, fold in eggs last.
+       | 494 | 36g | 84g | 12g | 12g
+
+    
+    
+ | 
+       | 11. Egg Fried Rice Style SSoy sauce scrambled eggs — 3-ingredient simple
+       | 4 eggs, 1 tbsp soy sauce (DMart), ½ tsp pepper, 1 tsp sesame oil or regular oil, spring onion
+       | Beat eggs with soy sauce and pepper. Scramble in hot pan. Top with spring onion. Fastest.
+       | 524 | 39g | 72g | 16g | 8g
+
+    
+ | 
+       | 12. Harissa-style Spicy Egg SHot sauce + egg — 2-ingredient side
+       | 4 eggs, 1 tsp hot chilli sauce (DMart: Maggi/Sunrise), ½ tsp cumin, 1 tsp oil
+       | Scramble eggs, stir in hot sauce at the end. Done in 5 min.
+       | 508 | 38g | 68g | 15g | 8g
+
+    
+ | 
+       | 13. Italian Herb Omelette SOregano + chilli flakes — Italian seasoning from DMart
+       | 4 eggs, ½ tsp oregano (DMart: Keya/Catch brand), ½ tsp chilli flakes, 1 small onion, 1 tsp oil
+       | Whisk eggs with herbs, cook as a flat omelette. Easy variety-changer.
+       | 520 | 38g | 70g | 15g | 9g
+
+    
+ | 
+       | 14. Paneer Bhurji (light) SCrumbled paneer + 2 eggs
+       | 60g paneer (crumbled), 2 eggs, 1 onion, 1 tomato, ½ tsp cumin, 1 tsp oil
+       | Temper cumin, sauté onion-tomato, add paneer + eggs, stir-scramble 3 min.
+       | 535 | 41g | 72g | 16g | 8g
+
+    
+    
+ | 
+       | 15. Soya Muttai Poriyal SSoya chunks + egg — highest protein breakfast
+       | 3 eggs, 30g dry soya chunks (rehydrated, squeezed), 1 onion, 1 tsp oil, spices
+       | Rehydrate soya (10 min hot water), squeeze dry, sauté with onion, fold in eggs.
+       | 496 | 37g | 75g | 16g | 9g
+
+    
+ | 
+       | 16. Banana Oat Egg Pancakes S3-ingredient — no flour needed
+       | 2 eggs, 1 banana (120g), 30g rolled oats, pinch cinnamon, ½ tsp oil
+       | Mash banana + oats + eggs to batter. Cook small pancakes 2 min/side. Eat instead of chapati.
+       | 517 | 37g | 78g | 16g | 13g
+
+    
+ | 
+       | 17. Oats Porridge + Boiled Eggs SSimplest option — 5 min total
+       | 50g rolled oats, 300 ml water, pinch salt, 3 boiled eggs (boil the night before)
+       | Boil oats 4 min. Eggs already boiled. Fastest possible.
+       | 490 | 33g | 77g | 14g | 13g
+
+    
+    
+ | 
+       | 18. Moong Dal Cheela + Egg CProtein-rich lentil crepe — soak overnight
+       | 60g split moong (soaked overnight, blended to batter), 2 eggs mixed in, onion, green chili, ½ tsp oil
+       | Blend soaked moong to smooth batter, add eggs, pour thin crepe on pan. 2 min/side.
+       | 530 | 43g | 72g | 17g | 8g
+
+    
+ | 
+       | 19. Muttai Kola Urundai CAir-fryer spiced egg patties — weekend
+       | 4 eggs (boiled, mashed), 2 tbsp besan, 1 onion, ½ tsp fennel, spices, 1 tsp oil
+       | Mix into firm dough, shape patties, air-fry 190°C 12 min till golden. Best with mint chutney.
+       | 544 | 42g | 76g | 17g | 9g
+
+    
+ | 
+       | 20. Egg + Sprouted Moong Bowl CHigh fiber + protein — sprout 36 hrs ahead
+       | 3 scrambled eggs, 60g sprouted green moong, lemon juice, chaat masala (DMart)
+       | Scramble eggs, toss sprouts with lemon and chaat masala, serve together.
+       | 508 | 39g | 72g | 17g | 10g
+
+  
+  
+Chapati base (3 × 40g, no oil): 336 kcal, 9.6g P, 63g C, 1.5g F, 7.2g fiber — USDA FDC #174075. Each row total = side + chapati. Oats (40g dry): 156 kcal, 5.2g P — USDA FDC #173904.
+
+  
+
+## Lunch — 20 recipes
+
+  
+Always 2 chapatis as base (2 × 112 = 224 kcal · 6.4g P · 42g C · 1g F · 4.8g fiber). Side dish is protein — dry pack only, safe for 6–7 hrs unrefrigerated. No curd, no wet gravy in the box. Macros = side + chapati total. Variety now spans Tamil Nadu, North Indian, and global-inspired flavors — all with DMart/supermarket ingredients.
+
+  
+Simple ingredient recipes flagged below — some use just 4–5 ingredients total. The "DMart tag" shows the one non-obvious ingredient you'll buy there.
+
+  
+
+    
+ |  | Recipe | Ingredients (side dish — chapati separate) | Method & notes | kcal | P | C | F | Fiber
+
+    
+    
+ | 
+       | 1. Air-Fryer Tandoori Chicken SThe king — air fryer makes it brilliant
+       | 180g chicken breast, 3 tbsp hung curd, 1 tbsp tandoori masala (MDH/Everest — DMart), 1 tsp kashmiri chili pwd, lemon juice, ginger-garlic
+       | Marinate 30 min or overnight. Air-fry 200°C 15 min, flip halfway. Char edges = authentic. Cool before packing.
+       | 445 | 42g | 44g | 9g | 6g
+
+    
+ | 
+       | 2. Milagu Kozhi Varuval SSouth Indian pepper dry roast — 4 ingredients
+       | 180g chicken, 1½ tsp black pepper, ginger-garlic paste, 1 tsp oil, curry leaves
+       | Marinate 15 min, air-fry 200°C 14 min or pan-roast completely dry. Cool before packing.
+       | 440 | 41g | 44g | 9g | 6g
+
+    
+ | 
+       | 3. Hariyali Chicken (Green Masala) SMint + coriander marinated — bright and simple
+       | 180g chicken, handful mint + coriander (blended to paste), 1 tsp ginger-garlic, lemon, 1 tsp oil
+       | Coat in green paste, air-fry 200°C 14 min. Turns beautifully fragrant. Simple 4-ingredient marinade.
+       | 442 | 42g | 44g | 9g | 6g
+
+    
+ | 
+       | 4. Soy-Garlic Chicken S3-ingredient marinade — global, simple
+       | 180g chicken, 2 tbsp soy sauce (DMart), 5 garlic cloves (minced), ½ tsp pepper, 1 tsp oil
+       | Marinate 20 min, air-fry 200°C 14 min. No other spices needed. Extremely simple.
+       | 448 | 42g | 45g | 10g | 6g
+
+    
+ | 
+       | 5. Chilli Garlic Chicken (Indo-Chinese) SHot sauce + soy — dry stir-fry
+       | 180g chicken, 1 tbsp soy sauce, 1 tsp chilli sauce (DMart), garlic, ginger, capsicum (50g), 1 tsp oil
+       | Stir-fry on highest heat 8 min till absolutely dry. No sauce pooling — it all absorbs.
+       | 444 | 42g | 44g | 10g | 6g
+
+    
+ | 
+       | 6. Lemon Pepper Chicken S2-ingredient marinade — as simple as it gets
+       | 180g chicken, juice of 1 lemon, 1 tsp black pepper, pinch salt, ½ tsp oil
+       | Marinate 15 min, air-fry 200°C 13 min. The simplest possible chicken prep.
+       | 440 | 42g | 44g | 9g | 6g
+
+    
+ | 
+       | 7. Chicken Tikka Dry SClassic tikka — cubed, air-fried
+       | 180g chicken (cubed), 2 tbsp curd (carried dried marinade — curd cooks off), tikka masala (MDH/DMart), ginger-garlic, 1 tsp oil
+       | Marinate cubed chicken in thick masala minimum 30 min. Air-fry 200°C 12 min. Tikka masala bakes dry. Safe to carry.
+       | 450 | 43g | 45g | 10g | 7g
+
+    
+ | 
+       | 8. Sesame Soy Chicken SEllu + soy coating — crispy air-fryer
+       | 180g chicken, 1 tbsp sesame seeds, 1 tbsp soy sauce, ½ tsp pepper, ginger, 1 tsp oil
+       | Coat chicken in sesame + soy + pepper. Air-fry 200°C 14 min. Sesame crust forms nicely.
+       | 455 | 43g | 47g | 10g | 7g
+
+    
+    
+ | 
+       | 9. Vella Kadalai Sundal SWhite chickpea sundal — batch-cook on Sunday
+       | 80g dry white chickpeas (soaked + pressure-cooked), mustard, curry leaves, coconut (2 tbsp), 1 tsp oil
+       | Temper mustard + curry leaves, add chickpeas + coconut, cook off any moisture 3 min.
+       | 398 | 26g | 61g | 9g | 15g
+
+    
+ | 
+       | 10. Soya Milagu Varuval SPepper soya dry fry
+       | 50g dry soya chunks (rehydrated, squeezed very dry), 1 onion, 1 tsp pepper, curry leaves, 1 tsp oil
+       | Rehydrate in hot water 10 min, squeeze hard. Stir-fry with onion + pepper 8 min till edges crisp.
+       | 380 | 34g | 52g | 8g | 11g
+
+    
+ | 
+       | 11. Paneer Tikka (air-fried dry) SCubed paneer — tikka masala dry coat
+       | 100g paneer (cubed), 1 tsp tikka masala (DMart), ½ tsp kashmiri chili, lemon, pinch salt, ½ tsp oil
+       | Coat cubed paneer, air-fry 200°C 8 min. No marinade required — just toss and fry.
+       | 442 | 30g | 52g | 22g | 6g
+
+    
+ | 
+       | 12. Soya Chilli (dry) SIndo-Chinese dry — soy sauce + chilli sauce
+       | 50g dry soya, 1 capsicum, 1 tbsp soy sauce, 1 tsp chilli sauce (DMart), garlic, 1 tsp oil
+       | Rehydrate soya, squeeze dry, stir-fry on high heat with capsicum + sauces till all liquid absorbed.
+       | 388 | 33g | 56g | 8g | 9g
+
+    
+ | 
+       | 13. Rajma Poriyal SDry kidney bean stir-fry
+       | 80g dry rajma (soaked overnight, pressure-cooked), tempering, 1 tsp oil
+       | Cook beans, dry-roast with tempering. Batch cook on Sunday — zero morning prep.
+       | 410 | 29g | 55g | 9g | 13g
+
+    
+    
+ | 
+       | 14. Muttai Kola Urundai (packed) SAir-fried egg patties — travel perfectly
+       | 4 boiled eggs (mashed), 2 tbsp besan, spices, ½ tsp oil
+       | Mix into dough, shape, air-fry 190°C 12 min. Very dry — holds shape in a box all day.
+       | 445 | 40g | 45g | 11g | 6g
+
+    
+ | 
+       | 15. Ketchup Masala Egg S4-ingredient — tomato ketchup as the sauce
+       | 4 boiled eggs (halved), 2 tbsp tomato ketchup (DMart), ½ tsp chilli pwd, ½ tsp cumin, ½ tsp oil
+       | Fry halved eggs cut-side down 2 min, pour ketchup + spices, toss to coat, cook 2 min more till dry.
+       | 430 | 38g | 44g | 10g | 6g
+
+    
+    
+ | 
+       | 16. Kadai Chicken Chukka SCapsicum + chicken dry stir-fry
+       | 180g chicken, 1 capsicum, 1 onion, kadai masala (DMart) or cumin + coriander + pepper, 1 tsp oil
+       | Dry stir-fry chicken + capsicum together. No water. Cook off all moisture.
+       | 440 | 41g | 46g | 10g | 7g
+
+    
+ | 
+       | 17. Mixed Bean Sundal SAny combo of legumes — Sunday batch
+       | 40g chickpeas + 40g rajma (cooked), tempering, 2 tbsp coconut, 1 tsp oil
+       | Same sundal method. Mix beans for variety. Pre-cook on Sunday.
+       | 420 | 33g | 56g | 9g | 14g
+
+    
+ | 
+       | 18. Vinegar-Pepper Chicken SGoan-inspired dry — simple 3-ingredient marinade
+       | 180g chicken, 2 tsp vinegar (DMart), 1 tsp black pepper, 4 garlic cloves, 1 tsp oil
+       | Marinate in vinegar + pepper + garlic 20 min. Pan-roast or air-fry completely dry.
+       | 444 | 43g | 45g | 9g | 6g
+
+    
+ | 
+       | 19. Peanut Pepper Chicken SCrushed peanut crust — simple coating
+       | 180g chicken, 20g peanuts (coarsely crushed), 1 tsp pepper, lemon, 1 tsp oil
+       | Coat chicken in peanut + pepper + lemon, air-fry 200°C 14 min. Crunchy coating.
+       | 450 | 43g | 46g | 10g | 7g
+
+    
+ | 
+       | 20. Turmeric Lemon Herb Chicken SMediterranean-style — oregano from DMart
+       | 180g chicken, juice of 1 lemon, 1 tsp turmeric, ½ tsp oregano (DMart: Keya/Catch), garlic, 1 tsp oil
+       | Marinate 20 min, air-fry 200°C 13 min. Fragrant and clean-tasting.
+       | 438 | 42g | 44g | 9g | 6g
+
+  
+  
+Chapati base (2 × 40g, no oil): 224 kcal, 6.4g P, 42g C, 1g F, 4.8g fiber. Chicken 180g raw breast ≈ 135g cooked = 223 kcal, 42g P (USDA FDC #171477). All totals include chapatis. Tikka/tandoori masala cooked dry = no dairy left in the packed lunch.
+
+  
+
+## Dinner — 20 recipes
+
+  
+Always: 1 cup (200g) cooked white rice (260 kcal · 5.4g P · 56g C · 0.6g F) + 200g boiler chicken curry or side. Macros include rice. Curd-based, coconut milk, pasta sauces — all fine here. Eaten fresh at home. Global variety included — all ingredients from DMart TN.
+
+  
+
+    
+ |  | Recipe | Ingredients (curry for 200g chicken) | Method note | kcal | P | C | F | Fiber
+
+    
+    
+ | 
+       | 1. Naatu Kozhi Kuzhambu Style SClassic Tamil coconut-tomato gravy
+       | Onion, tomato, ground coconut paste (3 tbsp), spices, 1 tsp oil
+       | Sauté onion-tomato-masala, add chicken, coconut paste + water, simmer 20 min.
+       | 618 | 68g | 60g | 13g | 5g
+
+    
+ | 
+       | 2. Pepper Garlic Chicken Dry SSimple 3-ingredient dry roast at dinner
+       | 2 tsp black pepper, 8 garlic cloves, curry leaves, 1 tsp oil
+       | Pan-roast or air-fry. Simplest dinner.
+       | 606 | 68g | 57g | 12g | 4g
+
+    
+ | 
+       | 3. Chettinad Kozhi Curry CComplex spiced gravy — weekend
+       | Fresh-ground chettinad masala (fennel, pepper, cinnamon, star anise, dry red chili), onion, tomato, 1 tsp oil
+       | Grind masala, build gravy, simmer 20 min.
+       | 621 | 68g | 60g | 13g | 5g
+
+    
+    
+ | 
+       | 4. Tandoori Chicken + Rice SAir-fryer tandoori — the dinner version
+       | 3 tbsp hung curd, 1 tbsp tandoori masala (MDH — DMart), kashmiri chili pwd, ginger-garlic, lemon
+       | Marinate 30 min or overnight. Air-fry 200°C 18 min (bigger pieces). Serve over rice.
+       | 636 | 70g | 60g | 14g | 4g
+
+    
+ | 
+       | 5. Butter Chicken Style (lighter) CNo butter/cream — tomato-curd base
+       | Onion, 3 tomatoes, 50g hung curd, garam masala, kashmiri chili, ginger-garlic, 1 tsp oil
+       | Blend onion-tomato base, cook with spices, add chicken + hung curd (no fresh cream). Light version.
+       | 628 | 68g | 61g | 14g | 5g
+
+    
+ | 
+       | 6. Chicken Salna SChennai street-style thin gravy
+       | Onion, tomato, fennel, coconut paste, star anise, 1 tsp oil
+       | Thin fragrant gravy — pairs perfectly with rice.
+       | 625 | 68g | 61g | 14g | 5g
+
+    
+    
+ | 
+       | 7. Soy-Ginger Chicken on Rice SAsian-style — soy sauce + ginger
+       | 2 tbsp soy sauce (DMart), 1-inch ginger (grated), 2 garlic cloves, ½ tsp sesame oil, spring onion, 1 tsp oil
+       | High-heat stir-fry 8 min, serve over rice. Pour the pan juices over the rice.
+       | 626 | 68g | 62g | 14g | 4g
+
+    
+ | 
+       | 8. Chicken Schezwan Stir-fry SIndo-Chinese — schezwan sauce (DMart)
+       | 1 tsp schezwan sauce (DMart), capsicum, spring onion, soy sauce, garlic, 1 tsp oil
+       | High heat stir-fry, schezwan sauce goes in last. Serve immediately over rice.
+       | 617 | 68g | 59g | 13g | 4g
+
+    
+ | 
+       | 9. Chicken Peanut Kuzhambu CPeanut paste gravy — Tamil Nadu-inspired
+       | 30g peanuts (boiled, ground to paste), onion, tomato, chili, 1 tsp oil
+       | Use peanut paste as thickener instead of coconut. Earthy, nutty gravy.
+       | 634 | 68g | 62g | 15g | 6g
+
+    
+ | 
+       | 10. Coconut Milk Chicken Curry SKozhi Thengai Paal — creamy gravy
+       | 100 ml coconut milk (canned — DMart), onion, tomato, spices, 1 tsp oil
+       | Build base, add chicken, stir in coconut milk last — never boil hard once added.
+       | 647 | 68g | 63g | 16g | 5g
+
+    
+    
+ | 
+       | 11. Pepper Tamarind Chicken S4-ingredient — pepper + tamarind + chili + oil
+       | Tamarind water (small ball), 2 tsp pepper, 2 dried red chilies, 1 tsp oil
+       | Thin peppery-sour gravy. Simmer 15 min.
+       | 616 | 68g | 59g | 13g | 4g
+
+    
+ | 
+       | 12. Tomato Chicken Curry S3 tomatoes + spices — beginner-proof
+       | 3 large tomatoes (chopped), onion, garam masala, chili pwd, 1 tsp oil
+       | Pressure-cook 3 whistles or simmer 20 min. Very forgiving — can't go wrong.
+       | 620 | 68g | 61g | 13g | 5g
+
+    
+ | 
+       | 13. Ketchup Chicken Curry STomato ketchup as the base — simplest curry ever
+       | 3 tbsp tomato ketchup (DMart), 1 onion, garlic, ½ tsp chili pwd, 1 tsp oil
+       | Sauté onion-garlic, add ketchup + spice, add chicken, add water (50 ml), simmer 15 min. Surprisingly good.
+       | 617 | 68g | 59g | 13g | 4g
+
+    
+ | 
+       | 14. Chicken Egg Kuzhambu SDouble protein — 2 eggs added to curry
+       | Onion, tomato, spices, 2 boiled eggs (added to gravy last 5 min), 1 tsp oil
+       | Normal gravy + add 2 eggs whole in last 5 min to absorb gravy.
+       | 630 | 69g | 62g | 14g | 5g
+
+    
+ | 
+       | 15. Chicken Spinach Curry SIron + protein — add spinach at the end
+       | 80g spinach (fresh), onion, tomato, spices, 1 tsp oil
+       | Normal gravy, add spinach only in last 3 min. Wilts fast. Adds micronutrients.
+       | 630 | 68g | 62g | 14g | 6g
+
+    
+ | 
+       | 16. Thayir Kozhi (Curd Chicken) CCurd-based tangy curry
+       | 120g whisked curd, mild spices, onion, 1 tsp oil
+       | Cook chicken in onion-spice base, take off heat, stir in curd slowly. Never boil once curd is in.
+       | 640 | 69g | 61g | 15g | 4g
+
+    
+ | 
+       | 17. Mint Chicken (Pudina Kozhi) SFresh mint paste — bright and simple
+       | 50g fresh mint, green chili, ginger, onion, 1 tsp oil
+       | Blend mint + chili + ginger to paste. Use as marinade + sauce base. Simmer 15 min.
+       | 617 | 68g | 59g | 13g | 4g
+
+    
+ | 
+       | 18. Chicken Capsicum Masala SBell pepper base curry
+       | 2 capsicums, onion, tomato, masala, 1 tsp oil
+       | Sauté capsicum soft, build masala, add chicken, 15 min.
+       | 622 | 68g | 61g | 13g | 5g
+
+    
+ | 
+       | 19. Chicken Mushroom Stir-fry SEarthy + protein — soy sauce version
+       | 120g mushroom, soy sauce (1 tbsp), garlic, pepper, 1 tsp oil
+       | Use 120g chicken + 120g mushroom. Stir-fry together with soy sauce. Mushroom releases and reabsorbs liquid.
+       | 614 | 68g | 58g | 13g | 5g
+
+    
+ | 
+       | 20. Vinegar Garlic Chicken Curry SGoan-inspired — vinegar (DMart) + garlic
+       | 2 tsp vinegar (DMart), 8 garlic cloves (sliced), 2 dried red chilies, tomato, 1 tsp oil
+       | Sauté garlic golden, add vinegar + tomato + chilies, add chicken, thin gravy, simmer 15 min.
+       | 618 | 68g | 60g | 13g | 4g
+
+  
+  
+Rice (200g cooked): 260 kcal, 5.4g P, 56g C, 0.6g F — USDA FDC #168879. Chicken (200g cooked breast): 330 kcal, 62g P — USDA FDC #171477. All dinner totals include rice.
+
+  
+
+## Snacks — 30 recipes
+
+  
+Tick what's eaten. Pick 1–2 per day to bridge from the base ~1,970 kcal to the 2,350 kcal target, or to hit a macro that's running short. These are real diet snacks — not junk. Includes protein desserts, "nice cream", protein brownies, and Tamil Nadu classics.
+
+  ☀️ Morning / College
+  
+
+    
+ |  | Recipe | Ingredients | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 1. Masala Peanuts
+       | 40g roasted peanuts, curry leaves, chili, turmeric, ½ tsp oil
+       | 230 | 10g | 8g | 18g | 3g | College carry
+
+    
+ | 
+       | 2. Chikki (Peanut Jaggery Brittle)
+       | 25g peanuts, 20g jaggery — melt jaggery, mix peanuts, set flat, break into pieces
+       | 175 | 8g | 20g | 8g | 2g | Pre-workout / college
+
+    
+ | 
+       | 3. Trail Mix (carry pouch)
+       | 20g roasted peanuts, 10g pumpkin seeds, 10g roasted chana dal, curry leaves
+       | 210 | 10g | 20g | 11g | 4g | Anytime, no spoilage
+
+    
+ | 
+       | 4. Sprouted Moong Chaat
+       | 60g sprouted green moong, onion, tomato, lemon, chaat masala
+       | 150 | 11g | 25g | 1g | 6g | Home — morning gap
+
+    
+ | 
+       | 5. Vellam Pottukadalai Urundai
+       | 40g roasted gram (pottukadalai), 25g jaggery, cardamom — shape into balls
+       | 160 | 4g | 28g | 4g | 4g | Pre-workout energy
+
+  
+
+  🥤 Protein drinks & smoothies
+  
+
+    
+ |  | Recipe | Ingredients | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 6. Whey Banana Shake
+       | ½ scoop whey (15g), 1 banana (120g), 150 ml milk — blend
+       | 220 | 25g | 24g | 3g | 2g | Post-workout
+
+    
+ | 
+       | 7. Peanut Butter Banana Shake
+       | 1 banana, 1 tbsp peanut butter (15g), 200 ml milk — blend
+       | 215 | 18g | 24g | 6g | 3g | Post-workout
+
+    
+ | 
+       | 8. High-Protein Mango Lassi
+       | 100g curd, ½ scoop whey, 1 small mango (100g), blend with ice
+       | 190 | 16g | 26g | 3g | 2g | Afternoon treat
+
+    
+ | 
+       | 9. Spiced Buttermilk (Mor)
+       | 80g curd, 200 ml water, curry leaves, ginger, green chili, salt — whisk
+       | 60 | 3g | 5g | 2g | 0g | Digestion / hydration
+
+    
+ | 
+       | 10. Oat Curd Shake
+       | 20g rolled oats (blended dry to powder), 100g curd, water, jaggery 5g — blend
+       | 175 | 13g | 22g | 4g | 2g | Morning or post-workout
+
+  
+
+  🫙 Protein desserts — sweet but high protein
+  
+
+    
+ |  | Recipe | Ingredients | Method summary | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 11. Protein Brownie BitesFudgy, no bake
+       | 30g peanut butter, 20g cocoa powder, ½ scoop whey (15g), 20g jaggery, 1 tbsp oats, splash milk
+       | Mix all, shape into 4 balls, refrigerate 30 min. Makes 4 balls total. C
+       | 220 | 18g | 28g | 6g | 4g | Dessert / post-dinner
+
+    
+ | 
+       | 12. Banana Nice Cream (Protein)"Ice cream" with no ice cream
+       | 2 frozen bananas (240g), ½ scoop whey (15g), splash milk — blend till creamy
+       | Freeze bananas first (overnight). Blend frozen. Eat immediately. S
+       | 185 | 16g | 22g | 4g | 3g | Post-workout treat
+
+    
+ | 
+       | 13. Hung Curd Ice Cream (Frozen Yogurt)Creamy, tangy, high protein
+       | 150g hung curd, 1 tbsp jaggery (15g), pinch cardamom — stir, freeze 4h
+       | Stir once after 2h to break ice crystals, freeze again. C (needs freeze time)
+       | 190 | 17g | 20g | 6g | 0g | Dessert
+
+    
+ | 
+       | 14. Chocolate Oat Protein BallsNo-bake snack balls
+       | 30g oats, 15g cocoa, ½ scoop whey, 20g peanut butter, 15g jaggery, splash milk
+       | Mix into dough, shape balls, refrigerate 1h. Makes 5 balls. C
+       | 195 | 18g | 26g | 5g | 4g | Anytime snack
+
+    
+ | 
+       | 15. Baked Oat Protein MuffinSingle-serve, air-fryer friendly
+       | 30g rolled oats, 1 egg, ½ scoop whey, 1 banana (60g), pinch baking powder
+       | Mix, pour into muffin mold, air-fry 180°C 12 min or bake 175°C 15 min. C
+       | 180 | 15g | 22g | 5g | 3g | Breakfast / snack
+
+  
+
+  🫘 Tamil Nadu sundal & legumes — fiber & protein
+  
+
+    
+ |  | Recipe | Ingredients | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 16. Pachai Payaru Sundal
+       | 60g whole green moong (cooked), tempering, coconut, 1 tsp oil
+       | 170 | 12g | 26g | 3g | 7g | Anytime
+
+    
+ | 
+       | 17. Kadalai Paruppu Sundal
+       | 60g chana dal (soaked + cooked), tempering, coconut, 1 tsp oil
+       | 175 | 11g | 28g | 4g | 8g | Anytime
+
+    
+ | 
+       | 18. Pattani Sundal (dried green peas)
+       | 60g dried green peas (cooked), tempering, coconut, 1 tsp oil
+       | 165 | 10g | 27g | 3g | 8g | Anytime
+
+    
+ | 
+       | 19. Kala Chana Sundal
+       | 60g black chickpeas (cooked), tempering, coconut, 1 tsp oil. Highest iron.
+       | 155 | 11g | 24g | 3g | 9g | Anytime
+
+    
+ | 
+       | 20. Payaru Thayir Pachadi
+       | 50g sprouted moong, 100g curd, cumin, salt — mix as raita
+       | 130 | 9g | 16g | 3g | 4g | Afternoon at home
+
+  
+
+  🍦 Light sweet / energy snacks
+  
+
+    
+ |  | Recipe | Ingredients | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 21. Ellu Urundai (Sesame Ball)
+       | 20g sesame seeds, 20g jaggery, pinch cardamom — melt jaggery, mix sesame, shape
+       | 140 | 3g | 18g | 7g | 2g | Pre-workout
+
+    
+ | 
+       | 22. Kambu KoozhPearl millet cold fermented porridge
+       | 40g kambu flour, water, pinch salt — ferment overnight, serve cold with onion and green chili
+       | 150 | 4g | 28g | 4g | 3g | Hot-day cooler
+
+    
+ | 
+       | 23. Air-fried Nendran Chips
+       | 1 raw banana (100g), pinch salt, pinch chili — slice thin, air-fry 180°C 15 min
+       | 155 | 3g | 22g | 6g | 3g | Evening
+
+    
+ | 
+       | 24. Masala Corn
+       | 1 cup corn kernels (boiled), pepper, chaat masala, lemon, salt
+       | 165 | 5g | 30g | 4g | 4g | Evening / post-dinner
+
+    
+ | 
+       | 25. Ragi Malt (Kezhvaragu Kanji)
+       | 30g ragi flour, 250 ml milk, jaggery 8g, cardamom — stir over low heat till thick
+       | 180 | 5g | 32g | 5g | 4g | Evening / recovery
+
+  
+
+  💪 High-protein savory snacks
+  
+
+    
+ |  | Recipe | Ingredients | kcal | P | C | F | Fiber | When
+
+    
+ | 
+       | 26. Pepper Egg White Bites
+       | 3 boiled egg whites, ¼ tsp pepper, chaat masala, salt
+       | 160 | 13g | 3g | 11g | 1g | Pure protein top-up
+
+    
+ | 
+       | 27. Soya Chilli Bites (Indo-Chinese)
+       | 40g dry soya chunks (rehydrated, squeezed), soy sauce, red chili sauce, garlic, ½ tsp oil — stir-fry
+       | 200 | 17g | 18g | 8g | 4g | Evening snack / home
+
+    
+ | 
+       | 28. Hung Curd + Peanut Dip with Veg
+       | 100g hung curd, 10g crushed peanuts, cumin, cucumber sticks (100g)
+       | 195 | 15g | 12g | 10g | 2g | Afternoon at home
+
+    
+ | 
+       | 29. Paneer Tikka Bites (air-fried)
+       | 80g paneer, chili powder, turmeric, lemon, ginger-garlic — marinate 10 min, air-fry 200°C 8 min
+       | 185 | 13g | 14g | 9g | 0g | Snack / home
+
+    
+ | 
+       | 30. Oats Khichdi (light savory bowl)
+       | 30g rolled oats, 15g split moong dal, mustard, curry leaves, carrot, 1 tsp oil
+       | 195 | 16g | 18g | 7g | 4g | Light evening meal / snack
+
+  
+
+  
+
+## Weekly shopping list
+
+  
+Buy chicken, curd, and vegetables fresh each week (Saturday). Pantry and spices last several weeks. Pre-marinate and portion chicken on Sunday evening to save weekday prep time.
+
+  
+
+    
+
+      
+
+## Proteins
+
+      
+        
+Boiler chicken breast, boneless — 2.5 kg
+        
+Eggs — 35
+        
+Paneer — 300g block
+        
+Soya chunks, dry — 250g pack
+        
+Whey protein (isolate) — 1 kg tin (~4–5 weeks)
+        
+Split moong dal — 200g
+      
+    
+    
+
+      
+
+## Dairy
+
+      
+        
+Curd (full-fat, fresh) — 500g (or make at home)
+        
+Hung curd: strain 250g curd in cloth 2–3 hrs → ~150g hung curd
+        
+Milk (whole) — 1 litre
+      
+    
+    
+
+      
+
+## Grains & legumes
+
+      
+        
+Whole wheat atta — 2 kg
+        
+Ragi (finger millet) flour — 500g
+        
+Kambu (pearl millet) flour — 250g
+        
+Rolled oats — 500g
+        
+White rice — 2 kg
+        
+White chickpeas (vella kadalai) — 250g
+        
+Kala chana (black chickpeas) — 200g
+        
+Kidney beans (rajma) — 200g
+        
+Whole green moong — 200g (for sprouts + sundal)
+        
+Dried green peas (pattani) — 150g
+        
+Field beans (mochai kottai) — 150g
+        
+Chana dal — 150g
+        
+Pottukadalai (roasted gram) — 150g
+        
+Tamarind — 100g block
+        
+Peanuts, raw — 300g
+        
+Peanut butter (natural, no sugar) — 200g jar
+        
+Besan (gram flour) — 100g
+      
+    
+    
+
+      
+
+## Vegetables
+
+      
+        
+Onions — 1.5 kg
+        
+Tomatoes — 1 kg
+        
+Garlic — 2 bulbs
+        
+Ginger — 150g
+        
+Green chilies — 100g
+        
+Capsicum (red + green) — 4
+        
+Spinach — 200g (fresh)
+        
+Mushrooms — 200g (use within 3 days)
+        
+Carrots — 300g
+        
+Cucumber — 3
+        
+Raw banana — 2 (for chips)
+        
+Corn — 2 cobs or frozen pack
+        
+Fresh coconut or frozen grated — 2 packs
+        
+Curry leaves — 3–4 sprigs
+        
+Coriander + mint — 1 bunch each
+        
+Lemons — 6–8
+        
+Spring onions — 1 bunch
+      
+    
+    
+
+      
+
+## Sauces & condiments
+
+      
+        
+Soy sauce — 1 small bottle
+        
+Red chili sauce / gochujang — 1 small bottle
+        
+Schezwan sauce — 1 small bottle (optional)
+        
+Coconut milk (canned) — 2 tins
+        
+Poppy seeds (khus khus) — 50g
+        
+Chaat masala — 1 pack
+        
+Cocoa powder, unsweetened — 100g
+      
+    
+    
+
+      
+
+## Spices (top up as needed)
+
+      
+        
+Turmeric, chili powder, coriander powder
+        
+Black pepper — whole + ground
+        
+Mustard seeds, cumin, fennel seeds
+        
+Chettinad masala or: cinnamon, star anise, fennel, cloves
+        
+Cardamom powder
+        
+Cooking oil — small bottle (1 tsp/meal rule)
+        
+Jaggery — 300g
+        
+Salt
+      
+    
+    
+
+      
+
+## Fruit
+
+      
+        
+Bananas — 20–22 (2/day pre-workout + snacks)
+        
+Mangoes — seasonal, for lassi
+      
+    
+    
+
+      
+
+## Seeds & extras
+
+      
+        
+Sesame seeds — 100g
+        
+Pumpkin seeds — 50g
+        
+Flaxseeds (ground or whole) — 100g
+        
+Chia seeds — 50g (optional, for overnight oats)
+      
+    
+  
+
+  
+
+## Progress tracking
+
+  
+
+    
+ | Check | When
+
+    
+ | Morning weigh-in — same conditions, before food and water | Every Sunday
+
+    
+ | Progress photo — same lighting, same spot | Every Sunday
+
+    
+ | Tape measure — waist, biceps, forearm | Every 4 weeks
+
+    
+ | If weight stalls 3+ weeks — trim ½ cup rice from dinner | If needed
+
+    
+ | If strength stalls 3+ weeks — check sleep first, then add 1 set to compound lifts | If needed
+
+  
+
+  
+
+## Training log format (copy each session)
+
+  
+
+    
+ | Date | Day | Exercise | Load | Set 1 | Set 2 | Set 3 | Set 4 | Notes
+
+    
+ | e.g. Wk1 Mon | Upper A | Bench press | 16 kg | 10 | 10 | 9 | 8 | Add 2 kg next week
+
+    
+ | e.g. Wk1 Thu | Upper B | Pull-ups | BW | 8 | 6 | 5 | 4 | Grip better than last week
+
+    
+ |  |  |  |  |  |  |  |  | 
+
+    
+ |  |  |  |  |  |  |  |  | 
+
+  
+
+  This is a general fitness and nutrition guide. All calorie figures use USDA FoodData Central 2024–25 data. Not medical or dietitian advice — adjust based on actual weekly weight and strength progress.
+
+  
+
+    Today: 0 kcal
+    0g protein
+    0g carbs
+    0g fat
+    0g fiber
+    Target → 2,350 kcal · 155g P · 260g C · 70g F · 35g fiber
+  
+  Reset

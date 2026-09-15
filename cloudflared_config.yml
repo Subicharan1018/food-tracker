@@ -1,0 +1,30 @@
+protocol: quic
+tunnel: 18d9f431-8f29-4797-8dc9-1ca777e0b137
+credentials-file: /etc/cloudflared/18d9f431-8f29-4797-8dc9-1ca777e0b137.json
+
+ingress:
+  - hostname: subimusic.me
+    service: http://localhost:4533
+    originRequest:
+      connectTimeout: 60s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 100
+      keepAliveTimeout: 120s
+      http2Origin: false
+      disableChunkedEncoding: false
+  - hostname: session.subimusic.me
+    service: http://localhost:5501
+    originRequest:
+      connectTimeout: 60s
+      tcpKeepAlive: 30s
+      keepAliveConnections: 100
+      keepAliveTimeout: 120s
+      http2Origin: false
+      disableChunkedEncoding: false
+  - hostname: shuffle.subimusic.me
+    service: http://localhost:5500
+  - hostname: music.subimusic.me
+    service: http://localhost:3000
+  - hostname: api.subimusic.me
+    service: http://localhost:8420
+  - service: http_status:404

@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import '../config/server_config.dart';
 
 sealed class AuthResult {
   const AuthResult();
@@ -250,5 +251,26 @@ class FirebaseAuthRestService {
     await _storage.delete(key: _kRefreshToken);
     await _storage.delete(key: _kUserId);
     await _storage.delete(key: _kTokenExpiry);
+  }
+
+  /// Register device FCM token with backend server
+  Future<void> registerFcmToken(String userId, {String? tokenOverride}) async {
+    final token = tokenOverride ?? await _storage.read(key: 'fcm_token');
+    if (token == null || token.isEmpty) return;
+
+    try {
+      await _dio.post(
+        '${ServerConfig.baseUrl}/user/fcm-token',
+        data: {'user_id': userId, 'fcm_token': token},
+        options: Options(
+          headers: {'Content-Type': 'application/json'},
+          validateStatus: (s) => s != null && s < 500,
+          sendTimeout: const Duration(seconds: 8),
+          receiveTimeout: const Duration(seconds: 8),
+        ),
+      );
+    } catch (e) {
+      debugPrint('Failed to register FCM token with server: $e');
+    }
   }
 }

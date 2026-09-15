@@ -7,8 +7,15 @@ import '../health/health_sync_service.dart';
 import '../local_db/app_database.dart';
 import '../local_db/seed_data.dart';
 import '../network/google_firestore_sync_service.dart';
-
+import '../ai/ai_api_client.dart';
 import '../sync/sync_scheduler.dart';
+import '../../features/workouts/hiit/hiit_timer_engine.dart';
+import '../../features/workouts/set_timer/set_rest_timer_service.dart';
+
+export '../../features/workouts/hiit/hiit_timer_engine.dart'
+    show hiitTimerProvider, HiitPhase, HiitState, HiitTimerEngine;
+export '../../features/workouts/set_timer/set_rest_timer_service.dart'
+    show setRestTimerProvider, RestTimerState, SetRestTimerNotifier;
 
 // Services
 final healthSyncServiceProvider = Provider<HealthSyncService>((ref) {
@@ -176,3 +183,50 @@ final todayStepsProvider = FutureProvider<int>((ref) async {
   final health = ref.watch(healthSyncServiceProvider);
   return health.fetchTodaySteps();
 });
+
+// ── AI Feature Providers ─────────────────────────────────────────────
+
+final aiApiClientProvider = Provider<AiApiClient>((ref) => AiApiClient());
+
+final todayDiaryEntriesProvider = FutureProvider<List<DiaryEntry>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  return db.getEntriesForDate(todayStr);
+});
+
+final todayWaterLogsProvider = FutureProvider<List<WaterLog>>((ref) async {
+  final db = ref.watch(databaseProvider);
+  final todayStr = DateFormat('yyyy-MM-dd').format(DateTime.now());
+  return (db.select(db.waterLogs)..where((w) => w.date.equals(todayStr))).get();
+});
+
+final userProfileStreamProvider = userProfileProvider;
+
+final mealPlanProvider = FutureProvider.family<Map<String, dynamic>, String>(
+  (ref, userId) async {
+    final client = ref.read(aiApiClientProvider);
+    final diary = await ref.read(todayDiaryEntriesProvider.future);
+    final waterLogs = await ref.read(todayWaterLogsProvider.future);
+    final waterMl = waterLogs.fold<int>(0, (sum, w) => sum + w.mlAdded);
+    return client.requestMealPlan(
+      userId: userId,
+      todayDiary: diary,
+      todayWaterMl: waterMl,
+    );
+  },
+);
+
+final workoutProgressionProvider = FutureProvider.family<Map<String, dynamic>, String>(
+  (ref, userId) async {
+    final client = ref.read(aiApiClientProvider);
+    return client.requestWorkoutProgression(userId: userId);
+  },
+);
+
+final weeklyDigestProvider = FutureProvider.family<Map<String, dynamic>?, String>(
+  (ref, week) async {
+    final client = ref.read(aiApiClientProvider);
+    final profile = await ref.read(userProfileProvider.future);
+    return client.fetchDigest(userId: profile?.id ?? 'default_user', week: week);
+  },
+);

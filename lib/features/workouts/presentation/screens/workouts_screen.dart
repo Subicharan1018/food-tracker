@@ -7,6 +7,22 @@ import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../streaks/services/streak_service.dart';
 import '../../data/workout_routines_provider.dart';
+import '../../hiit/hiit_timer_screen.dart';
+import '../../set_timer/set_rest_timer_service.dart';
+import '../../set_timer/set_rest_timer_widget.dart';
+
+String _categoryFor(String exerciseName) {
+  const compound = [
+    'Barbell Squat', 'Barbell bench press', 'Bench Press', 'Overhead press', 'Overhead Press',
+    'Romanian deadlift', 'Romanian Deadlift', 'Sumo Deadlift', 'Barbell back squat', 'Goblet Squat', 'Goblet squat finisher'
+  ];
+  const bodyweight = ['Pull-ups', 'Dips', 'Push-ups', 'Push-up burnout'];
+  if (compound.any((c) => exerciseName.toLowerCase().contains(c.toLowerCase()))) return 'compound';
+  if (bodyweight.any((b) => exerciseName.toLowerCase().contains(b.toLowerCase()))) return 'bodyweight';
+  if (exerciseName.toLowerCase().contains('hiit')) return 'hiit';
+  if (exerciseName.toLowerCase().contains('plank') || exerciseName.toLowerCase().contains('raise')) return 'core';
+  return 'accessory';
+}
 
 class WorkoutsScreen extends ConsumerStatefulWidget {
   const WorkoutsScreen({super.key});
@@ -689,82 +705,127 @@ class _RecompSplitTab extends ConsumerWidget {
       ),
     ];
 
-    return ListView.separated(
+    return ListView(
       padding: const EdgeInsets.all(16),
-      itemCount: splitDays.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 14),
-      itemBuilder: (context, index) {
-        final dayPlan = splitDays[index];
+      children: [
+        const SetRestTimerWidget(),
+        ...List.generate(splitDays.length, (index) {
+          final dayPlan = splitDays[index];
+          final isFriday = dayPlan.day == 'Fri';
 
-        return ExpansionTile(
-          initiallyExpanded: index == 0,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          backgroundColor: AppColors.card,
-          collapsedBackgroundColor: AppColors.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.border),
-          ),
-          collapsedShape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: AppColors.border),
-          ),
-          leading: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              dayPlan.day,
-              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
-            ),
-          ),
-          title: Text(dayPlan.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          children: [
-            const Divider(height: 1),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: dayPlan.exercises.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
-              itemBuilder: (ctx, exIndex) {
-                final ex = dayPlan.exercises[exIndex];
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(ex.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                            const SizedBox(height: 2),
-                            Text('${ex.setsReps} · Setup: ${ex.setup}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                            if (ex.restSec > 0)
-                              Text('Rest: ${ex.restSec}s', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                          ],
-                        ),
-                      ),
-                      ElevatedButton(
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: ExpansionTile(
+              initiallyExpanded: index == 0,
+              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+              backgroundColor: AppColors.card,
+              collapsedBackgroundColor: AppColors.card,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: AppColors.border),
+              ),
+              collapsedShape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+                side: const BorderSide(color: AppColors.border),
+              ),
+              leading: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.surfaceElevated,
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  dayPlan.day,
+                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
+                ),
+              ),
+              title: Text(dayPlan.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              children: [
+                if (isFriday)
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    child: SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        icon: const Icon(Icons.timer_outlined, color: Colors.black, size: 18),
+                        label: const Text('Launch HIIT Sprint Timer', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800)),
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.cardElevated,
-                          foregroundColor: AppColors.textPrimary,
-                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          backgroundColor: AppColors.positive,
+                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                         ),
-                        onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
-                        child: const Text('Log Sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                        onPressed: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
+                          );
+                        },
                       ),
-                    ],
+                    ),
                   ),
-                );
-              },
+                const Divider(height: 1),
+                ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: dayPlan.exercises.length,
+                  separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+                  itemBuilder: (ctx, exIndex) {
+                    final ex = dayPlan.exercises[exIndex];
+                    final isHiitEx = ex.name.toLowerCase().contains('hiit');
+
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      child: Row(
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(ex.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                                const SizedBox(height: 2),
+                                Text('${ex.setsReps} · Setup: ${ex.setup}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                                if (ex.restSec > 0)
+                                  Text('Rest: ${ex.restSec}s', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                              ],
+                            ),
+                          ),
+                          if (isHiitEx)
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.positive,
+                                foregroundColor: Colors.black,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
+                                );
+                              },
+                              child: const Text('HIIT Timer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
+                            )
+                          else
+                            ElevatedButton(
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.cardElevated,
+                                foregroundColor: AppColors.textPrimary,
+                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                              ),
+                              onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
+                              child: const Text('Log Sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                            ),
+                        ],
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        );
-      },
+          );
+        }),
+      ],
     );
   }
 
@@ -858,10 +919,15 @@ class _RecompSplitTab extends ConsumerWidget {
                           ),
                         ]);
 
+                        // Auto-start rest timer based on exercise category
+                        ref.read(setRestTimerProvider.notifier).startFor(
+                          _categoryFor(ex.name),
+                        );
+
                         if (context.mounted) {
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Logged ${ex.name} — ${weight}kg × $reps reps')),
+                            SnackBar(content: Text('Logged ${ex.name} — ${weight}kg × $reps reps (Rest timer started)')),
                           );
                         }
                       },

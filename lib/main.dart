@@ -1,11 +1,41 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
+import 'app_router.dart';
 import 'core/di/providers.dart';
+import 'core/notifications/notification_channels.dart';
+import 'core/notifications/water_notification_service.dart';
+import 'core/notifications/workout_notification_service.dart';
 import 'core/theme/app_theme.dart';
-import 'shared/screens/main_nav_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  final plugin = FlutterLocalNotificationsPlugin();
+  try {
+    await plugin.initialize(
+      const InitializationSettings(
+        android: AndroidInitializationSettings('@mipmap/launcher_icon'),
+      ),
+      onDidReceiveNotificationResponse: (response) {
+        final payload = response.payload;
+        if (payload != null && payload.isNotEmpty) {
+          appRouter.push(payload);
+        }
+      },
+    );
+    await NotificationChannels.createAll(plugin);
+  } catch (e) {
+    debugPrint('Local notifications init fallback: $e');
+  }
+
+  try {
+    await AndroidAlarmManager.initialize();
+  } catch (e) {
+    debugPrint('Alarm manager init fallback: $e');
+  }
+
   runApp(
     const ProviderScope(
       child: KinetikFitnessApp(),
@@ -26,9 +56,31 @@ class _KinetikFitnessAppState extends ConsumerState<KinetikFitnessApp>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    // Cold start auto-sync: pull remote updates & push any pending offline records
-    WidgetsBinding.instance.addPostFrameCallback((_) {
+
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Cold start auto-sync
       ref.read(syncSchedulerProvider).syncNow();
+
+      // Schedule background water and workout notifications
+      final db = ref.read(databaseProvider);
+      final plugin = FlutterLocalNotificationsPlugin();
+      try {
+        await WaterNotificationService(plugin, db).scheduleAll();
+        await WorkoutNotificationService(plugin).scheduleWeeklyAlarms();
+      } catch (e) {
+        debugPrint('Notification scheduling notice: $e');
+      }
+
+      // Register FCM token if authenticated
+      try {
+        final auth = ref.read(firebaseAuthRestServiceProvider);
+        final userId = await auth.getUserId();
+        if (userId != null && userId.isNotEmpty) {
+          await auth.registerFcmToken(userId);
+        }
+      } catch (e) {
+        debugPrint('FCM token registration notice: $e');
+      }
     });
   }
 
@@ -48,12 +100,11 @@ class _KinetikFitnessAppState extends ConsumerState<KinetikFitnessApp>
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       title: 'Kinetik — Recomp Manual & Tracker',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.darkTheme,
-      home: const MainNavScreen(),
+      routerConfig: appRouter,
     );
   }
 }
-

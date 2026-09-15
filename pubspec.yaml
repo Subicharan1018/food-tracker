@@ -45,9 +45,10 @@ dependencies:
   flutter_secure_storage: ^9.2.4
   shared_preferences: ^2.2.3
   health: 13.3.1
-  flutter_local_notifications: 18.0.1
-  android_alarm_manager_plus: 4.0.7
-  just_audio: 0.9.44
+  flutter_local_notifications: ^18.0.0
+  android_alarm_manager_plus: ^4.0.0
+  just_audio: ^0.9.40
+  http: ^1.2.0
 
 dev_dependencies:
   flutter_test:
@@ -76,6 +77,12 @@ flutter:
 
   assets:
     - assets/icons/
+    - assets/audio/drop.wav
+    - assets/audio/gym_bell.wav
+    - assets/audio/whistle_short.wav
+    - assets/audio/recovery_beep.wav
+    - assets/audio/countdown_tick.wav
+    - assets/audio/ding.wav
 
   # To add assets to your application, add an assets section, like this:
   # assets:

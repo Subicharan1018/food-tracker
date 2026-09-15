@@ -6,6 +6,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../streaks/services/streak_service.dart';
+import '../../nlp_input_widget.dart';
 
 class LogFoodScreen extends ConsumerStatefulWidget {
   final String initialMealSlot;
@@ -24,6 +25,54 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
   late String _selectedSlot;
   List<FoodItem> _searchResults = [];
   bool _isLoading = false;
+  bool _nlpMode = false;
+
+  Future<void> _handleNlpParsedItems(List<Map<String, dynamic>> items) async {
+    final db = ref.read(databaseProvider);
+    final dateStr = ref.read(formattedSelectedDateProvider);
+
+    for (final item in items) {
+      final name = item['food_name']?.toString() ?? 'Item';
+      final portion = (item['portion_qty'] as num?)?.toDouble() ?? 1.0;
+      final slot = item['meal_slot']?.toString().toLowerCase() ?? _selectedSlot;
+
+      final match = await db.searchFoodItems(name);
+      final food = match.isNotEmpty ? match.first : null;
+
+      final cal = food != null ? food.calories * portion : 150.0 * portion;
+      final p = food != null ? food.proteinG * portion : 10.0 * portion;
+      final c = food != null ? food.carbsG * portion : 15.0 * portion;
+      final f = food != null ? food.fatG * portion : 4.0 * portion;
+
+      await db.addDiaryEntry(
+        DiaryEntriesCompanion.insert(
+          id: const Uuid().v4(),
+          date: dateStr,
+          mealSlot: slot,
+          foodItemId: Value(food?.id),
+          foodName: food?.name ?? name,
+          portionQty: portion,
+          portionUnit: food?.servingUnit ?? 'serving',
+          calories: cal,
+          proteinG: p,
+          carbsG: c,
+          fatG: f,
+          fiberG: Value(food != null ? food.fiberG * portion : 2.0),
+          loggedAt: Value(DateTime.now()),
+        ),
+      );
+    }
+
+    if (mounted) {
+      setState(() => _nlpMode = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Logged ${items.length} item(s) from natural language! ✨'),
+          backgroundColor: AppColors.positive,
+        ),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -431,27 +480,49 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
             ),
           ),
 
-          // Search Bar
+          // Search Bar or NLP Input Toggle
           Padding(
-            padding: const EdgeInsets.all(16),
-            child: TextField(
-              controller: _searchController,
-              autofocus: false,
-              onChanged: _performSearch,
-              decoration: InputDecoration(
-                hintText: 'Search food (e.g. egg, chicken, rice, chapati, dal)',
-                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded, size: 18),
-                        onPressed: () {
-                          _searchController.clear();
-                          _performSearch('');
-                        },
-                      )
-                    : null,
-              ),
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: _nlpMode
+                ? NlpInputWidget(
+                    userId: ref.watch(userProfileProvider).value?.id,
+                    initialText: _searchController.text,
+                    onParsed: _handleNlpParsedItems,
+                    onFallbackSearch: (fallback) {
+                      setState(() {
+                        _nlpMode = false;
+                        _searchController.text = fallback;
+                      });
+                      _performSearch(fallback);
+                    },
+                  )
+                : TextField(
+                    controller: _searchController,
+                    autofocus: false,
+                    onChanged: _performSearch,
+                    decoration: InputDecoration(
+                      hintText: 'Search food (e.g. egg, chicken, rice, chapati)',
+                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
+                      suffixIcon: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (_searchController.text.isNotEmpty)
+                            IconButton(
+                              icon: const Icon(Icons.clear_rounded, size: 18),
+                              onPressed: () {
+                                _searchController.clear();
+                                _performSearch('');
+                              },
+                            ),
+                          IconButton(
+                            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.positive, size: 20),
+                            tooltip: 'Natural Language Input',
+                            onPressed: () => setState(() => _nlpMode = true),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
           ),
 
           // Recent / Frequent items horizontal list
