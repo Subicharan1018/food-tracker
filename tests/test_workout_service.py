@@ -44,3 +44,28 @@ async def test_workout_service_run_workout_progressions(
 
     await svc.run_workout_progressions()
     mock_fcm_service.send_progression_ready.assert_called_once_with("t1")
+
+@pytest.mark.asyncio
+async def test_workout_service_fallback_on_error(
+    mock_nemotron_service,
+    mock_context_builder,
+    mock_firestore_service,
+    mock_fcm_service,
+):
+    mock_nemotron_service.run_agent_loop.side_effect = RuntimeError("Nemotron agent loop failed: 'NoneType' object is not subscriptable")
+    mock_firestore_service.get_workout_history.return_value = [
+        {"exerciseName": "Barbell Squat", "weightKg": 100, "reps": 5, "date": "2026-09-10"},
+    ]
+
+    svc = WorkoutService(
+        nemotron_svc=mock_nemotron_service,
+        context_bld=mock_context_builder,
+        firestore_svc=mock_firestore_service,
+        fcm_svc=mock_fcm_service,
+    )
+
+    resp = await svc.generate_workout_progression("user123")
+    assert len(resp.exercises) == 6
+    squat = next(e for e in resp.exercises if e.name == "Barbell Squat")
+    assert "100" in squat.current
+    assert "102.5" in squat.recommendation

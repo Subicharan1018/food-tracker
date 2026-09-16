@@ -16,11 +16,14 @@ class NemotronService:
         )
 
     async def _execute_with_retry(self, api_call_coro):
-        """Retries on HTTP 503 up to 3 attempts with 10-second delay."""
+        """Retries on HTTP 503 up to 3 attempts with 10-second delay and enforces hard timeout."""
         max_attempts = 3
         for attempt in range(1, max_attempts + 1):
             try:
-                return await api_call_coro()
+                return await asyncio.wait_for(
+                    api_call_coro(),
+                    timeout=settings.ai_timeout_seconds,
+                )
             except APIStatusError as e:
                 if e.status_code == 503 and attempt < max_attempts:
                     logger.warning(
@@ -30,6 +33,9 @@ class NemotronService:
                     await asyncio.sleep(10)
                 else:
                     raise
+            except (asyncio.TimeoutError, TimeoutError):
+                logger.error("AI call timed out after %ds", settings.ai_timeout_seconds)
+                raise TimeoutError(f"AI call timed out after {settings.ai_timeout_seconds}s")
             except Exception:
                 raise
 
@@ -49,7 +55,12 @@ class NemotronService:
                 ],
                 max_tokens=max_tokens,
             )
-            return response.choices[0].message.content or ""
+            if not response or not getattr(response, "choices", None):
+                return ""
+            choice = response.choices[0]
+            if not choice or not getattr(choice, "message", None):
+                return ""
+            return choice.message.content or ""
 
         try:
             return await self._execute_with_retry(_call)
@@ -77,36 +88,74 @@ class NemotronService:
         try:
             for _ in range(max_iterations):
                 async def _call():
-                    return await self._client.chat.completions.create(
-                        model=settings.nemotron_model,
-                        messages=messages,
-                        tools=tools,
-                        tool_choice="auto",
-                        max_tokens=4000,
-                    )
+                    kwargs = {
+                        "model": settings.nemotron_model,
+                        "messages": messages,
+                        "max_tokens": 4000,
+                    }
+                    if tools:
+                        kwargs["tools"] = tools
+                        kwargs["tool_choice"] = "auto"
+                    return await self._client.chat.completions.create(**kwargs)
 
                 response = await self._execute_with_retry(_call)
+                if not response or not getattr(response, "choices", None):
+                    logger.warning("Empty or null choices returned from AI model.")
+                    break
+
                 choice = response.choices[0]
-                last_content = choice.message.content or ""
+                if not choice or not getattr(choice, "message", None):
+                    logger.warning("Empty choice message returned from AI model.")
+                    break
 
-                if choice.finish_reason == "stop":
-                    return last_content
+                message = choice.message
+                if message.content:
+                    last_content = message.content
 
-                if choice.finish_reason == "tool_calls" and choice.message.tool_calls:
-                    messages.append(choice.message)
-                    for tc in choice.message.tool_calls:
+                tool_calls = getattr(message, "tool_calls", None)
+                if tool_calls:
+                    assistant_msg = {
+                        "role": "assistant",
+                        "content": message.content or "",
+                        "tool_calls": [
+                            {
+                                "id": tc.id,
+                                "type": "function",
+                                "function": {
+                                    "name": tc.function.name,
+                                    "arguments": tc.function.arguments or "{}",
+                                },
+                            }
+                            for tc in tool_calls
+                        ],
+                    }
+                    messages.append(assistant_msg)
+
+                    for tc in tool_calls:
+                        args_str = getattr(tc.function, "arguments", "") or "{}"
                         try:
-                            args = json.loads(tc.function.arguments)
+                            args = json.loads(args_str) if isinstance(args_str, str) else (args_str or {})
                         except Exception:
                             args = {}
-                        result = await tool_dispatcher(tc.function.name, args)
+
+                        try:
+                            result = await tool_dispatcher(tc.function.name, args)
+                        except Exception as tool_err:
+                            logger.warning("Tool %s execution failed: %s", tc.function.name, tool_err)
+                            result = {"error": str(tool_err)}
+
                         messages.append({
                             "role": "tool",
                             "tool_call_id": tc.id,
                             "content": json.dumps(result),
                         })
+                elif choice.finish_reason == "stop" or message.content:
+                    return last_content
+                else:
+                    break
 
         except Exception as e:
+            logger.error("Nemotron agent loop failed: %s", e)
             raise RuntimeError(f"Nemotron agent loop failed: {e}") from e
 
         return last_content

@@ -25,6 +25,10 @@ void main() async {
         }
       },
     );
+    final androidPlugin = plugin.resolvePlatformSpecificImplementation<
+        AndroidFlutterLocalNotificationsPlugin>();
+    await androidPlugin?.requestNotificationsPermission();
+    await androidPlugin?.requestExactAlarmsPermission();
     await NotificationChannels.createAll(plugin);
   } catch (e) {
     debugPrint('Local notifications init fallback: $e');

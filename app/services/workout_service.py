@@ -50,7 +50,40 @@ class WorkoutService:
             result = []
             raw = ""
 
+        if not result:
+            result = self._generate_fallback_progressions(workout_logs)
+
         return WorkoutProgressionResponse(exercises=result, raw_text=raw)
+
+    def _generate_fallback_progressions(self, workout_logs: list[dict]) -> list[ExerciseProgression]:
+        fallback_list = []
+        for name in COMPOUND_LIFTS:
+            matches = [
+                w for w in (workout_logs or [])
+                if w.get("exerciseName", "").strip().lower() == name.lower()
+            ]
+            if matches:
+                latest = sorted(matches, key=lambda w: w.get("date", ""), reverse=True)[0]
+                weight = latest.get("weightKg", 0)
+                reps = latest.get("reps", 0)
+                current = f"{weight} kg × {reps} reps" if weight else f"{reps} reps"
+                rec_weight = (weight + 2.5) if weight else 2.5
+                recommendation = f"{rec_weight} kg × {reps or 8} reps"
+                reasoning = "Progressive overload: Add 2.5kg or 1 rep while maintaining strict form."
+            else:
+                current = "No recent logs"
+                recommendation = "3 sets of 8–10 reps (RPE 7–8)"
+                reasoning = "Establish baseline strength and form consistency."
+
+            fallback_list.append(
+                ExerciseProgression(
+                    name=name,
+                    current=current,
+                    recommendation=recommendation,
+                    reasoning=reasoning,
+                )
+            )
+        return fallback_list
 
     async def run_workout_progressions(self):
         users = self._firestore.get_all_users()

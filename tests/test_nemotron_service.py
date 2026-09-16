@@ -1,3 +1,4 @@
+import asyncio
 import pytest
 import json
 from unittest.mock import AsyncMock, MagicMock, patch
@@ -87,3 +88,63 @@ async def test_nemotron_agent_loop():
     assert result == '[{"recipe_name":"Dosa"}]'
     dispatcher.assert_called_once_with("get_remaining_macros", {"today_diary": []})
     assert mock_client.chat.completions.create.call_count == 2
+
+@pytest.mark.asyncio
+async def test_nemotron_agent_loop_empty_choices():
+    mock_client = MagicMock()
+    mock_response = MagicMock(choices=[])
+    mock_client.chat.completions.create = AsyncMock(return_value=mock_response)
+
+    svc = NemotronService(client=mock_client)
+    res = await svc.run_agent_loop("system", "user", [], AsyncMock())
+    assert res == ""
+
+@pytest.mark.asyncio
+async def test_nemotron_agent_loop_tool_error_resilience():
+    mock_client = MagicMock()
+
+    tc = MagicMock()
+    tc.id = "call_err"
+    tc.function.name = "failing_tool"
+    tc.function.arguments = "{}"
+
+    msg_1 = MagicMock()
+    msg_1.content = ""
+    msg_1.tool_calls = [tc]
+    choice_1 = MagicMock(finish_reason=None, message=msg_1)
+    resp_1 = MagicMock(choices=[choice_1])
+
+    msg_2 = MagicMock()
+    msg_2.content = "Handled error"
+    msg_2.tool_calls = None
+    choice_2 = MagicMock(finish_reason="stop", message=msg_2)
+    resp_2 = MagicMock(choices=[choice_2])
+
+    mock_client.chat.completions.create = AsyncMock(side_effect=[resp_1, resp_2])
+
+    failing_dispatcher = AsyncMock(side_effect=Exception("Database down"))
+    svc = NemotronService(client=mock_client)
+
+    result = await svc.run_agent_loop(
+        system="system",
+        user="user",
+        tools=[{"type": "function", "function": {"name": "failing_tool"}}],
+        tool_dispatcher=failing_dispatcher,
+    )
+    assert result == "Handled error"
+
+@pytest.mark.asyncio
+async def test_nemotron_timeout_enforcement():
+    mock_client = MagicMock()
+
+    async def hanging_call(*args, **kwargs):
+        await asyncio.sleep(10)
+        return MagicMock(choices=[MagicMock(message=MagicMock(content="Never"))])
+
+    mock_client.chat.completions.create = AsyncMock(side_effect=hanging_call)
+
+    svc = NemotronService(client=mock_client)
+    with patch("app.services.nemotron_service.settings.ai_timeout_seconds", 0.05):
+        with pytest.raises(RuntimeError, match="Nemotron complete failed: AI call timed out after"):
+            await svc.complete("system", "user")
+

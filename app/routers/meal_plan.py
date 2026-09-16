@@ -40,7 +40,9 @@ async def get_meal_plan(
         clean = raw.strip().removeprefix("```json").removeprefix("```").removesuffix("```").strip()
         plan_data = json.loads(clean)
         plan = [MealPlanItem(**item) for item in plan_data]
-    except Exception:
+    except Exception as e:
+        from app.config import logger
+        logger.error("Meal plan generation failed for user %s: %s", req.user_id, e)
         plan = []
         raw = ""
 
