@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:drift/drift.dart';
 import 'app_database.dart';
 import 'recipe_seed_list.dart';
@@ -165,6 +164,36 @@ class SeedData {
           fiberG: Value(0.0),
           source: Value('usda_fdc'),
           isGeneric: Value(true),
+        ),
+        const FoodItemsCompanion(
+          id: Value('user_protein_powder_45g'),
+          name: Value('Protein Powder (1 Heaping Scoop, 45g)'),
+          brand: Value('My Protein Powder'),
+          category: Value('supplement'),
+          servingSize: Value(1.0),
+          servingUnit: Value('scoop (45g)'),
+          calories: Value(165.3),
+          proteinG: Value(24.02),
+          carbsG: Value(14.71),
+          fatG: Value(1.08),
+          fiberG: Value(0.0),
+          source: Value('nutrition_label'),
+          isGeneric: Value(false),
+        ),
+        const FoodItemsCompanion(
+          id: Value('user_protein_powder_100g'),
+          name: Value('Protein Powder (Per 100g)'),
+          brand: Value('My Protein Powder'),
+          category: Value('supplement'),
+          servingSize: Value(100.0),
+          servingUnit: Value('g'),
+          calories: Value(367.3),
+          proteinG: Value(53.37),
+          carbsG: Value(32.68),
+          fatG: Value(2.40),
+          fiberG: Value(0.0),
+          source: Value('nutrition_label'),
+          isGeneric: Value(false),
         ),
         const FoodItemsCompanion(
           id: Value('whey_protein_isolate'),

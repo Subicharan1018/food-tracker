@@ -6,9 +6,13 @@ from app.services.context_builder import ContextBuilder
 from app.services.fcm_service import fcm_service, FcmService
 from app.services.digest_service import digest_service, DigestService
 from app.services.workout_service import workout_service, WorkoutService
+from app.services.food_db_service import food_db_service, FoodDbService
 
 def get_firestore_service() -> FirestoreService:
     return firestore_service
+
+def get_food_db_service() -> FoodDbService:
+    return food_db_service
 
 def get_nemotron_service() -> NemotronService:
     return nemotron_service

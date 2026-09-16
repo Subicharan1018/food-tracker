@@ -14,6 +14,7 @@ class Settings(BaseSettings):
     environment: str = "development"
     server_api_key: str | None = None
     recomp_manual_path: str = "assets/recomp_manual_v3.txt"
+    ifct_db_path: str = "app/data/ifct2017.db"
 
     model_config = SettingsConfigDict(
         env_file=".env",

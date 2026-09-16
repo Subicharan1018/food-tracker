@@ -1,0 +1,57 @@
+{
+  "vitaminD_mcg": {
+    "code": "vitd",
+    "factor_to_target_unit": 1000000,
+    "note": "Vitamin D (vitd in g, factor 1e6 to mcg)"
+  },
+  "b12_mcg": {
+    "code": null,
+    "factor_to_target_unit": null,
+    "note": "Not analyzed in IFCT 2017 primary dataset"
+  },
+  "iron_mg": {
+    "code": "fe",
+    "factor_to_target_unit": 1000,
+    "note": "Iron (fe in g, factor 1000 to mg)"
+  },
+  "calcium_mg": {
+    "code": "ca",
+    "factor_to_target_unit": 1000,
+    "note": "Calcium (ca in g, factor 1000 to mg)"
+  },
+  "magnesium_mg": {
+    "code": "mg",
+    "factor_to_target_unit": 1000,
+    "note": "Magnesium (mg in g, factor 1000 to mg)"
+  },
+  "zinc_mg": {
+    "code": "zn",
+    "factor_to_target_unit": 1000,
+    "note": "Zinc (zn in g, factor 1000 to mg)"
+  },
+  "potassium_mg": {
+    "code": "k",
+    "factor_to_target_unit": 1000,
+    "note": "Potassium (k in g, factor 1000 to mg)"
+  },
+  "folate_mcg": {
+    "code": "folsum",
+    "factor_to_target_unit": 1000000,
+    "note": "Total Folates B9 (folsum in g, factor 1e6 to mcg)"
+  },
+  "omega3_ala": {
+    "code": "f18d3n3",
+    "factor_to_target_unit": 1.0,
+    "note": "Alpha-linolenic acid (C18:3n3 in g)"
+  },
+  "omega3_epa": {
+    "code": "f20d5n3",
+    "factor_to_target_unit": 1.0,
+    "note": "Eicosapentaenoic acid (C20:5n3 in g)"
+  },
+  "omega3_dha": {
+    "code": "f22d6n3",
+    "factor_to_target_unit": 1.0,
+    "note": "Docosahexaenoic acid (C22:6n3 in g)"
+  }
+}

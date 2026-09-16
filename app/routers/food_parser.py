@@ -4,7 +4,8 @@ from app.models.requests  import ParseFoodRequest
 from app.models.responses import ParseFoodResponse, ParsedFoodItem
 from app.services.nemotron_service  import NemotronService
 from app.services.firestore_service import FirestoreService
-from app.dependencies import get_nemotron_service, get_firestore_service
+from app.services.food_db_service import FoodDbService
+from app.dependencies import get_nemotron_service, get_firestore_service, get_food_db_service
 
 router = APIRouter()
 
@@ -13,16 +14,23 @@ async def parse_food(
     req: ParseFoodRequest,
     nemotron_svc: NemotronService = Depends(get_nemotron_service),
     firestore_svc: FirestoreService = Depends(get_firestore_service),
+    food_db_svc: FoodDbService = Depends(get_food_db_service),
 ):
     recipes = firestore_svc.get_recipes(req.user_id)
-    names = [r.get("name", "") for r in recipes]
+    recipe_names = [r.get("name", "") for r in recipes if r.get("name")]
+    
+    # Query relevant candidate food items from IFCT 2017 database
+    ifct_candidates = food_db_svc.search_foods(req.input, limit=15)
+    ifct_names = [f["name"] for f in ifct_candidates]
+
+    combined_names = list(dict.fromkeys(recipe_names + ifct_names))
 
     system = (
         "You are a food log parser. Map free-text food entries to exact names from the "
         "provided database. Return ONLY a JSON array. No preamble. No markdown."
     )
     user_msg = (
-        f'Database names: {json.dumps(names)}\n\n'
+        f'Database names: {json.dumps(combined_names)}\n\n'
         f'Entry: "{req.input}"\n\n'
         'Return: [{"food_name":"...","portion_qty":1.0,"meal_slot":"breakfast"}]'
     )
