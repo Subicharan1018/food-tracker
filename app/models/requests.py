@@ -1,4 +1,5 @@
-from pydantic import BaseModel
+from typing import Literal
+from pydantic import AliasChoices, BaseModel, Field
 
 class DiaryEntryIn(BaseModel):
     mealSlot:  str
@@ -30,3 +31,19 @@ class DigestTriggerRequest(BaseModel):
 
 class VerifyRecipesRequest(BaseModel):
     user_id: str
+
+
+class CreateRecipeRequest(BaseModel):
+    """Natural-language recipe submitted to the AI recipe ingestion agent."""
+
+    user_id: str = Field(min_length=1)
+    recipe_text: str = Field(
+        min_length=3,
+        validation_alias=AliasChoices("recipe_text", "input"),
+        description="Markdown, plain text, or a natural-language recipe description",
+    )
+    meal_slot: Literal["breakfast", "lunch", "dinner", "snack"] = Field(
+        default="lunch",
+        validation_alias=AliasChoices("meal_slot", "mealSlot"),
+    )
+    servings: float = Field(default=1.0, gt=0, le=100)

@@ -102,7 +102,7 @@ class FirestoreService:
             .collection("recipes")
             .stream()
         )
-        return [doc.to_dict() for doc in docs]
+        return [{**(doc.to_dict() or {}), "id": doc.id} for doc in docs]
 
     # ── writes ───────────────────────────────────────────────────────
 
@@ -124,5 +124,19 @@ class FirestoreService:
         if not self.db:
             return
         self.db.collection("users").document(user_id).update({"fcmToken": fcm_token})
+
+    def save_recipe(self, user_id: str, recipe_id: str, recipe: dict) -> bool:
+        """Upsert a recipe in the user's collection using the app's sync schema."""
+        if not self.db:
+            return False
+        payload = {**recipe, "id": recipe_id}
+        (
+            self.db.collection("users")
+            .document(user_id)
+            .collection("recipes")
+            .document(recipe_id)
+            .set(payload)
+        )
+        return True
 
 firestore_service = FirestoreService()

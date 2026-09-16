@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 class MealPlanItem(BaseModel):
     recipe_name: str
@@ -44,3 +44,34 @@ class RecipeFlag(BaseModel):
 
 class VerifyRecipesResponse(BaseModel):
     flags: list[RecipeFlag]
+
+
+class RecipeIngredientResult(BaseModel):
+    ingredient: str
+    matched_food: str | None = None
+    food_code: str | None = None
+    amount: float | None = None
+    unit: str | None = None
+    grams: float = 0.0
+    calories: float = 0.0
+    protein_g: float = 0.0
+    carbs_g: float = 0.0
+    fat_g: float = 0.0
+    fiber_g: float = 0.0
+    resolved: bool = False
+
+
+class CreateRecipeResponse(BaseModel):
+    id: str
+    name: str
+    meal_slot: str
+    servings: float
+    calories: float
+    protein_g: float
+    carbs_g: float
+    fat_g: float
+    fiber_g: float
+    method: str = ""
+    ingredients: list[RecipeIngredientResult]
+    warnings: list[str] = Field(default_factory=list)
+    stored: bool
