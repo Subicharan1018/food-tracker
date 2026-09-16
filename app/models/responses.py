@@ -24,6 +24,7 @@ class WorkoutProgressionResponse(BaseModel):
 class ParsedFoodItem(BaseModel):
     food_name:   str
     portion_qty: float = 1.0
+    portion_unit: str | None = None
     meal_slot:   str = "snack"
 
 class ParseFoodResponse(BaseModel):

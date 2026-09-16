@@ -49,7 +49,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
           TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Cancel', style: TextStyle(color: AppColors.textMuted))),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+              backgroundColor: AppColors.brandPrimary,
               foregroundColor: AppColors.textInverse,
             ),
             onPressed: () async {
@@ -71,7 +71,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Targets saved!')));
               }
             },
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            child: const Text('Save', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -319,7 +319,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         Expanded(
                           child: ElevatedButton.icon(
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.textPrimary,
+                              backgroundColor: AppColors.brandPrimary,
                               foregroundColor: AppColors.textInverse,
                             ),
                             onPressed: isSyncing
@@ -406,4 +406,3 @@ class _TargetRow extends StatelessWidget {
     );
   }
 }
-

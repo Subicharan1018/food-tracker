@@ -44,32 +44,32 @@ class _MainNavScreenState extends State<MainNavScreen> {
           selectedIndex: _currentIndex,
           onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
           backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.textPrimary.withValues(alpha: 0.12),
+          indicatorColor: AppColors.brandPrimary.withValues(alpha: 0.16),
           elevation: 0,
           destinations: const [
             NavigationDestination(
               icon: Icon(Icons.home_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.home_rounded, color: AppColors.textPrimary),
+              selectedIcon: Icon(Icons.home_rounded, color: AppColors.brandPrimary),
               label: 'Home',
             ),
             NavigationDestination(
               icon: Icon(Icons.restaurant_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.restaurant_rounded, color: AppColors.textPrimary),
+              selectedIcon: Icon(Icons.restaurant_rounded, color: AppColors.brandPrimary),
               label: 'Log',
             ),
             NavigationDestination(
               icon: Icon(Icons.fitness_center_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.fitness_center_rounded, color: AppColors.textPrimary),
+              selectedIcon: Icon(Icons.fitness_center_rounded, color: AppColors.brandPrimary),
               label: 'Train',
             ),
             NavigationDestination(
               icon: Icon(Icons.trending_up_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.trending_up_rounded, color: AppColors.textPrimary),
+              selectedIcon: Icon(Icons.trending_up_rounded, color: AppColors.brandPrimary),
               label: 'Progress',
             ),
             NavigationDestination(
               icon: Icon(Icons.grid_view_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.textPrimary),
+              selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.brandPrimary),
               label: 'More',
             ),
           ],

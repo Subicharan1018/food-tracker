@@ -116,7 +116,7 @@ class WaterTrackingCard extends StatelessWidget {
               value: progress,
               backgroundColor: AppColors.cardElevated,
               valueColor: AlwaysStoppedAnimation<Color>(
-                progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
+                progress >= 1.0 ? AppColors.positive : AppColors.brandPrimary,
               ),
               minHeight: 8,
             ),

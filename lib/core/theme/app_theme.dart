@@ -2,21 +2,25 @@ import 'package:flutter/material.dart';
 
 class AppColors {
   // Neutral Scale (carries ~95% of the UI)
-  static const Color background = Color(0xFF0B0D10);
-  static const Color surface = Color(0xFF151A21);
-  static const Color card = Color(0xFF151A21);
-  static const Color surfaceElevated = Color(0xFF1E2632);
-  static const Color cardElevated = Color(0xFF1E2632);
-  static const Color border = Color(0xFF262E38);
-  static const Color borderSubtle = Color(0xFF1E2632);
+  static const Color background = Color(0xFF000000);
+  // AMOLED-black base with charcoal layers for enough hierarchy to scan.
+  static const Color surface = Color(0xFF080808);
+  static const Color card = Color(0xFF0B0B0B);
+  static const Color surfaceElevated = Color(0xFF151515);
+  static const Color cardElevated = Color(0xFF151515);
+  static const Color border = Color(0xFF282828);
+  static const Color borderSubtle = Color(0xFF1A1A1A);
+
+  /// Kinetik's identity colour. Reserved for navigation and intentional actions.
+  static const Color brandPrimary = Color(0xFFFF7A3D);
 
   // Text Neutral Scale
-  static const Color textPrimary = Color(0xFFF2F4F7);
-  static const Color textSecondary = Color(0xFF8B95A3);
-  static const Color textMuted = Color(0xFF5B6472);
-  static const Color textInverse = Color(0xFF0B0D10);
+  static const Color textPrimary = Color(0xFFF3F0EA);
+  static const Color textSecondary = Color(0xFFA49F96);
+  static const Color textMuted = Color(0xFF6D6A64);
+  static const Color textInverse = Color(0xFF000000);
 
-  // The only two status verdict colors — never decorative
+  // Verdict colours are never used as brand or CTA colours.
   /// Positive Green (#22C55E): Goal met / on-track / active streak (a real verdict)
   static const Color positive = Color(0xFF22C55E);
 
@@ -81,16 +85,27 @@ class AppTypography {
   );
 }
 
+/// Shared shapes keep information quiet and make the few actions easy to spot.
+class AppShapes {
+  static final BorderRadius information = BorderRadius.circular(12);
+  static final BorderRadius action = const BorderRadius.only(
+    topLeft: Radius.circular(20),
+    topRight: Radius.circular(12),
+    bottomLeft: Radius.circular(12),
+    bottomRight: Radius.circular(20),
+  );
+}
+
 class AppTheme {
   static ThemeData get darkTheme {
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.dark,
       scaffoldBackgroundColor: AppColors.background,
-      primaryColor: AppColors.textPrimary,
+      primaryColor: AppColors.brandPrimary,
       colorScheme: const ColorScheme.dark(
-        primary: AppColors.textPrimary,
-        secondary: AppColors.textSecondary,
+        primary: AppColors.brandPrimary,
+        secondary: AppColors.brandPrimary,
         surface: AppColors.surface,
         error: AppColors.textSecondary,
         onPrimary: AppColors.textInverse,
@@ -100,7 +115,7 @@ class AppTheme {
         color: AppColors.card,
         elevation: 0,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
+          borderRadius: AppShapes.information,
           side: const BorderSide(color: AppColors.border, width: 1),
         ),
         margin: EdgeInsets.zero,
@@ -115,21 +130,21 @@ class AppTheme {
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
-          backgroundColor: AppColors.textPrimary,
+          backgroundColor: AppColors.brandPrimary,
           foregroundColor: AppColors.textInverse,
           elevation: 0,
           textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape: RoundedRectangleBorder(borderRadius: AppShapes.action),
         ),
       ),
       floatingActionButtonTheme: const FloatingActionButtonThemeData(
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.brandPrimary,
         foregroundColor: AppColors.textInverse,
         elevation: 2,
       ),
       bottomNavigationBarTheme: const BottomNavigationBarThemeData(
         backgroundColor: AppColors.surface,
-        selectedItemColor: AppColors.textPrimary,
+        selectedItemColor: AppColors.brandPrimary,
         unselectedItemColor: AppColors.textSecondary,
         type: BottomNavigationBarType.fixed,
         elevation: 0,
@@ -148,7 +163,7 @@ class AppTheme {
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: AppColors.textPrimary, width: 1.5),
+          borderSide: const BorderSide(color: AppColors.brandPrimary, width: 1.5),
         ),
         errorBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -164,7 +179,7 @@ class AppTheme {
       switchTheme: SwitchThemeData(
         thumbColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.textPrimary;
+            return AppColors.brandPrimary;
           }
           return AppColors.textSecondary;
         }),
@@ -176,7 +191,7 @@ class AppTheme {
         }),
         trackOutlineColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.textPrimary.withValues(alpha: 0.5);
+            return AppColors.brandPrimary.withValues(alpha: 0.5);
           }
           return AppColors.border;
         }),
@@ -184,7 +199,7 @@ class AppTheme {
       checkboxTheme: CheckboxThemeData(
         fillColor: WidgetStateProperty.resolveWith((states) {
           if (states.contains(WidgetState.selected)) {
-            return AppColors.textPrimary;
+            return AppColors.brandPrimary;
           }
           return Colors.transparent;
         }),

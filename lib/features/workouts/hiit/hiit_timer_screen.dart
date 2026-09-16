@@ -92,13 +92,16 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
     final isDone = state.phase == HiitPhase.sessionDone;
     final isPaused = state.phase == HiitPhase.paused;
     final isIdle = state.phase == HiitPhase.idle;
+    final isRoundComplete = state.phase == HiitPhase.roundComplete;
 
-    final progress = isDone ? 1.0 : (isIdle ? 1.0 : (state.secondsRemaining / 30.0).clamp(0.0, 1.0));
+    final progress = isDone || isIdle ? 1.0 : (state.secondsRemaining / 30.0).clamp(0.0, 1.0);
     final ringColor = isSprint
         ? const Color(0xFFEF4444)
-        : (isRecovery ? const Color(0xFF14B8A6) : (isDone ? AppColors.positive : AppColors.textSecondary));
+        : (isRecovery
+            ? const Color(0xFF14B8A6)
+            : (isDone ? AppColors.positive : (isRoundComplete ? AppColors.attention : AppColors.brandPrimary)));
 
-    String phaseText = 'IDLE';
+    String phaseText = 'READY';
     if (isSprint) phaseText = 'SPRINT';
     if (isRecovery) phaseText = 'RECOVER';
     if (state.phase == HiitPhase.roundComplete) phaseText = 'ROUND UP';
@@ -112,9 +115,11 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
       ),
       body: SafeArea(
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-          child: Column(
-            children: [
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               // Top round status
               if (!isIdle)
                 Text(
@@ -141,45 +146,71 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
 
               // Round Selector when Idle
               if (isIdle) ...[
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: 8,
+                  runSpacing: 8,
                   children: [6, 7, 8, 10].map((rounds) {
                     final selected = _selectedTotalRounds == rounds;
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 6),
-                      child: ChoiceChip(
+                    return ChoiceChip(
                         label: Text('$rounds Rounds'),
                         selected: selected,
-                        selectedColor: AppColors.textPrimary,
+                        selectedColor: AppColors.brandPrimary,
                         backgroundColor: AppColors.card,
                         labelStyle: TextStyle(
-                          color: selected ? Colors.black : AppColors.textPrimary,
+                          color: selected ? AppColors.textInverse : AppColors.textPrimary,
                           fontWeight: FontWeight.w700,
                         ),
+                        side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
+                        showCheckmark: false,
                         onSelected: (_) => setState(() => _selectedTotalRounds = rounds),
-                      ),
-                    );
+                      );
                   }).toList(),
                 ),
                 const SizedBox(height: 16),
               ],
 
-              const Spacer(),
+              if (!isIdle) ...[
+                _RoundProgress(current: state.currentRound, total: state.totalRounds),
+                const SizedBox(height: 12),
+              ],
+
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 11),
+                decoration: BoxDecoration(
+                  color: ringColor.withValues(alpha: 0.09),
+                  borderRadius: AppShapes.information,
+                  border: Border.all(color: ringColor.withValues(alpha: 0.30)),
+                ),
+                child: Row(
+                  children: [
+                    Container(width: 8, height: 8, decoration: BoxDecoration(color: ringColor, shape: BoxShape.circle)),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: Text(
+                        isIdle ? '30 sec sprint  ·  30 sec recovery' : (isPaused ? 'Timer paused — recover your breathing' : (isDone ? 'Session complete' : (isSprint ? 'Push hard, stay controlled' : 'Recover and prepare for the next sprint'))),
+                        style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 20),
 
               // Circular Countdown Ring
               Center(
                 child: SizedBox(
-                  width: 240,
-                  height: 240,
+                  width: 220,
+                  height: 220,
                   child: Stack(
                     alignment: Alignment.center,
                     children: [
                       SizedBox(
-                        width: 240,
-                        height: 240,
+                        width: 220,
+                        height: 220,
                         child: CircularProgressIndicator(
                           value: progress,
-                          strokeWidth: 16,
+                          strokeWidth: 14,
                           backgroundColor: AppColors.surfaceElevated,
                           valueColor: AlwaysStoppedAnimation<Color>(ringColor),
                           strokeCap: StrokeCap.round,
@@ -213,7 +244,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                 ),
               ),
 
-              const SizedBox(height: 20),
+              const SizedBox(height: 16),
 
               // Next Phase Preview
               if ((isSprint || isRecovery) && state.secondsRemaining <= 10)
@@ -228,7 +259,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
               else
                 const SizedBox(height: 24),
 
-              const Spacer(),
+              const SizedBox(height: 8),
 
               // Session Summary on Completion
               if (isDone) ...[
@@ -236,7 +267,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
                     color: AppColors.card,
-                    borderRadius: BorderRadius.circular(16),
+                      borderRadius: AppShapes.information,
                     border: Border.all(color: AppColors.positive.withValues(alpha: 0.5)),
                   ),
                   child: Column(
@@ -266,14 +297,15 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                   width: double.infinity,
                   height: 52,
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.check_circle_rounded, color: Colors.black),
+                    icon: const Icon(Icons.check_circle_rounded, color: AppColors.textInverse),
                     label: const Text(
                       'Log Workout Session',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppColors.textInverse),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.positive,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                      backgroundColor: AppColors.brandPrimary,
+                      foregroundColor: AppColors.textInverse,
+                      shape: RoundedRectangleBorder(borderRadius: AppShapes.action),
                     ),
                     onPressed: () => _logHiitWorkout(state.totalElapsedSeconds, state.totalRounds),
                   ),
@@ -283,14 +315,15 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                   width: double.infinity,
                   height: 54,
                   child: ElevatedButton.icon(
-                    icon: const Icon(Icons.play_arrow_rounded, size: 28, color: Colors.black),
+                    icon: const Icon(Icons.play_arrow_rounded, size: 28, color: AppColors.textInverse),
                     label: const Text(
                       'Start HIIT Session',
-                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: Colors.black),
+                      style: TextStyle(fontSize: 17, fontWeight: FontWeight.bold, color: AppColors.textInverse),
                     ),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.positive,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                      backgroundColor: AppColors.brandPrimary,
+                      foregroundColor: AppColors.textInverse,
+                      shape: RoundedRectangleBorder(borderRadius: AppShapes.action),
                     ),
                     onPressed: () => engine.start(totalRounds: _selectedTotalRounds),
                   ),
@@ -346,10 +379,40 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                   style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
                 ),
               ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
+    );
+  }
+}
+
+class _RoundProgress extends StatelessWidget {
+  final int current;
+  final int total;
+
+  const _RoundProgress({required this.current, required this.total});
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: List.generate(total, (index) {
+        final completed = index < current - 1;
+        final active = index == current - 1;
+        return Expanded(
+          child: Container(
+            height: 5,
+            margin: EdgeInsets.only(right: index == total - 1 ? 0 : 4),
+            decoration: BoxDecoration(
+              color: completed
+                  ? AppColors.positive
+                  : (active ? AppColors.brandPrimary : AppColors.surfaceElevated),
+              borderRadius: BorderRadius.circular(4),
+            ),
+          ),
+        );
+      }),
     );
   }
 }

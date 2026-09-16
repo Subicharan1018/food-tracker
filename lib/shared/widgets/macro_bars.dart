@@ -27,19 +27,18 @@ class MacroBarsGrid extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
+        _MacroCard(
+          name: 'Protein',
+          consumed: proteinConsumed,
+          target: proteinTarget,
+          unit: 'g',
+          icon: Icons.fitness_center_rounded,
+          isProtein: true,
+          hero: true,
+        ),
+        const SizedBox(height: 12),
         Row(
           children: [
-            Expanded(
-              child: _MacroCard(
-                name: 'Protein',
-                consumed: proteinConsumed,
-                target: proteinTarget,
-                unit: 'g',
-                icon: Icons.fitness_center_rounded,
-                isProtein: true,
-              ),
-            ),
-            const SizedBox(width: 12),
             Expanded(
               child: _MacroCard(
                 name: 'Carbs',
@@ -49,11 +48,7 @@ class MacroBarsGrid extends StatelessWidget {
                 icon: Icons.bolt_rounded,
               ),
             ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
+            const SizedBox(width: 12),
             Expanded(
               child: _MacroCard(
                 name: 'Fat',
@@ -63,7 +58,11 @@ class MacroBarsGrid extends StatelessWidget {
                 icon: Icons.pie_chart_rounded,
               ),
             ),
-            const SizedBox(width: 12),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Row(
+          children: [
             Expanded(
               child: _MacroCard(
                 name: 'Fiber',
@@ -73,6 +72,7 @@ class MacroBarsGrid extends StatelessWidget {
                 icon: Icons.eco_rounded,
               ),
             ),
+            const Spacer(),
           ],
         ),
       ],
@@ -87,6 +87,7 @@ class _MacroCard extends StatelessWidget {
   final String unit;
   final IconData icon;
   final bool isProtein;
+  final bool hero;
 
   const _MacroCard({
     required this.name,
@@ -95,22 +96,23 @@ class _MacroCard extends StatelessWidget {
     required this.unit,
     required this.icon,
     this.isProtein = false,
+    this.hero = false,
   });
 
   Color _resolveColor() {
     if (target <= 0) return AppColors.textPrimary;
-    // Special-cased Protein: White in-progress, Green when reached or exceeded. NEVER turns Amber.
+    // Special-cased Protein: Orange in-progress, Green when reached or exceeded. NEVER turns Amber.
     if (isProtein) {
-      return consumed >= target ? AppColors.positive : AppColors.textPrimary;
+      return consumed >= target ? AppColors.positive : AppColors.brandPrimary;
     }
-    // Carbs, Fat, Fiber: White in-progress, Green 95-105%, Amber over 105%
+    // Carbs, Fat, Fiber: Orange in-progress, Green 95-105%, Amber over 105%
     if (consumed > target * 1.05) {
       return AppColors.attention;
     }
     if (consumed >= target * 0.95) {
       return AppColors.positive;
     }
-    return AppColors.textPrimary;
+    return AppColors.brandPrimary;
   }
 
   @override
@@ -139,7 +141,7 @@ class _MacroCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppShapes.information,
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
@@ -159,15 +161,15 @@ class _MacroCard extends StatelessWidget {
               Icon(icon, size: 16, color: AppColors.textMuted),
             ],
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: hero ? 12 : 8),
           Row(
             crossAxisAlignment: CrossAxisAlignment.baseline,
             textBaseline: TextBaseline.alphabetic,
             children: [
               Text(
                 consumed.toStringAsFixed(1),
-                style: const TextStyle(
-                  fontSize: 18,
+                style: TextStyle(
+                  fontSize: hero ? 26 : 18,
                   fontWeight: FontWeight.w800,
                   color: AppColors.textPrimary,
                 ),
@@ -181,14 +183,14 @@ class _MacroCard extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 6),
+          SizedBox(height: hero ? 10 : 6),
           ClipRRect(
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: progress,
               backgroundColor: AppColors.cardElevated,
               valueColor: AlwaysStoppedAnimation<Color>(stateColor),
-              minHeight: 6,
+              minHeight: hero ? 8 : 6,
             ),
           ),
           const SizedBox(height: 4),

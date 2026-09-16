@@ -47,8 +47,8 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
         ),
         bottom: TabBar(
           controller: _tabController,
-          indicatorColor: AppColors.textPrimary,
-          labelColor: AppColors.textPrimary,
+          indicatorColor: AppColors.brandPrimary,
+          labelColor: AppColors.brandPrimary,
           unselectedLabelColor: AppColors.textMuted,
           tabs: const [
             Tab(text: 'Protein Sources'),
@@ -120,7 +120,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       macroName: 'Protein',
                       totalConsumed: totalProtein,
                       target: proteinTarget,
-                      color: totalProtein >= proteinTarget ? AppColors.positive : AppColors.textPrimary,
+                      color: totalProtein >= proteinTarget ? AppColors.positive : AppColors.brandPrimary,
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.proteinG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -132,7 +132,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       target: carbTarget,
                       color: totalCarbs > carbTarget * 1.05
                           ? AppColors.attention
-                          : (totalCarbs >= carbTarget * 0.95 ? AppColors.positive : AppColors.textPrimary),
+                          : (totalCarbs >= carbTarget * 0.95 ? AppColors.positive : AppColors.brandPrimary),
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.carbsG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -144,7 +144,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
                       target: fatTarget,
                       color: totalFat > fatTarget * 1.05
                           ? AppColors.attention
-                          : (totalFat >= fatTarget * 0.95 ? AppColors.positive : AppColors.textPrimary),
+                          : (totalFat >= fatTarget * 0.95 ? AppColors.positive : AppColors.brandPrimary),
                       items: entries.map((e) => _SourceItem(foodName: e.foodName, grams: e.fatG, mealSlot: e.mealSlot)).toList()
                         ..sort((a, b) => b.grams.compareTo(a.grams)),
                     ),
@@ -154,7 +154,7 @@ class _MacroSourceScreenState extends ConsumerState<MacroSourceScreen>
             ],
           );
         },
-        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.textPrimary)),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary)),
         error: (err, _) => Center(child: Text('Error loading macro sources: $err')),
       ),
     );
@@ -350,14 +350,14 @@ class _FilterChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.surfaceElevated,
+      selectedColor: AppColors.brandPrimary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+        color: selected ? AppColors.textInverse : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

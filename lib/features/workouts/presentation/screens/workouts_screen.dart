@@ -210,13 +210,13 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                               label: Text(lvl.toUpperCase()),
                               selected: sel,
                               onSelected: (_) => setModalState(() => intensity = lvl),
-                              selectedColor: AppColors.surfaceElevated,
+                              selectedColor: AppColors.brandPrimary,
                               backgroundColor: AppColors.card,
-                              side: BorderSide(color: sel ? AppColors.textPrimary : AppColors.border),
+                              side: BorderSide(color: sel ? AppColors.brandPrimary : AppColors.border),
                               labelStyle: TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.w700,
-                                color: sel ? AppColors.textPrimary : AppColors.textSecondary,
+                                color: sel ? AppColors.textInverse : AppColors.textSecondary,
                               ),
                               showCheckmark: false,
                             ),
@@ -259,7 +259,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                       height: 50,
                       child: ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.textPrimary,
+                          backgroundColor: AppColors.brandPrimary,
                           foregroundColor: AppColors.textInverse,
                         ),
                         onPressed: () async {
@@ -518,7 +518,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                 color: AppColors.card,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                                  color: routine.isCustom ? AppColors.textPrimary.withValues(alpha: 0.4) : AppColors.border,
+                              color: routine.isCustom ? AppColors.brandPrimary.withValues(alpha: 0.55) : AppColors.border,
                                 ),
                               ),
                               child: Column(
@@ -527,7 +527,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                 children: [
                                   Icon(
                                     routine.icon,
-                                    color: routine.isCustom ? AppColors.textPrimary : AppColors.textMuted,
+                                    color: routine.isCustom ? AppColors.brandPrimary : AppColors.textMuted,
                                     size: 24,
                                   ),
                                   Column(
@@ -569,8 +569,8 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: AppColors.textPrimary,
-                  labelColor: AppColors.textPrimary,
+                  indicatorColor: AppColors.brandPrimary,
+                  labelColor: AppColors.brandPrimary,
                   unselectedLabelColor: AppColors.textSecondary,
                   tabs: const [
                     Tab(text: 'Recomp Split'),
@@ -596,7 +596,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
         ),
       ),
       floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.brandPrimary,
         foregroundColor: AppColors.textInverse,
         icon: const Icon(Icons.add_rounded),
         label: const Text('Log Activity', style: TextStyle(fontWeight: FontWeight.w700)),
@@ -630,13 +630,20 @@ class _SliverAppBarDelegate extends SliverPersistentHeaderDelegate {
   }
 }
 
-class _RecompSplitTab extends ConsumerWidget {
+class _RecompSplitTab extends ConsumerStatefulWidget {
   final List<WorkoutSetLog> setLogs;
 
   const _RecompSplitTab({required this.setLogs});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<_RecompSplitTab> createState() => _RecompSplitTabState();
+}
+
+class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
+  int _selectedDay = 0;
+
+  @override
+  Widget build(BuildContext context) {
     final splitDays = [
       _SplitDay(
         day: 'Mon',
@@ -705,27 +712,49 @@ class _RecompSplitTab extends ConsumerWidget {
       ),
     ];
 
+    final dayPlan = splitDays[_selectedDay];
+    final isFriday = dayPlan.day == 'Fri';
+
     return ListView(
       padding: const EdgeInsets.all(16),
       children: [
         const SetRestTimerWidget(),
-        ...List.generate(splitDays.length, (index) {
-          final dayPlan = splitDays[index];
-          final isFriday = dayPlan.day == 'Fri';
-
-          return Padding(
-            padding: const EdgeInsets.only(bottom: 14),
-            child: ExpansionTile(
-              initiallyExpanded: index == 0,
+        const SizedBox(height: 12),
+        const Text('RECOMP SPLIT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted)),
+        const SizedBox(height: 10),
+        SizedBox(
+          height: 54,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            itemCount: splitDays.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 8),
+            itemBuilder: (context, index) {
+              final active = index == _selectedDay;
+              return ChoiceChip(
+                label: Text(splitDays[index].day),
+                selected: active,
+                onSelected: (_) => setState(() => _selectedDay = index),
+                selectedColor: AppColors.brandPrimary,
+                backgroundColor: AppColors.card,
+                side: BorderSide(color: active ? AppColors.brandPrimary : AppColors.border),
+                labelStyle: TextStyle(fontWeight: FontWeight.w800, color: active ? AppColors.textInverse : AppColors.textSecondary),
+                showCheckmark: false,
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 4),
+        ExpansionTile(
+              initiallyExpanded: true,
               tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
               backgroundColor: AppColors.card,
               collapsedBackgroundColor: AppColors.card,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: AppShapes.information,
                 side: const BorderSide(color: AppColors.border),
               ),
               collapsedShape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: AppShapes.information,
                 side: const BorderSide(color: AppColors.border),
               ),
               leading: Container(
@@ -739,8 +768,8 @@ class _RecompSplitTab extends ConsumerWidget {
                   style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
                 ),
               ),
-              title: Text(dayPlan.title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+              title: Text(dayPlan.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+              subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
               children: [
                 if (isFriday)
                   Padding(
@@ -773,6 +802,45 @@ class _RecompSplitTab extends ConsumerWidget {
                     final ex = dayPlan.exercises[exIndex];
                     final isHiitEx = ex.name.toLowerCase().contains('hiit');
 
+                    return Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Text(ex.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+                              ),
+                              if (ex.restSec > 0) Text('${ex.restSec}s rest', style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
+                            ],
+                          ),
+                          const SizedBox(height: 4),
+                          Text(ex.setsReps, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                          const SizedBox(height: 2),
+                          Text(ex.setup, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
+                          const SizedBox(height: 8),
+                          SizedBox(
+                            width: double.infinity,
+                            child: isHiitEx
+                                ? ElevatedButton.icon(
+                                    icon: const Icon(Icons.timer_outlined, size: 16),
+                                    label: const Text('Launch HIIT timer'),
+                                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary, foregroundColor: AppColors.textInverse, minimumSize: const Size.fromHeight(38)),
+                                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen())),
+                                  )
+                                : OutlinedButton(
+                                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.brandPrimary, side: const BorderSide(color: AppColors.brandPrimary), minimumSize: const Size.fromHeight(38)),
+                                    onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
+                                    child: const Text('Log sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    );
+                    /*
+                      Old horizontal exercise row intentionally removed: long setup
+                      copy and action buttons cannot share a phone-width row.
                     return Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                       child: Row(
@@ -818,13 +886,11 @@ class _RecompSplitTab extends ConsumerWidget {
                             ),
                         ],
                       ),
-                    );
+                    ); */
                   },
                 ),
               ],
             ),
-          );
-        }),
       ],
     );
   }
@@ -897,7 +963,7 @@ class _RecompSplitTab extends ConsumerWidget {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                      backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                       ),
                       onPressed: () async {
@@ -963,7 +1029,7 @@ class _WorkoutHistoryTab extends StatelessWidget {
             const SizedBox(height: 12),
             ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.textPrimary,
+                backgroundColor: AppColors.brandPrimary,
                 foregroundColor: AppColors.textInverse,
               ),
               onPressed: onLogActivityTap,

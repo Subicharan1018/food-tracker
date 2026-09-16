@@ -32,7 +32,9 @@ async def parse_food(
     user_msg = (
         f'Database names: {json.dumps(combined_names)}\n\n'
         f'Entry: "{req.input}"\n\n'
-        'Return: [{"food_name":"...","portion_qty":1.0,"meal_slot":"breakfast"}]'
+        'Return: [{"food_name":"...","portion_qty":200,"portion_unit":"g","meal_slot":"breakfast"}]. '
+        'Use the database serving unit when no unit is written. Preserve explicit units such as g, kg, ml, '
+        'piece, egg, scoop, cup, tbsp, or serving.'
     )
 
     try:

@@ -22,6 +22,10 @@ class _WorkoutProgressionCardState extends ConsumerState<WorkoutProgressionCard>
 
   @override
   Widget build(BuildContext context) {
+    final now = DateTime.now();
+    if (widget.data == null && now.weekday != DateTime.saturday && now.weekday != DateTime.sunday) {
+      return const SizedBox.shrink();
+    }
     final userAsync = ref.watch(userProfileProvider);
     final userId = userAsync.value?.id ?? 'default_user';
 
@@ -121,48 +125,27 @@ class _WorkoutProgressionCardState extends ConsumerState<WorkoutProgressionCard>
                         Row(
                           children: [
                             Expanded(
-                              flex: 3,
                               child: Text(
                                 name,
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
                               ),
                             ),
-                            Text(
-                              current,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 6),
-                              child: Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 16,
-                                color: AppColors.attention,
-                              ),
-                            ),
-                            Text(
-                              recommendation,
-                              style: const TextStyle(
-                                fontSize: 13,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.attention,
-                              ),
-                            ),
-                            if (reasoning.isNotEmpty) ...[
-                              const SizedBox(width: 4),
+                            if (reasoning.isNotEmpty)
                               Icon(
                                 isExpanded ? Icons.expand_less_rounded : Icons.expand_more_rounded,
                                 size: 18,
                                 color: AppColors.textMuted,
                               ),
-                            ],
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        Row(
+                          children: [
+                            Flexible(child: Text(current, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary))),
+                            const Padding(padding: EdgeInsets.symmetric(horizontal: 8), child: Icon(Icons.arrow_forward_rounded, size: 16, color: AppColors.attention)),
+                            Flexible(child: Text(recommendation, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w800, color: AppColors.attention))),
                           ],
                         ),
                         if (isExpanded && reasoning.isNotEmpty) ...[

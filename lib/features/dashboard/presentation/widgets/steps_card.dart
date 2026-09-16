@@ -42,7 +42,7 @@ class StepsCard extends StatelessWidget {
                 children: [
                   Icon(
                     Icons.directions_walk_rounded,
-                    color: progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
+                    color: progress >= 1.0 ? AppColors.positive : AppColors.brandPrimary,
                     size: 20,
                   ),
                   const SizedBox(width: 8),
@@ -126,7 +126,7 @@ class StepsCard extends StatelessWidget {
                       value: progress,
                       backgroundColor: AppColors.cardElevated,
                       valueColor: AlwaysStoppedAnimation<Color>(
-                        progress >= 1.0 ? AppColors.positive : AppColors.textPrimary,
+                        progress >= 1.0 ? AppColors.positive : AppColors.brandPrimary,
                       ),
                       strokeWidth: 5,
                     ),
@@ -149,4 +149,3 @@ class StepsCard extends StatelessWidget {
     );
   }
 }
-

@@ -56,7 +56,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+            backgroundColor: AppColors.brandPrimary,
               foregroundColor: AppColors.textInverse,
             ),
             onPressed: () {
@@ -129,7 +129,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                        backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                       ),
                       onPressed: () async {
@@ -153,7 +153,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                           );
                         }
                       },
-                      child: const Text('Save Weigh-In', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                      child: const Text('Save Weigh-In', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ],
@@ -202,13 +202,13 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                               if (type == 'waist') valueCm = 70.0;
                               if (type == 'chest') valueCm = 95.0;
                             }),
-                            selectedColor: AppColors.surfaceElevated,
+                            selectedColor: AppColors.brandPrimary,
                             backgroundColor: AppColors.card,
-                            side: BorderSide(color: sel ? AppColors.textPrimary : AppColors.border),
+                            side: BorderSide(color: sel ? AppColors.brandPrimary : AppColors.border),
                             labelStyle: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w700,
-                              color: sel ? AppColors.textPrimary : AppColors.textSecondary,
+                              color: sel ? AppColors.textInverse : AppColors.textSecondary,
                             ),
                             showCheckmark: false,
                           ),
@@ -251,7 +251,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                        backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                       ),
                       onPressed: () async {
@@ -275,7 +275,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                           );
                         }
                       },
-                      child: const Text('Save Measurement', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w800)),
+                      child: const Text('Save Measurement', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w800)),
                     ),
                   ),
                 ],
@@ -326,7 +326,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.textPrimary,
+        backgroundColor: AppColors.brandPrimary,
         foregroundColor: AppColors.textInverse,
         elevation: 4,
         onPressed: () => _showWeighInDialog(currentWeight),
@@ -548,7 +548,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                       const SizedBox(height: 12),
                       ElevatedButton(
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.textPrimary,
+                          backgroundColor: AppColors.brandPrimary,
                           foregroundColor: AppColors.textInverse,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),

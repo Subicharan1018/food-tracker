@@ -11,9 +11,8 @@ import '../../../../shared/widgets/macro_bars.dart';
 import '../../../food_logging/presentation/screens/log_food_screen.dart';
 import '../../../macro_breakdown/presentation/screens/macro_source_screen.dart';
 import '../../../steps_activity/presentation/screens/steps_screen.dart';
-import '../widgets/meal_slot_card.dart';
-import '../widgets/water_card.dart';
-import '../widgets/steps_card.dart';
+import '../widgets/vitals_strip.dart';
+import '../widgets/meal_rail.dart';
 import '../widgets/streak_card.dart';
 import '../../../ai_digest/weekly_digest_card.dart';
 import '../../../ai_planner/meal_plan_card.dart';
@@ -66,7 +65,7 @@ class HomeScreen extends ConsumerWidget {
                     child: Column(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        CircularProgressIndicator(color: AppColors.positive),
+                        CircularProgressIndicator(color: AppColors.brandPrimary),
                         SizedBox(height: 20),
                         Text(
                           'Kinetik is planning your evening... (~60 seconds)',
@@ -186,7 +185,7 @@ class HomeScreen extends ConsumerWidget {
                     'Recomp · Phase 1',
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, color: AppColors.positive, fontWeight: FontWeight.w600),
+                    style: const TextStyle(fontSize: 11, color: AppColors.brandPrimary, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -359,109 +358,27 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            // 4. Water Tracker
-            WaterTrackingCard(
-              currentMl: currentWater,
-              targetMl: targetWater,
-              onAddWater: (ml) async {
-                final db = ref.read(databaseProvider);
-                await db.addWaterLog(
-                  WaterLogsCompanion.insert(
-                    id: const Uuid().v4(),
-                    date: dateStr,
-                    mlAdded: ml,
-                    loggedAt: Value(DateTime.now()),
-                  ),
-                );
-              },
-            ),
-
-            const SizedBox(height: 16),
-
-            // 5. Steps Card
-            StepsCard(
-              currentSteps: ref.watch(todayStepsProvider).value ?? 0,
-              targetSteps: targetSteps,
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const StepsScreen()),
-                );
-              },
-              onSimulateStepAdd: () {
-                ref.invalidate(todayStepsProvider);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Synced steps from Health Connect / Pedometer!')),
-                );
-              },
+            VitalsStrip(
+              waterMl: currentWater,
+              waterTargetMl: targetWater,
+              steps: ref.watch(todayStepsProvider).value ?? 0,
+              stepsTarget: targetSteps,
+              onAddWater: (ml) async => ref.read(databaseProvider).addWaterLog(WaterLogsCompanion.insert(id: const Uuid().v4(), date: dateStr, mlAdded: ml, loggedAt: Value(DateTime.now()))),
+              onStepsTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StepsScreen())),
             ),
 
             const SizedBox(height: 24),
-            const Text(
-              'MEAL SCHEDULE & SLOTS',
-              style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textMuted, letterSpacing: 0.5),
-            ),
-            const SizedBox(height: 10),
-
-            // Meal Slots from Recomp_Manual_v3.html
-            MealSlotCard(
-              slotKey: 'breakfast',
-              title: 'Breakfast',
-              subtitle: '3 chapatis + egg/oat side dish (~508 kcal / 38g P)',
-              timeRange: '6:00 – 6:30 AM',
-              entries: entries.where((e) => e.mealSlot == 'breakfast').toList(),
-              onAddTap: () => _navigateLogFood(context, 'breakfast'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-            ),
-
-            MealSlotCard(
-              slotKey: 'lunch',
-              title: 'Lunch (Packed Dry Box)',
-              subtitle: '2 chapatis + protein dry pack (~440 kcal / 42g P)',
-              timeRange: '1:00 PM',
-              entries: entries.where((e) => e.mealSlot == 'lunch').toList(),
-              onAddTap: () => _navigateLogFood(context, 'lunch'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-            ),
-
-            MealSlotCard(
-              slotKey: 'shake',
-              title: 'Protein Shake (Bus Stop)',
-              subtitle: '1 scoop whey + 250 ml water (114 kcal / 27g P)',
-              timeRange: '4:30 – 5:00 PM',
-              entries: entries.where((e) => e.mealSlot == 'shake').toList(),
-              onAddTap: () => _navigateLogFood(context, 'shake'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-            ),
-
-            MealSlotCard(
-              slotKey: 'pre_workout',
-              title: 'Pre-Workout Snack',
-              subtitle: '2 bananas on reaching home (214 kcal / 2.6g P)',
-              timeRange: '6:00 PM',
-              entries: entries.where((e) => e.mealSlot == 'pre_workout').toList(),
-              onAddTap: () => _navigateLogFood(context, 'pre_workout'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-            ),
-
-            MealSlotCard(
-              slotKey: 'dinner',
-              title: 'Dinner (White Rice + Chicken Curry)',
-              subtitle: '1 cup rice + 200g boiler chicken curry (~625 kcal / 68g P)',
-              timeRange: '8:15 – 8:30 PM',
-              entries: entries.where((e) => e.mealSlot == 'dinner').toList(),
-              onAddTap: () => _navigateLogFood(context, 'dinner'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-            ),
-
-            MealSlotCard(
-              slotKey: 'snack',
-              title: 'Diet & High-Protein Snacks',
-              subtitle: '1–2 picks from 30 snack recipes (~150–300 kcal)',
-              timeRange: 'Anytime',
-              entries: entries.where((e) => e.mealSlot == 'snack').toList(),
-              onAddTap: () => _navigateLogFood(context, 'snack'),
-              onDeleteEntry: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
+            MealRail(
+              onAdd: (slot) => _navigateLogFood(context, slot),
+              onDelete: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
+              items: [
+                MealRailItem(keyName: 'breakfast', title: 'Breakfast', subtitle: '3 chapatis + egg/oat side dish (~508 kcal / 38g P)', time: '6:00 AM', icon: Icons.wb_sunny_outlined, entries: entries.where((e) => e.mealSlot == 'breakfast').toList()),
+                MealRailItem(keyName: 'lunch', title: 'Lunch', subtitle: '2 chapatis + protein dry pack (~440 kcal / 42g P)', time: '1:00 PM', icon: Icons.lunch_dining_outlined, entries: entries.where((e) => e.mealSlot == 'lunch').toList()),
+                MealRailItem(keyName: 'shake', title: 'Shake', subtitle: '1 scoop whey + 250 ml water (114 kcal / 27g P)', time: '4:30 PM', icon: Icons.local_cafe_outlined, entries: entries.where((e) => e.mealSlot == 'shake').toList()),
+                MealRailItem(keyName: 'pre_workout', title: 'Pre-workout', subtitle: '2 bananas on reaching home (214 kcal / 2.6g P)', time: '6:00 PM', icon: Icons.bolt_outlined, entries: entries.where((e) => e.mealSlot == 'pre_workout').toList()),
+                MealRailItem(keyName: 'dinner', title: 'Dinner', subtitle: '1 cup rice + 200g chicken curry (~625 kcal / 68g P)', time: '8:15 PM', icon: Icons.dinner_dining_outlined, entries: entries.where((e) => e.mealSlot == 'dinner').toList()),
+                MealRailItem(keyName: 'snack', title: 'Snack', subtitle: '1–2 high-protein picks (~150–300 kcal)', time: 'Anytime', icon: Icons.cookie_outlined, entries: entries.where((e) => e.mealSlot == 'snack').toList()),
+              ],
             ),
 
             const SizedBox(height: 16),
@@ -481,8 +398,8 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.positive,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  backgroundColor: AppColors.brandPrimary,
+                  shape: RoundedRectangleBorder(borderRadius: AppShapes.action),
                 ),
                 onPressed: () => _requestMealPlan(context, ref),
               ),

@@ -155,7 +155,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   height: 50,
                   child: ElevatedButton.icon(
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.textPrimary,
+                    backgroundColor: AppColors.brandPrimary,
                       foregroundColor: AppColors.textInverse,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
@@ -328,7 +328,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                   },
                 );
               },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.textPrimary)),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary)),
               error: (err, _) => Center(child: Text('Error: $err')),
             ),
           ),
@@ -394,14 +394,14 @@ class _ChipItem extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.surfaceElevated,
+      selectedColor: AppColors.brandPrimary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+        color: selected ? AppColors.textInverse : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

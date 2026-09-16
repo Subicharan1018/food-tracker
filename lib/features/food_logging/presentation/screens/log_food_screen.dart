@@ -8,6 +8,50 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../streaks/services/streak_service.dart';
 import '../../nlp_input_widget.dart';
 
+class _PortionSpec {
+  final double servingSize;
+  final String unit;
+  final double step;
+  final bool isMass;
+
+  const _PortionSpec({required this.servingSize, required this.unit, required this.step, required this.isMass});
+
+  String format(double amount) => isMass
+      ? (amount == amount.roundToDouble() ? amount.toInt().toString() : amount.toStringAsFixed(1))
+      : (amount == amount.roundToDouble() ? amount.toInt().toString() : amount.toStringAsFixed(2));
+}
+
+_PortionSpec _portionSpec(FoodItem food) {
+  final raw = food.servingUnit.trim().toLowerCase();
+  final isKg = raw == 'kg' || raw.startsWith('kg ') || raw.startsWith('kilogram');
+  final isGram = raw == 'g' || raw.startsWith('g ') || raw.startsWith('gram');
+  final isMl = raw == 'ml' || raw.startsWith('ml ') || raw.startsWith('milliliter');
+  final isLiter = raw == 'l' || raw.startsWith('l ') || raw.startsWith('liter');
+  final isMass = isKg || isGram || isMl || isLiter;
+  final unit = isKg ? 'kg' : (isGram ? 'g' : (isMl ? 'ml' : (isLiter ? 'L' : food.servingUnit)));
+  final step = (isKg || isLiter) ? 0.1 : (isMass ? 10.0 : 0.25);
+  return _PortionSpec(
+    servingSize: food.servingSize > 0 ? food.servingSize : 1.0,
+    unit: unit,
+    step: step,
+    isMass: isMass,
+  );
+}
+
+double _portionFactor(_PortionSpec spec, double amount) => amount / spec.servingSize;
+
+double _convertMass(double amount, String? from, String to) {
+  if (from == null) return amount;
+  final source = from.trim().toLowerCase();
+  final target = to.trim().toLowerCase();
+  if (source == target) return amount;
+  if (source == 'kg' && target == 'g') return amount * 1000;
+  if (source == 'g' && target == 'kg') return amount / 1000;
+  if (source == 'l' && target == 'ml') return amount * 1000;
+  if (source == 'ml' && target == 'l') return amount / 1000;
+  return amount;
+}
+
 class LogFoodScreen extends ConsumerStatefulWidget {
   final String initialMealSlot;
 
@@ -33,16 +77,27 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
 
     for (final item in items) {
       final name = item['food_name']?.toString() ?? 'Item';
-      final portion = (item['portion_qty'] as num?)?.toDouble() ?? 1.0;
+      final requested = (item['portion_qty'] as num?)?.toDouble() ?? 1.0;
       final slot = item['meal_slot']?.toString().toLowerCase() ?? _selectedSlot;
 
       final match = await db.searchFoodItems(name);
       final food = match.isNotEmpty ? match.first : null;
 
-      final cal = food != null ? food.calories * portion : 150.0 * portion;
-      final p = food != null ? food.proteinG * portion : 10.0 * portion;
-      final c = food != null ? food.carbsG * portion : 15.0 * portion;
-      final f = food != null ? food.fatG * portion : 4.0 * portion;
+      final spec = food == null ? null : _portionSpec(food);
+      // A bare NLP quantity means servings for count-based foods, but the
+      // standard serving size for gram/ml foods. Explicit 200g/250ml values
+      // remain literal amounts from the parser.
+      final parsedUnit = item['portion_unit']?.toString();
+      final portion = food == null
+          ? requested
+          : (spec!.isMass && parsedUnit == null && requested == 1.0
+              ? spec.servingSize
+              : (spec.isMass ? _convertMass(requested, parsedUnit, spec.unit) : requested));
+      final factor = food == null ? portion : _portionFactor(spec!, portion);
+      final cal = food != null ? food.calories * factor : 150.0 * portion;
+      final p = food != null ? food.proteinG * factor : 10.0 * portion;
+      final c = food != null ? food.carbsG * factor : 15.0 * portion;
+      final f = food != null ? food.fatG * factor : 4.0 * portion;
 
       await db.addDiaryEntry(
         DiaryEntriesCompanion.insert(
@@ -52,12 +107,12 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
           foodItemId: Value(food?.id),
           foodName: food?.name ?? name,
           portionQty: portion,
-          portionUnit: food?.servingUnit ?? 'serving',
+          portionUnit: food?.servingUnit ?? item['portion_unit']?.toString() ?? 'serving',
           calories: cal,
           proteinG: p,
           carbsG: c,
           fatG: f,
-          fiberG: Value(food != null ? food.fiberG * portion : 2.0),
+          fiberG: Value(food != null ? food.fiberG * factor : 2.0 * portion),
           loggedAt: Value(DateTime.now()),
         ),
       );
@@ -100,7 +155,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
   }
 
   void _showPortionDialog(FoodItem food) {
-    double portionQty = 1.0;
+    final spec = _portionSpec(food);
+    double portionQty = spec.servingSize;
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -111,10 +167,11 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
       builder: (ctx) {
         return StatefulBuilder(
           builder: (modalCtx, setModalState) {
-            final calories = food.calories * portionQty;
-            final protein = food.proteinG * portionQty;
-            final carbs = food.carbsG * portionQty;
-            final fat = food.fatG * portionQty;
+            final factor = _portionFactor(spec, portionQty);
+            final calories = food.calories * factor;
+            final protein = food.proteinG * factor;
+            final carbs = food.carbsG * factor;
+            final fat = food.fatG * factor;
 
             return Padding(
               padding: EdgeInsets.only(
@@ -144,7 +201,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Standard: ${food.servingSize} ${food.servingUnit} · ${food.calories.toInt()} kcal',
+                    'Standard: ${spec.format(spec.servingSize)} ${spec.unit} · ${food.calories.toInt()} kcal',
                     style: const TextStyle(
                       fontSize: 13,
                       color: AppColors.textSecondary,
@@ -176,8 +233,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      const Text(
-                        'Number of Servings',
+                      Text(
+                        'Amount (${spec.unit})',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
@@ -189,8 +246,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                           IconButton(
                             icon: const Icon(Icons.remove_circle_outline_rounded),
                             color: AppColors.textPrimary,
-                            onPressed: portionQty > 0.25
-                                ? () => setModalState(() => portionQty -= 0.25)
+                            onPressed: portionQty > spec.step
+                                ? () => setModalState(() => portionQty = (portionQty - spec.step).clamp(spec.step, double.infinity).toDouble())
                                 : null,
                           ),
                           Container(
@@ -201,7 +258,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                               border: Border.all(color: AppColors.border),
                             ),
                             child: Text(
-                              portionQty.toStringAsFixed(2),
+                              spec.format(portionQty),
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.w700,
@@ -212,7 +269,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                           IconButton(
                             icon: const Icon(Icons.add_circle_outline_rounded),
                             color: AppColors.textPrimary,
-                            onPressed: () => setModalState(() => portionQty += 0.25),
+                            onPressed: () => setModalState(() => portionQty += spec.step),
                           ),
                         ],
                       ),
@@ -221,9 +278,11 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
 
                   // Quick presets
                   const SizedBox(height: 12),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0].map((preset) {
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [0.5, 1.0, 1.5, 2.0, 3.0, 4.0].map((multiplier) {
+                      final preset = spec.servingSize * multiplier;
                       final selected = portionQty == preset;
                       return InkWell(
                         onTap: () => setModalState(() => portionQty = preset),
@@ -231,18 +290,18 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         child: Container(
                           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: selected ? AppColors.surfaceElevated : AppColors.card,
+                            color: selected ? AppColors.brandPrimary : AppColors.card,
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: selected ? AppColors.textPrimary : AppColors.border,
+                              color: selected ? AppColors.brandPrimary : AppColors.border,
                             ),
                           ),
                           child: Text(
-                            '${preset}x',
+                            '${spec.format(preset)} ${spec.unit}',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
-                              color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+                              color: selected ? AppColors.textInverse : AppColors.textSecondary,
                             ),
                           ),
                         ),
@@ -258,7 +317,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     height: 50,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                        backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(14),
@@ -281,7 +340,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             proteinG: protein,
                             carbsG: carbs,
                             fatG: fat,
-                            fiberG: Value(food.fiberG * portionQty),
+                            fiberG: Value(food.fiberG * factor),
                             loggedAt: Value(DateTime.now()),
                           ),
                         );
@@ -341,6 +400,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
     final proteinCtrl = TextEditingController();
     final carbsCtrl = TextEditingController();
     final fatCtrl = TextEditingController();
+    final amountCtrl = TextEditingController(text: '1');
+    final unitCtrl = TextEditingController(text: 'serving');
 
     showDialog(
       context: context,
@@ -380,6 +441,25 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   keyboardType: TextInputType.number,
                   decoration: const InputDecoration(labelText: 'Fat (g)'),
                 ),
+                const SizedBox(height: 10),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextField(
+                        controller: amountCtrl,
+                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                        decoration: const InputDecoration(labelText: 'Amount'),
+                      ),
+                    ),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: TextField(
+                        controller: unitCtrl,
+                        decoration: const InputDecoration(labelText: 'Unit (g, ml, piece)'),
+                      ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -390,7 +470,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
             ),
             ElevatedButton(
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppColors.textPrimary,
+                backgroundColor: AppColors.brandPrimary,
                 foregroundColor: AppColors.textInverse,
               ),
               onPressed: () async {
@@ -399,6 +479,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                 final protein = double.tryParse(proteinCtrl.text) ?? 0.0;
                 final carbs = double.tryParse(carbsCtrl.text) ?? 0.0;
                 final fat = double.tryParse(fatCtrl.text) ?? 0.0;
+                final amount = double.tryParse(amountCtrl.text) ?? 1.0;
+                final unit = unitCtrl.text.trim().isEmpty ? 'serving' : unitCtrl.text.trim();
 
                 if (name.isEmpty || kcal <= 0) return;
 
@@ -411,8 +493,8 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                     date: dateStr,
                     mealSlot: _selectedSlot,
                     foodName: name,
-                    portionQty: 1.0,
-                    portionUnit: 'serving',
+                    portionQty: amount,
+                    portionUnit: unit,
                     calories: kcal,
                     proteinG: protein,
                     carbsG: carbs,
@@ -431,7 +513,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                   );
                 }
               },
-              child: const Text('Add Entry', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+              child: const Text('Add Entry', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
             ),
           ],
         );
@@ -559,7 +641,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
           // Food items list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.textPrimary))
+                ? const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary))
                 : _searchResults.isEmpty
                     ? Center(
                         child: Column(
@@ -574,7 +656,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                               icon: const Icon(Icons.add, color: AppColors.textInverse),
                               label: const Text('Add Custom Food', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
                               style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.textPrimary,
+                                backgroundColor: AppColors.brandPrimary,
                                 foregroundColor: AppColors.textInverse,
                               ),
                             ),
@@ -627,14 +709,14 @@ class _SlotChip extends StatelessWidget {
       label: Text(label),
       selected: selected,
       onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.surfaceElevated,
+      selectedColor: AppColors.brandPrimary,
       backgroundColor: AppColors.card,
       labelStyle: TextStyle(
         fontSize: 12,
         fontWeight: FontWeight.w600,
-        color: selected ? AppColors.textPrimary : AppColors.textSecondary,
+        color: selected ? AppColors.textInverse : AppColors.textSecondary,
       ),
-      side: BorderSide(color: selected ? AppColors.textPrimary : AppColors.border),
+      side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
       showCheckmark: false,
     );
   }

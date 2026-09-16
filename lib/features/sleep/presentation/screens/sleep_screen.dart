@@ -264,7 +264,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                     height: 52,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.textPrimary,
+                        backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),

@@ -100,7 +100,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.textPrimary,
+              backgroundColor: AppColors.brandPrimary,
               foregroundColor: AppColors.textInverse,
             ),
             onPressed: () async {
@@ -127,7 +127,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                 );
               }
             },
-            child: const Text('Save', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w700)),
+            child: const Text('Save', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
           ),
         ],
       ),
@@ -295,7 +295,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.textPrimary),
+                                child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brandPrimary),
                               )
                             : const Icon(Icons.sync_rounded, color: AppColors.textSecondary, size: 22),
                         onPressed: _isRefreshing ? null : _requestHealthConnectPermissions,
@@ -419,7 +419,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                                 getTooltipItem: (group, groupIndex, rod, rodIndex) {
                                   return BarTooltipItem(
                                     '${rod.toY.toInt()} steps',
-                                    const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                    const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
                                   );
                                 },
                               ),
@@ -492,7 +492,7 @@ class _StepsScreenState extends ConsumerState<StepsScreen> {
                                   barRods: [
                                     BarChartRodData(
                                       toY: item.steps.toDouble(),
-                                      color: isMet ? AppColors.positive : AppColors.textPrimary,
+                                      color: isMet ? AppColors.positive : AppColors.brandPrimary,
                                       width: 22,
                                       borderRadius: const BorderRadius.vertical(top: Radius.circular(6)),
                                     ),

@@ -34,7 +34,7 @@ class CalorieRing extends StatelessWidget {
 
     final Color ringColor = isOver
         ? AppColors.attention
-        : (isOnTrack ? AppColors.positive : AppColors.textPrimary);
+        : (isOnTrack ? AppColors.positive : AppColors.brandPrimary);
 
     final String subtitle = isOver
         ? 'kcal over'

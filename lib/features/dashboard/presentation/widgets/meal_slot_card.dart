@@ -31,7 +31,7 @@ class MealSlotCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: 14),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: AppShapes.information,
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
