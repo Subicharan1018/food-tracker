@@ -6,6 +6,7 @@ def test_no_issue_day_does_not_trigger_an_alert():
     recipes = [{"name": "eggs", "nutrients": {
         "vitaminD_mcg": 15, "b12_mcg": 2.2, "iron_mg": 19,
         "calcium_mg": 1000, "magnesium_mg": 440, "zinc_mg": 17, "folate_mcg": 300,
+        "potassium_mg": 3510, "omega3_g": 2.2,
     }}]
     assert detect_gaps(diary, recipes, 21) == {}
 

@@ -81,6 +81,15 @@ _UNITS = {
 _ALIASES = {
     "palak": "spinach",
     "spinach leaves": "spinach",
+    "oil": "sunflower oil",
+    "cooking oil": "sunflower oil",
+    "vegetable oil": "sunflower oil",
+    "olive oil": "sunflower oil",
+    "tomato": "tomato ripe",
+    "tomatoes": "tomato ripe",
+    "onion": "onion big",
+    "onions": "onion big",
+    "garlic": "garlic big cloves",
     "green chilli": "chillies green",
     "green chili": "chillies green",
     "red chilli powder": "chillies red",
@@ -428,7 +437,7 @@ class RecipeIngestionService:
         ingredients = [self._nutrition_for_ingredient(item) for item in parsed["ingredients"]]
         warnings = []
         for item in ingredients:
-            if not item["resolved"] and item["grams"] > 0:
+            if not item["resolved"]:
                 warnings.append(f"No IFCT match for '{item['ingredient']}'; excluded from nutrition totals.")
         if not ingredients:
             warnings.append("No ingredients were detected; recipe was stored with zero nutrition.")

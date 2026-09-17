@@ -28,6 +28,12 @@ class _FakeFoodDb:
         query = query.lower()
         return [food for key, food in self.foods.items() if key in query or query in key]
 
+    def get_food_by_code(self, code):
+        for food in self.foods.values():
+            if food.get("code") == code:
+                return food
+        return None
+
 
 class _FakeFirestore:
     def __init__(self):
@@ -91,4 +97,4 @@ async def test_recipe_ingestion_uses_structured_ai_result():
 
     assert result["name"] == "Paneer Bowl"
     assert result["meal_slot"] == "breakfast"
-    assert result["calories"] == pytest.approx(64.48, abs=0.01)
+    assert result["calories"] == pytest.approx(64.475, abs=0.01)

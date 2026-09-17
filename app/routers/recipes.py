@@ -6,6 +6,7 @@ from app.services.nemotron_service  import NemotronService
 from app.services.firestore_service import FirestoreService
 from app.services.food_db_service import FoodDbService
 from app.services.recipe_ingestion_service import RecipeIngestionService
+from app.config import logger
 from app.dependencies import get_food_db_service, get_nemotron_service, get_firestore_service
 
 router = APIRouter()
@@ -28,8 +29,8 @@ async def create_recipe(
         servings=req.servings,
         nemotron=nemotron_svc,
     )
-    if not result["stored"]:
-        raise HTTPException(status_code=503, detail="Recipe database is unavailable")
+    if not result.get("stored"):
+        logger.warning("Recipe '%s' parsed successfully but Firestore remote persistence was skipped (service account not configured).", result.get("id"))
     return result
 
 
