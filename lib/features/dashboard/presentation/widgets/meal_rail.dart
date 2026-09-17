@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
 import 'meal_slot_card.dart';
+import 'meal_slot_timing.dart';
 
 class MealRailItem {
   final String keyName, title, subtitle, time;
@@ -22,7 +23,26 @@ class MealRail extends StatefulWidget {
 }
 
 class _MealRailState extends State<MealRail> {
-  int _selected = 0;
+  late int _selected;
+
+  @override
+  void initState() {
+    super.initState();
+    _selected = _indexForSlot(mealSlotForTime(DateTime.now()));
+  }
+
+  int _indexForSlot(String slot) {
+    final index = widget.items.indexWhere((item) => item.keyName == slot);
+    return index >= 0 ? index : 0;
+  }
+
+  @override
+  void didUpdateWidget(covariant MealRail oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (_selected >= widget.items.length) {
+      _selected = 0;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

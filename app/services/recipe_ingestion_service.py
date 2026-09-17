@@ -13,6 +13,7 @@ from app.config import logger
 from app.services.food_db_service import FoodDbService
 from app.services.firestore_service import FirestoreService
 from app.services.nemotron_service import NemotronService
+from app.services.nutrient_calculator import compute_recipe_nutrients, load_nutrient_profiles
 
 
 _FRACTIONS = {
@@ -448,17 +449,14 @@ class RecipeIngestionService:
         slug = re.sub(r"[^a-z0-9]+", "_", _normalise(name)).strip("_") or "recipe"
         recipe_id = f"{slug}_{hashlib.sha1(normalized_fingerprint.encode('utf-8')).hexdigest()[:10]}"
         updated_at = datetime.now(timezone.utc).isoformat()
-        display_ingredients = []
-        for item in ingredients:
-            amount = item.get("amount")
-            unit = item.get("unit")
-            if amount is not None and unit:
-                quantity = f"{amount:g} {unit}"
-            elif item["grams"] > 0:
-                quantity = f"{item['grams']:g} g"
-            else:
-                quantity = "to taste"
-            display_ingredients.append(f"{item['ingredient']} — {quantity}")
+        # ``ingredientsJson`` is now the structured source of truth.  The app
+        # can still render it as a friendly list, but no nutrient code needs to
+        # re-parse a display string.
+        nutrient_result = compute_recipe_nutrients(
+            {"ingredients": ingredients, "servings": servings},
+            load_nutrient_profiles(),
+            self._food_db,
+        )
         payload = {
             "id": recipe_id,
             "name": name,
@@ -469,10 +467,15 @@ class RecipeIngestionService:
             "carbsG": round(total["carbs_g"], 2),
             "fatG": round(total["fat_g"], 2),
             "fiberG": round(total["fiber_g"], 2),
-            # Keep the existing mobile sync contract (a list of display strings),
-            # while retaining the complete IFCT audit trail in a second field.
-            "ingredientsJson": json.dumps(display_ingredients, ensure_ascii=False),
+            "ingredientsJson": json.dumps(ingredients, ensure_ascii=False),
             "ingredientDetailsJson": json.dumps(ingredients, ensure_ascii=False),
+            "nutrients": nutrient_result["totals"],
+            "nutrientMeta": {
+                "source": nutrient_result["source"],
+                "missing_data": nutrient_result["missing_data"],
+                "unavailable_nutrients": nutrient_result["unavailable_nutrients"],
+                "computed_at": updated_at,
+            },
             "method": str(parsed.get("method") or ""),
             "tags": f"user-created,{meal_slot}",
             "source": "ai_recipe_ingestion",
@@ -488,6 +491,14 @@ class RecipeIngestionService:
             **{key: round(value, 2) for key, value in total.items()},
             "method": str(parsed.get("method") or ""),
             "ingredients": ingredients,
-            "warnings": warnings,
+            "warnings": warnings + [
+                f"Micronutrient coverage pending for: {', '.join(nutrient_result['missing_data'])}"
+            ] if nutrient_result["missing_data"] else warnings,
+            "nutrients": nutrient_result["totals"],
+            "nutrient_meta": {
+                "source": nutrient_result["source"],
+                "missing_data": nutrient_result["missing_data"],
+                "unavailable_nutrients": nutrient_result["unavailable_nutrients"],
+            },
             "stored": stored,
         }

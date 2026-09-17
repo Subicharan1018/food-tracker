@@ -640,7 +640,8 @@ class _RecompSplitTab extends ConsumerStatefulWidget {
 }
 
 class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
-  int _selectedDay = 0;
+  // DateTime.weekday is Monday=1 ... Sunday=7, matching the split list below.
+  int _selectedDay = DateTime.now().weekday - 1;
 
   @override
   Widget build(BuildContext context) {
@@ -708,6 +709,26 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
           _SplitExercise('Lateral raises', '4 × 15', 'Light dumbbells, 2–2.5 kg/hand', 45, 2.5),
           _SplitExercise('Wrist curls', '3 × 15–20', 'Light dumbbell or band', 30, 4.0),
           _SplitExercise('HIIT — elliptical', '6 rounds', '30s sprint / 30s recovery', 30, 0.0),
+        ],
+      ),
+      _SplitDay(
+        day: 'Sat',
+        title: 'Active Recovery',
+        focus: 'Walking, Mobility, Easy Core',
+        length: '~30–45 min',
+        exercises: [
+          _SplitExercise('Brisk walk', '30–40 min', 'Easy conversational pace; keep recovery active', 0, 0.0),
+          _SplitExercise('Mobility flow', '10–15 min', 'Hips, shoulders, ankles, and thoracic spine', 0, 0.0),
+        ],
+      ),
+      _SplitDay(
+        day: 'Sun',
+        title: 'Rest + Reset',
+        focus: 'Recovery and weekly planning',
+        length: '~10–20 min',
+        exercises: [
+          _SplitExercise('Easy mobility', '10–15 min', 'Gentle range of motion; no fatigue work', 0, 0.0),
+          _SplitExercise('Weekly reset', '5 min', 'Review progression, meals, and next week setup', 0, 0.0),
         ],
       ),
     ];

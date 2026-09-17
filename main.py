@@ -2,7 +2,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, HTTPException, Depends
 from pydantic import BaseModel
 from app.config import settings, logger
-from app.routers import meal_plan, workout, food_parser, digest, recipes, foods
+from app.routers import meal_plan, workout, food_parser, digest, recipes, foods, pacing
 from app.services.firestore_service import FirestoreService
 from app.dependencies import (
     get_firestore_service,
@@ -32,6 +32,7 @@ app.include_router(workout.router,     prefix="/ai", tags=["AI"], dependencies=a
 app.include_router(food_parser.router, prefix="/ai", tags=["AI"], dependencies=api_dependencies)
 app.include_router(digest.router,      prefix="/ai", tags=["AI"], dependencies=api_dependencies)
 app.include_router(recipes.router,     prefix="/ai", tags=["AI"], dependencies=api_dependencies)
+app.include_router(pacing.router,      prefix="/ai", tags=["AI"], dependencies=api_dependencies)
 app.include_router(foods.router,       prefix="",    tags=["Foods"])
 
 @app.get("/health")

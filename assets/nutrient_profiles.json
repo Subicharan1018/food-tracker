@@ -1,0 +1,12 @@
+{
+  "_meta": {
+    "description": "Curated overrides and audit metadata. IFCT 2017 SQLite remains the primary profile source for matched foods.",
+    "verified_date": "2026-09-16"
+  },
+  "whey protein": {
+    "per_100g": {},
+    "source": "UNAVAILABLE",
+    "verified_date": "2026-09-16",
+    "note": "Brand-specific nutrition must be entered from the product label; no generic value is inferred."
+  }
+}

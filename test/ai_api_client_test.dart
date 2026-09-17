@@ -97,6 +97,47 @@ void main() {
       expect((res['items'] as List).first['food_name'], 'Egg');
     });
 
+    test('createRecipe sends pasted recipe, meal slot, and servings', () async {
+      final mockClient = MockClient((request) async {
+        expect(request.url.path, '/ai/recipes');
+        final body = jsonDecode(request.body) as Map<String, dynamic>;
+        expect(body['user_id'], 'user_123');
+        expect(body['meal_slot'], 'lunch');
+        expect(body['servings'], 2.0);
+        expect((body['recipe_text'] as String).contains('Paneer'), isTrue);
+
+        return http.Response(
+          jsonEncode({
+            'id': 'palak_paneer_abc',
+            'name': 'Palak Paneer',
+            'meal_slot': 'lunch',
+            'servings': 2,
+            'calories': 320,
+            'protein_g': 22,
+            'carbs_g': 15,
+            'fat_g': 18,
+            'fiber_g': 5,
+            'ingredients': [],
+            'warnings': [],
+            'stored': true,
+          }),
+          200,
+          headers: {'content-type': 'application/json'},
+        );
+      });
+
+      final client = AiApiClient(baseUrl: 'http://test-server', client: mockClient);
+      final res = await client.createRecipe(
+        userId: 'user_123',
+        recipeText: 'Palak Paneer\n- Paneer — 150 g',
+        mealSlot: 'lunch',
+        servings: 2,
+      );
+
+      expect(res['name'], 'Palak Paneer');
+      expect(res['stored'], isTrue);
+    });
+
     test('fetchDigest returns parsed map on 200 and null on non-200', () async {
       final mockClient = MockClient((request) async {
         if (request.url.path.contains('2026-W37')) {

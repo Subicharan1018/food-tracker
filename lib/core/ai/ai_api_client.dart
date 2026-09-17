@@ -28,7 +28,7 @@ class AiApiClient {
         )
         .timeout(_timeout);
 
-    if (response.statusCode == 200) {
+    if (response.statusCode >= 200 && response.statusCode < 300) {
       final decoded = jsonDecode(response.body);
       if (decoded is Map<String, dynamic>) {
         return decoded;
@@ -106,6 +106,32 @@ class AiApiClient {
 
   Future<Map<String, dynamic>> verifyRecipes({required String userId}) =>
       _post('/ai/verify-recipes', {'user_id': userId});
+
+  Future<Map<String, dynamic>> createRecipe({
+    required String userId,
+    required String recipeText,
+    required String mealSlot,
+    double servings = 1.0,
+  }) =>
+      _post('/ai/recipes', {
+        'user_id': userId,
+        'recipe_text': recipeText,
+        'meal_slot': mealSlot,
+        'servings': servings,
+      });
+
+  Future<Map<String, dynamic>?> fetchDailyPaceStatus({
+    required String userId,
+  }) async {
+    final response = await _client
+        .get(Uri.parse('$_base/ai/pacing-status/$userId'))
+        .timeout(_timeout);
+    if (response.statusCode == 200) {
+      final decoded = jsonDecode(response.body);
+      return decoded is Map<String, dynamic> ? decoded : null;
+    }
+    return null;
+  }
 
   Future<bool> isServerReachable() async {
     try {

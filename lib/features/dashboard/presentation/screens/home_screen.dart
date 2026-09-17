@@ -17,6 +17,7 @@ import '../widgets/streak_card.dart';
 import '../../../ai_digest/weekly_digest_card.dart';
 import '../../../ai_planner/meal_plan_card.dart';
 import '../../../workouts/progression_card.dart';
+import '../../../nutrition/nutrient_pace_card.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -132,6 +133,7 @@ class HomeScreen extends ConsumerWidget {
     final isToday = DateFormat('yyyy-MM-dd').format(DateTime.now()) == dateStr;
 
     final user = userAsync.value;
+    final paceAsync = ref.watch(dailyPaceProvider(user?.id ?? 'default_user'));
     final targetKcal = user?.calorieTarget ?? 2350;
     final targetP = user?.proteinTargetG ?? 155.0;
     final targetC = user?.carbTargetG ?? 260.0;
@@ -310,6 +312,10 @@ class HomeScreen extends ConsumerWidget {
               fiberConsumed: totalFiber,
               fiberTarget: 30.0,
             ),
+
+            const SizedBox(height: 16),
+
+            NutrientPaceCard(status: paceAsync.value),
 
             const SizedBox(height: 16),
 

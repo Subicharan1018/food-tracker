@@ -104,6 +104,12 @@ class FirestoreService:
         )
         return [{**(doc.to_dict() or {}), "id": doc.id} for doc in docs]
 
+    def get_inventory(self, user_id: str) -> list[dict]:
+        if not self.db:
+            return []
+        docs = self.db.collection("users").document(user_id).collection("inventory").stream()
+        return [{**(doc.to_dict() or {}), "id": doc.id} for doc in docs]
+
     # ── writes ───────────────────────────────────────────────────────
 
     def save_digest(self, user_id: str, week: str, content: dict):
@@ -138,5 +144,29 @@ class FirestoreService:
             .set(payload)
         )
         return True
+
+    def update_recipe_nutrients(self, user_id: str, recipe_id: str, nutrients: dict) -> bool:
+        if not self.db or not recipe_id:
+            return False
+        self.db.collection("users").document(user_id).collection("recipes").document(recipe_id).set(
+            {"nutrients": nutrients, "nutrientsUpdatedAt": datetime.now().isoformat()}, merge=True
+        )
+        return True
+
+    def save_daily_pace_status(self, user_id: str, content: dict, date_key: str | None = None) -> bool:
+        if not self.db:
+            return False
+        date_key = date_key or datetime.now().strftime("%Y-%m-%d")
+        self.db.collection("users").document(user_id).collection("daily_pace_status").document(date_key).set(
+            {**content, "updated_at": datetime.now().isoformat()}, merge=True
+        )
+        return True
+
+    def get_daily_pace_status(self, user_id: str, date_key: str | None = None) -> dict | None:
+        if not self.db:
+            return None
+        date_key = date_key or datetime.now().strftime("%Y-%m-%d")
+        doc = self.db.collection("users").document(user_id).collection("daily_pace_status").document(date_key).get()
+        return doc.to_dict() if doc.exists else None
 
 firestore_service = FirestoreService()

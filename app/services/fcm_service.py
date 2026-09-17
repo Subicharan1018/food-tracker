@@ -31,4 +31,12 @@ class FcmService:
             {"action": "open_progression_card"},
         )
 
+    def send_pacing_alert(self, fcm_token: str, message: str):
+        self._send(
+            fcm_token,
+            "Nutrition pace check",
+            message,
+            {"action": "open_nutrient_pace"},
+        )
+
 fcm_service = FcmService()

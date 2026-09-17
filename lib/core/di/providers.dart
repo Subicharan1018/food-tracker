@@ -230,3 +230,9 @@ final weeklyDigestProvider = FutureProvider.family<Map<String, dynamic>?, String
     return client.fetchDigest(userId: profile?.id ?? 'default_user', week: week);
   },
 );
+
+/// Server-computed nutrition pace.  It is deliberately not inferred on-device:
+/// every displayed value must retain the backend's freshness timestamp.
+final dailyPaceProvider = FutureProvider.family<Map<String, dynamic>?, String>(
+  (ref, userId) => ref.read(aiApiClientProvider).fetchDailyPaceStatus(userId: userId),
+);

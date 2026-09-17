@@ -74,4 +74,6 @@ class CreateRecipeResponse(BaseModel):
     method: str = ""
     ingredients: list[RecipeIngredientResult]
     warnings: list[str] = Field(default_factory=list)
+    nutrients: dict[str, float] = Field(default_factory=dict)
+    nutrient_meta: dict = Field(default_factory=dict)
     stored: bool
