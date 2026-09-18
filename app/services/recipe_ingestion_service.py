@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from typing import Any
 
 from app.config import logger
+from app.models.recipe_extraction import RecipeExtraction
 from app.services.food_db_service import FoodDbService
 from app.services.firestore_service import FirestoreService
 from app.services.nemotron_service import NemotronService
@@ -71,6 +72,12 @@ _UNITS = {
     "pcs": "piece",
     "clove": "clove",
     "cloves": "clove",
+    "pod": "pod",
+    "pods": "pod",
+    "leaf": "leaf",
+    "leaves": "leaf",
+    "stick": "stick",
+    "sticks": "stick",
     "medium": "medium",
     "small": "small",
     "large": "large",
@@ -98,6 +105,42 @@ _ALIASES = {
     "red chili": "chillies red",
     "ginger garlic": "ginger",
     "lemon juice": "lemon juice",
+    # Recipe text often includes preparation descriptors that are not part of
+    # the IFCT food name. These aliases keep matching deterministic.
+    "chicken": "chicken poultry thigh skinless",
+    "seeraga samba rice": "rice raw milled",
+    "raw rice": "rice raw milled",
+    "curd": "curd",
+    "yogurt": "curd",
+    "chilli powder": "chillies red",
+    "red chilli powder": "chillies red",
+    "coriander powder": "coriander seeds",
+    "cumin powder": "cumin seeds",
+}
+
+# Small, explicit fallbacks for ingredients that are common in Indian recipes
+# but are not present (or are not named consistently) in the bundled IFCT
+# extract. These are per 100 g reference values and are disclosed as curated
+# rather than being presented as an IFCT match.
+_CURATED_PROFILES = {
+    "curd": {
+        "name": "Curd, plain",
+        "energy_kcal": 61.0, "protein_g": 3.1, "carbohydrates_g": 4.7,
+        "fat_g": 3.3, "fiber_g": 0.0, "serving_size": 100.0,
+        "source": "Kinetik curated reference",
+    },
+    "cinnamon": {
+        "name": "Cinnamon",
+        "energy_kcal": 247.0, "protein_g": 4.0, "carbohydrates_g": 80.6,
+        "fat_g": 1.2, "fiber_g": 53.1, "serving_size": 100.0,
+        "source": "Kinetik curated reference",
+    },
+    "bay leaf": {
+        "name": "Bay leaf",
+        "energy_kcal": 313.0, "protein_g": 7.6, "carbohydrates_g": 74.9,
+        "fat_g": 8.4, "fiber_g": 26.3, "serving_size": 100.0,
+        "source": "Kinetik curated reference",
+    },
 }
 
 _NUMBER_RE = re.compile(
@@ -110,6 +153,17 @@ def _normalise(value: str) -> str:
     value = value.replace("&", " and ")
     value = re.sub(r"[^\w\s]", " ", value, flags=re.UNICODE)
     return re.sub(r"\s+", " ", value).strip()
+
+
+def _lookup_name(value: str) -> str:
+    """Remove preparation descriptors before food-database matching."""
+    normalized = _normalise(value)
+    normalized = re.sub(
+        r"\b(raw|fresh|cooked|boiled|fried|some|skin|with skin|skinless|"
+        r"boneless|with bone|chopped|diced|sliced|powder|whole)\b",
+        " ", normalized,
+    )
+    return re.sub(r"\s+", " ", normalized).strip()
 
 
 def _parse_number(value: str | float | int | None) -> float | None:
@@ -230,15 +284,35 @@ def _estimate_grams(name: str, amount: float | None, unit: str | None) -> float:
         density = 0.92 if "oil" in normalized else 1.0
         return amount * 1000.0 * density
     if unit == "tsp":
-        return amount * (4.5 if "oil" in normalized else 5.0)
+        if "oil" in normalized:
+            return amount * 4.5
+        if "salt" in normalized:
+            return amount * 6.0
+        if any(token in normalized for token in ("cumin", "coriander", "chilli", "chili", "turmeric", "pepper")):
+            return amount * 2.5
+        return amount * 5.0
     if unit == "tbsp":
         return amount * (13.5 if "oil" in normalized else 15.0)
     if unit == "cup":
-        return amount * (218.0 if "spinach" in normalized or "palak" in normalized else 240.0)
+        if "spinach" in normalized or "palak" in normalized:
+            return amount * 218.0
+        if "mint" in normalized:
+            return amount * 20.0
+        if "coriander" in normalized or "cilantro" in normalized:
+            return amount * 16.0
+        if "parsley" in normalized:
+            return amount * 60.0
+        return amount * 240.0
     if unit == "serving":
         return amount * 100.0
     if unit == "clove":
         return amount * (3.0 if "garlic" in normalized else 5.0)
+    if unit == "pod":
+        return amount * (0.4 if "cardamom" in normalized else 1.0)
+    if unit == "leaf":
+        return amount * (0.5 if "bay" in normalized else 1.0)
+    if unit == "stick":
+        return amount * (2.0 if "cinnamon" in normalized else 5.0)
     if unit in {"piece", "small", "medium", "large"}:
         if "onion" in normalized:
             size = {"small": 70.0, "medium": 110.0, "large": 150.0}.get(unit, 10.0)
@@ -252,6 +326,14 @@ def _estimate_grams(name: str, amount: float | None, unit: str | None) -> float:
             size = 3.0
         elif "lemon" in normalized:
             size = 45.0
+        elif "cinnamon" in normalized:
+            size = 2.0
+        elif "clove" in normalized:
+            size = 0.25
+        elif "cardamom" in normalized:
+            size = 0.4
+        elif "bay leaf" in normalized:
+            size = 0.5
         else:
             size = 100.0 if unit == "piece" else 10.0
         return amount * size
@@ -307,6 +389,71 @@ class RecipeIngestionService:
 
         return {"name": title, "meal_slot": meal_slot, "ingredients": ingredients, "method": ""}
 
+    def _parse_kinetik_format(self, recipe_text: str, meal_slot: str) -> dict[str, Any] | None:
+        """Parse the canonical ChatGPT-to-Kinetik format without an LLM.
+
+        Format:
+          RECIPE: Chicken Biryani
+          SERVINGS: 4
+          INGREDIENTS:
+          - chicken | 500 | g | raw
+          METHOD:
+          ...
+        """
+        lines = [line.strip() for line in recipe_text.replace("\r", "").split("\n")]
+        title = next((line.split(":", 1)[1].strip() for line in lines
+                      if line.upper().startswith("RECIPE:") and ":" in line), "")
+        servings = 1.0
+        for line in lines:
+            if line.upper().startswith("SERVINGS:") and ":" in line:
+                parsed_servings = _parse_number(line.split(":", 1)[1].strip())
+                if parsed_servings and parsed_servings > 0:
+                    servings = parsed_servings
+
+        section = ""
+        ingredients: list[dict[str, Any]] = []
+        method_lines: list[str] = []
+        for raw_line in lines:
+            upper = raw_line.upper()
+            if upper in {"INGREDIENTS:", "INGREDIENTS"}:
+                section = "ingredients"
+                continue
+            if upper in {"METHOD:", "METHOD", "INSTRUCTIONS:", "INSTRUCTIONS", "DIRECTIONS:", "DIRECTIONS"}:
+                section = "method"
+                continue
+            if not raw_line:
+                continue
+            if section == "ingredients" and raw_line.startswith("-"):
+                parts = [part.strip() for part in raw_line[1:].split("|")]
+                if len(parts) < 3:
+                    return None
+                name = parts[0]
+                amount = _parse_number(parts[1])
+                unit = _canonical_unit(parts[2])
+                state = parts[3].lower() if len(parts) > 3 else "unclear"
+                if not name or amount is None or not unit:
+                    return None
+                ingredients.append({
+                    "name": name,
+                    "amount": amount,
+                    "unit": unit,
+                    "grams": _estimate_grams(name, amount, unit),
+                    "state": state if state in {"raw", "dry", "cooked"} else "unclear",
+                    "confidence": 1.0,
+                })
+            elif section == "method":
+                method_lines.append(raw_line)
+
+        if not title or not ingredients:
+            return None
+        return {
+            "name": title,
+            "meal_slot": meal_slot,
+            "servings": servings,
+            "ingredients": ingredients,
+            "method": " ".join(method_lines).strip(),
+        }
+
     def _normalise_ai_data(self, data: Any, recipe_text: str, meal_slot: str) -> dict[str, Any] | None:
         if isinstance(data, list):
             data = {"ingredients": data}
@@ -334,7 +481,11 @@ class RecipeIngestionService:
             if not ingredient:
                 continue
             grams = grams if grams is not None else _estimate_grams(ingredient, amount, unit)
-            ingredients.append({"name": ingredient, "amount": amount, "unit": unit, "grams": grams})
+            item = {"name": ingredient, "amount": amount, "unit": unit, "grams": grams}
+            state = str(raw_item.get("state") or "unclear").lower()
+            if state in {"raw", "dry", "cooked", "unclear"}:
+                item["state"] = state
+            ingredients.append(item)
         if not ingredients:
             return fallback
         return {
@@ -351,10 +502,16 @@ class RecipeIngestionService:
         nemotron: NemotronService,
     ) -> dict[str, Any]:
         fallback = self._fallback_parse(recipe_text, meal_slot)
+        canonical = self._parse_kinetik_format(recipe_text, meal_slot)
+        if canonical is not None:
+            return canonical
         system = (
             "You are Kinetik's recipe-ingestion agent. Extract every ingredient exactly once "
-            "from the user's recipe, preserve explicit quantities, and normalize each quantity "
-            "to an estimated edible gram weight when possible. Return ONLY JSON, never markdown."
+            "from the user's recipe, preserve explicit quantities and whether the ingredient is "
+            "raw or cooked, and normalize each quantity to an estimated gram weight when possible. "
+            "Do not invent calories or macros: nutrition is calculated deterministically from the "
+            "verified food database after extraction. Never omit oil, ghee, rice, sauces, or dairy. "
+            "Return ONLY JSON, never markdown."
         )
         user = (
             f"Default meal slot: {meal_slot}\n"
@@ -363,19 +520,67 @@ class RecipeIngestionService:
             "\"method\":\"...\",\"ingredients\":[{\"name\":\"Paneer\",\"amount\":150,"
             "\"unit\":\"g\",\"grams\":150}]} . Use null grams only when an estimate is impossible."
         )
+        extraction_schema = {
+            "type": "object",
+            "additionalProperties": False,
+            "properties": {
+                "name": {"type": "string", "minLength": 1},
+                "meal_slot": {"type": "string", "enum": ["breakfast", "lunch", "dinner", "snack"]},
+                "method": {"type": "string"},
+                "ingredients": {
+                    "type": "array",
+                    "minItems": 1,
+                    "items": {
+                        "type": "object",
+                        "additionalProperties": False,
+                        "properties": {
+                            "name": {"type": "string", "minLength": 1},
+                            "amount": {"type": ["number", "null"], "minimum": 0},
+                            "unit": {"type": ["string", "null"]},
+                            "grams": {"type": ["number", "null"], "minimum": 0},
+                            "state": {"type": "string", "enum": ["raw", "dry", "cooked", "unclear"]},
+                            "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+                        },
+                        "required": ["name", "amount", "unit", "grams", "state", "confidence"],
+                    },
+                },
+            },
+            "required": ["name", "meal_slot", "method", "ingredients"],
+        }
         try:
-            raw = await nemotron.complete(system, user, max_tokens=2500)
-            parsed = self._normalise_ai_data(_extract_json(raw), recipe_text, meal_slot)
+            raw = await nemotron.extract_with_tool(
+                system,
+                user,
+                tool_name="extract_recipe",
+                tool_description="Extract recipe facts only. Never calculate calories or macros.",
+                tool_schema=extraction_schema,
+                max_tokens=2500,
+            )
+            validated = RecipeExtraction.model_validate(raw)
+            parsed = self._normalise_ai_data(validated.model_dump(), recipe_text, meal_slot)
             return parsed or fallback
         except Exception as exc:
             logger.warning("Recipe AI parsing failed; using deterministic parser: %s", exc)
             return fallback
 
-    def _resolve_food(self, ingredient_name: str) -> dict | None:
+    def _resolve_food(self, ingredient_name: str, state: str | None = None) -> dict | None:
         normalized = _normalise(ingredient_name)
-        query = _ALIASES.get(normalized, ingredient_name)
+        lookup = _lookup_name(ingredient_name)
+        state = _normalise(state or "unclear")
+        if state == "cooked" and "rice" in lookup:
+            canonical = "rice cooked"
+        else:
+            canonical = _ALIASES.get(normalized) or _ALIASES.get(lookup) or lookup
+
+        curated = _CURATED_PROFILES.get(lookup) or _CURATED_PROFILES.get(normalized)
+        if curated is not None:
+            return {**curated, "code": f"CURATED:{lookup}"}
+
+        query = canonical
         try:
-            candidates = self._food_db.search_foods(query, limit=20) or []
+            candidates = self._food_db.search_foods(query, limit=50) or []
+            if not candidates and query != lookup:
+                candidates = self._food_db.search_foods(lookup, limit=50) or []
         except Exception as exc:
             logger.warning("IFCT lookup failed for recipe ingredient '%s': %s", ingredient_name, exc)
             return None
@@ -390,14 +595,17 @@ class RecipeIngestionService:
             overlap = len(query_tokens & name_tokens)
             exact = 1000 if name == _normalise(query) else 0
             contains = 100 if query_tokens and query_tokens.issubset(name_tokens) else 0
-            return exact + contains + overlap * 10, -len(name)
+            # Never let a similarly named non-food item such as chicken
+            # mushroom win over a poultry record.
+            irrelevant = -500 if "chicken" in query_tokens and "poultry" not in name else 0
+            return exact + contains + overlap * 10 + irrelevant, -len(name)
 
         return max(candidates, key=score)
 
     def _nutrition_for_ingredient(self, parsed: dict[str, Any]) -> dict[str, Any]:
         name = str(parsed["name"])
         grams = max(float(parsed.get("grams") or 0.0), 0.0)
-        food = self._resolve_food(name)
+        food = self._resolve_food(name, parsed.get("state"))
         result = {
             "ingredient": name,
             "matched_food": food.get("name") if food else None,
@@ -416,11 +624,22 @@ class RecipeIngestionService:
             return result
         serving_size = float(food.get("serving_size") or 100.0)
         factor = grams / serving_size if serving_size > 0 else 0.0
+        protein = float(food.get("protein_g") or 0.0) * factor
+        carbs = float(food.get("carbohydrates_g") or 0.0) * factor
+        fat = float(food.get("fat_g") or 0.0) * factor
+        source_energy = float(food.get("energy_kcal") or 0.0) * factor
+        macro_energy = protein * 4.0 + carbs * 4.0 + fat * 9.0
+        # Several IFCT oil/ghee rows contain zero energy despite 100 g fat,
+        # and a few rows have an energy value that conflicts materially with
+        # their macros. Use the macro identity in those cases.
+        energy = macro_energy if source_energy <= 0 or (
+            macro_energy > 0 and abs(source_energy - macro_energy) / macro_energy > 0.25
+        ) else source_energy
         result.update(
-            calories=round(float(food.get("energy_kcal") or 0.0) * factor, 2),
-            protein_g=round(float(food.get("protein_g") or 0.0) * factor, 2),
-            carbs_g=round(float(food.get("carbohydrates_g") or 0.0) * factor, 2),
-            fat_g=round(float(food.get("fat_g") or 0.0) * factor, 2),
+            calories=round(energy, 2),
+            protein_g=round(protein, 2),
+            carbs_g=round(carbs, 2),
+            fat_g=round(fat, 2),
             fiber_g=round(float(food.get("fiber_g") or 0.0) * factor, 2),
         )
         return result
@@ -442,12 +661,17 @@ class RecipeIngestionService:
         if not ingredients:
             warnings.append("No ingredients were detected; recipe was stored with zero nutrition.")
 
+        detected_servings = float(parsed.get("servings") or 0.0)
+        effective_servings = detected_servings if servings == 1.0 and detected_servings > 0 else servings
+        recipe_total = {
+            "calories": sum(item["calories"] for item in ingredients),
+            "protein_g": sum(item["protein_g"] for item in ingredients),
+            "carbs_g": sum(item["carbs_g"] for item in ingredients),
+            "fat_g": sum(item["fat_g"] for item in ingredients),
+            "fiber_g": sum(item["fiber_g"] for item in ingredients),
+        }
         total = {
-            "calories": sum(item["calories"] for item in ingredients) / servings,
-            "protein_g": sum(item["protein_g"] for item in ingredients) / servings,
-            "carbs_g": sum(item["carbs_g"] for item in ingredients) / servings,
-            "fat_g": sum(item["fat_g"] for item in ingredients) / servings,
-            "fiber_g": sum(item["fiber_g"] for item in ingredients) / servings,
+            key: value / effective_servings for key, value in recipe_total.items()
         }
         name = str(parsed.get("name") or "Untitled recipe").strip()[:180]
         normalized_fingerprint = json.dumps(
@@ -462,7 +686,7 @@ class RecipeIngestionService:
         # can still render it as a friendly list, but no nutrient code needs to
         # re-parse a display string.
         nutrient_result = compute_recipe_nutrients(
-            {"ingredients": ingredients, "servings": servings},
+            {"ingredients": ingredients, "servings": effective_servings},
             load_nutrient_profiles(),
             self._food_db,
         )
@@ -470,7 +694,12 @@ class RecipeIngestionService:
             "id": recipe_id,
             "name": name,
             "mealSlot": meal_slot,
-            "servings": servings,
+            "servings": effective_servings,
+            "totalCalories": round(recipe_total["calories"], 2),
+            "totalProteinG": round(recipe_total["protein_g"], 2),
+            "totalCarbsG": round(recipe_total["carbs_g"], 2),
+            "totalFatG": round(recipe_total["fat_g"], 2),
+            "totalFiberG": round(recipe_total["fiber_g"], 2),
             "calories": round(total["calories"], 2),
             "proteinG": round(total["protein_g"], 2),
             "carbsG": round(total["carbs_g"], 2),
@@ -496,7 +725,12 @@ class RecipeIngestionService:
             "id": recipe_id,
             "name": name,
             "meal_slot": meal_slot,
-            "servings": servings,
+            "servings": effective_servings,
+            "total_calories": round(recipe_total["calories"], 2),
+            "total_protein_g": round(recipe_total["protein_g"], 2),
+            "total_carbs_g": round(recipe_total["carbs_g"], 2),
+            "total_fat_g": round(recipe_total["fat_g"], 2),
+            "total_fiber_g": round(recipe_total["fiber_g"], 2),
             **{key: round(value, 2) for key, value in total.items()},
             "method": str(parsed.get("method") or ""),
             "ingredients": ingredients,

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:food_tracker/core/auth/firebase_auth_rest_service.dart';
 
 void main() {
@@ -8,6 +9,7 @@ void main() {
   group('FirebaseAuthRestService Tests', () {
     setUp(() {
       FlutterSecureStorage.setMockInitialValues({});
+      SharedPreferences.setMockInitialValues({});
     });
 
     test('Initializes with default API key and project settings', () {
@@ -42,6 +44,13 @@ void main() {
       final updated = await service.getLastSyncTimestamp();
       expect(updated, now);
     });
+
+    test('Canonical User ID persists and anchors user identity', () async {
+      final service = FirebaseAuthRestService(apiKey: 'TEST_API_KEY');
+      await service.setCanonicalUserId('xglm2AMV46WgLwOr7CvEQm5I8x02');
+
+      final userId = await service.getUserId();
+      expect(userId, 'xglm2AMV46WgLwOr7CvEQm5I8x02');
+    });
   });
 }
-

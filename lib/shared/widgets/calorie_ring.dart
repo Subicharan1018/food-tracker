@@ -2,7 +2,7 @@ import 'dart:math';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 
-class CalorieRing extends StatelessWidget {
+class CalorieRing extends StatefulWidget {
   final int targetCalories;
   final int consumedCalories;
   final int burnedCalories;
@@ -13,109 +13,180 @@ class CalorieRing extends StatelessWidget {
     required this.targetCalories,
     required this.consumedCalories,
     this.burnedCalories = 0,
-    this.size = 210,
+    this.size = 200,
   });
 
   @override
-  Widget build(BuildContext context) {
-    final remaining = targetCalories - consumedCalories + burnedCalories;
-    final progress = targetCalories > 0
-        ? (consumedCalories / targetCalories).clamp(0.0, 1.5)
-        : 0.0;
+  State<CalorieRing> createState() => _CalorieRingState();
+}
 
-    // 95% - 105% buffer window matching macro tolerance:
-    // < 95%: Monochrome White (in progress)
-    // 95% - 105%: Positive Green (target met / on-track)
-    // > 105%: Attention Amber (exceeded)
-    final isOver = targetCalories > 0 && consumedCalories > (targetCalories * 1.05);
-    final isOnTrack = targetCalories > 0 &&
-        consumedCalories >= (targetCalories * 0.95) &&
-        consumedCalories <= (targetCalories * 1.05);
+class _CalorieRingState extends State<CalorieRing>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _progressAnim;
+  double _prevProgress = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    );
+    final target = _calcProgress();
+    _prevProgress = 0;
+    _progressAnim = Tween(begin: 0.0, end: target).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void didUpdateWidget(covariant CalorieRing oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.consumedCalories != widget.consumedCalories ||
+        oldWidget.burnedCalories != widget.burnedCalories ||
+        oldWidget.targetCalories != widget.targetCalories) {
+      final newTarget = _calcProgress();
+      _progressAnim =
+          Tween(begin: _prevProgress, end: newTarget).animate(
+        CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic),
+      );
+      _prevProgress = newTarget;
+      _controller
+        ..reset()
+        ..forward();
+    }
+  }
+
+  double _calcProgress() {
+    if (widget.targetCalories <= 0) return 0;
+    return (widget.consumedCalories / widget.targetCalories).clamp(0.0, 1.5);
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final remaining =
+        widget.targetCalories - widget.consumedCalories + widget.burnedCalories;
+    final isOver = widget.targetCalories > 0 &&
+        widget.consumedCalories > (widget.targetCalories * 1.05);
+    final isOnTrack = widget.targetCalories > 0 &&
+        widget.consumedCalories >= (widget.targetCalories * 0.95) &&
+        widget.consumedCalories <= (widget.targetCalories * 1.05);
 
     final Color ringColor = isOver
         ? AppColors.attention
         : (isOnTrack ? AppColors.positive : AppColors.brandPrimary);
 
-    final String subtitle = isOver
-        ? 'kcal over'
-        : (isOnTrack ? 'kcal · on track' : 'kcal remaining');
+    final String label = isOver
+        ? 'over budget'
+        : (isOnTrack ? 'on track ✓' : 'remaining');
 
-    final Color subtitleColor = isOver
+    final Color labelColor = isOver
         ? AppColors.attention
         : (isOnTrack ? AppColors.positive : AppColors.textSecondary);
 
-    return SizedBox(
-      width: size,
-      height: size,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          CustomPaint(
-            size: Size(size, size),
-            painter: _RingPainter(
-              progress: progress,
-              ringColor: ringColor,
-              trackColor: AppColors.cardElevated,
-              strokeWidth: 16,
-            ),
-          ),
-          Column(
-            mainAxisSize: MainAxisSize.min,
+    return AnimatedBuilder(
+      animation: _progressAnim,
+      builder: (context, _) {
+        return SizedBox(
+          width: widget.size,
+          height: widget.size,
+          child: Stack(
+            alignment: Alignment.center,
             children: [
-              Text(
-                '${remaining.abs()}',
-                style: AppTypography.displayLarge.copyWith(
-                  color: isOver ? AppColors.attention : AppColors.textPrimary,
-                  fontWeight: FontWeight.w900,
-                  fontSize: 38,
-                  height: 1.0,
+              // Glow behind ring
+              if (!isOver && isOnTrack)
+                Container(
+                  width: widget.size * 0.82,
+                  height: widget.size * 0.82,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppColors.positive.withValues(alpha: 0.08),
+                        blurRadius: 40,
+                        spreadRadius: 10,
+                      ),
+                    ],
+                  ),
+                ),
+              CustomPaint(
+                size: Size(widget.size, widget.size),
+                painter: _RingPainter(
+                  progress: _progressAnim.value.clamp(0.0, 1.0),
+                  ringColor: ringColor,
+                  trackColor: AppColors.border.withValues(alpha: 0.5),
+                  strokeWidth: 18,
                 ),
               ),
-              const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: AppTypography.labelSmall.copyWith(
-                  color: subtitleColor,
-                  fontWeight: FontWeight.w600,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      '$consumedCalories',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
-                      ),
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    '${remaining.abs()}',
+                    style: TextStyle(
+                      fontSize: 44,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -1.5,
+                      height: 1.0,
+                      color: isOver
+                          ? AppColors.attention
+                          : AppColors.textPrimary,
                     ),
-                    const Text(
-                      ' / ',
-                      style: TextStyle(fontSize: 12, color: AppColors.textMuted),
+                  ),
+                  const SizedBox(height: 3),
+                  Text(
+                    'kcal $label',
+                    style: TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: labelColor,
+                      letterSpacing: 0.2,
                     ),
-                    Text(
-                      '$targetCalories target',
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
+                  ),
+                  const SizedBox(height: 10),
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.surface,
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: AppColors.border),
                     ),
-                  ],
-                ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          '${widget.consumedCalories}',
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w800,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Text(
+                          ' / ${widget.targetCalories}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
-        ],
-      ),
+        );
+      },
     );
   }
 }
@@ -138,31 +209,33 @@ class _RingPainter extends CustomPainter {
     final center = Offset(size.width / 2, size.height / 2);
     final radius = (size.width - strokeWidth) / 2;
 
-    // Track circle
     final trackPaint = Paint()
       ..color = trackColor
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
-
     canvas.drawCircle(center, radius, trackPaint);
 
-    // Progress arc
+    // Gradient arc
     final sweepAngle = 2 * pi * progress.clamp(0.0, 1.0);
+    final rect = Rect.fromCircle(center: center, radius: radius);
+    final gradient = SweepGradient(
+      startAngle: -pi / 2,
+      endAngle: -pi / 2 + sweepAngle + 0.001,
+      colors: [
+        ringColor.withValues(alpha: 0.7),
+        ringColor,
+      ],
+      tileMode: TileMode.clamp,
+    );
+
     final progressPaint = Paint()
-      ..color = ringColor
+      ..shader = gradient.createShader(rect)
       ..style = PaintingStyle.stroke
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    // Start from top (-pi / 2)
-    canvas.drawArc(
-      Rect.fromCircle(center: center, radius: radius),
-      -pi / 2,
-      sweepAngle,
-      false,
-      progressPaint,
-    );
+    canvas.drawArc(rect, -pi / 2, sweepAngle, false, progressPaint);
   }
 
   @override

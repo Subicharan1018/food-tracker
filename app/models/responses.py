@@ -66,6 +66,11 @@ class CreateRecipeResponse(BaseModel):
     name: str
     meal_slot: str
     servings: float
+    total_calories: float = 0.0
+    total_protein_g: float = 0.0
+    total_carbs_g: float = 0.0
+    total_fat_g: float = 0.0
+    total_fiber_g: float = 0.0
     calories: float
     protein_g: float
     carbs_g: float

@@ -98,3 +98,121 @@ async def test_recipe_ingestion_uses_structured_ai_result():
     assert result["name"] == "Paneer Bowl"
     assert result["meal_slot"] == "breakfast"
     assert result["calories"] == pytest.approx(64.475, abs=0.01)
+
+
+@pytest.mark.asyncio
+async def test_recipe_ingestion_counts_raw_rice_chicken_and_zero_energy_fats():
+    class _EstimatorFoodDb:
+        foods = {
+            "chicken": {
+                "code": "N002", "name": "Chicken, poultry, thigh, skinless",
+                "serving_size": 100, "energy_kcal": 199.8,
+                "protein_g": 18.18, "carbohydrates_g": 0, "fat_g": 14.23, "fiber_g": 0,
+            },
+            "rice": {
+                "code": "A015", "name": "Rice, raw, milled",
+                "serving_size": 100, "energy_kcal": 356.4,
+                "protein_g": 7.94, "carbohydrates_g": 78.24, "fat_g": 0.52, "fiber_g": 1,
+            },
+            "oil": {
+                "code": "T012", "name": "Sunflower oil",
+                "serving_size": 100, "energy_kcal": 0,
+                "protein_g": 0, "carbohydrates_g": 0, "fat_g": 100, "fiber_g": 0,
+            },
+            "ghee": {
+                "code": "T013", "name": "Ghee",
+                "serving_size": 100, "energy_kcal": 0,
+                "protein_g": 0, "carbohydrates_g": 0, "fat_g": 100, "fiber_g": 0,
+            },
+        }
+
+        def search_foods(self, query, limit=20):
+            query = query.lower()
+            return [food for key, food in self.foods.items() if key in query or query in key]
+
+        def get_food_by_code(self, code):
+            return next((food for food in self.foods.values() if food["code"] == code), None)
+
+    firestore = _FakeFirestore()
+    service = RecipeIngestionService(_EstimatorFoodDb(), firestore)
+    result = await service.ingest(
+        user_id="user123",
+        meal_slot="lunch",
+        servings=1,
+        nemotron=_FallbackAi(),
+        recipe_text=(
+            "Chicken Seeraga Samba Rice\n"
+            "- Chicken (raw, some skin) — 500 g\n"
+            "- Seeraga samba rice (raw) — 250 g\n"
+            "- Oil — 25 ml\n"
+            "- Ghee — 5 g\n"
+            "- Curd — 100 g"
+        ),
+    )
+
+    # The previous implementation returned roughly 165 kcal because several
+    # valid ingredients were not matched and IFCT oil/ghee energy is zero.
+    assert result["calories"] > 2000
+    assert result["protein_g"] > 100
+    assert result["calories"] == pytest.approx(
+        result["protein_g"] * 4 + result["carbs_g"] * 4 + result["fat_g"] * 9,
+        abs=25,
+    )
+
+
+@pytest.mark.asyncio
+async def test_recipe_ingestion_requires_validated_extraction_tool():
+    class _ToolAi:
+        async def extract_with_tool(self, system, user, tool_name, tool_description, tool_schema, max_tokens):
+            assert tool_name == "extract_recipe"
+            assert tool_schema["additionalProperties"] is False
+            return {
+                "name": "Rice Bowl",
+                "meal_slot": "lunch",
+                "method": "Mix and serve.",
+                "ingredients": [{
+                    "name": "Paneer", "amount": 50, "unit": "g", "grams": 50,
+                    "state": "raw", "confidence": 0.99,
+                }],
+            }
+
+    firestore = _FakeFirestore()
+    service = RecipeIngestionService(_FakeFoodDb(), firestore)
+    result = await service.ingest(
+        user_id="user123",
+        meal_slot="lunch",
+        servings=1,
+        nemotron=_ToolAi(),
+        recipe_text="anything",
+    )
+
+    assert result["name"] == "Rice Bowl"
+    assert result["calories"] == pytest.approx(128.95, abs=0.01)
+
+
+@pytest.mark.asyncio
+async def test_canonical_kinetik_format_bypasses_ai_and_uses_detected_servings():
+    class _FailIfCalled:
+        async def extract_with_tool(self, *args, **kwargs):
+            raise AssertionError("canonical Kinetik format should not call the model")
+
+    firestore = _FakeFirestore()
+    service = RecipeIngestionService(_FakeFoodDb(), firestore)
+    result = await service.ingest(
+        user_id="user123",
+        meal_slot="lunch",
+        servings=1,
+        nemotron=_FailIfCalled(),
+        recipe_text=(
+            "RECIPE: Paneer Bowl\n"
+            "SERVINGS: 2\n\n"
+            "INGREDIENTS:\n"
+            "- Paneer | 100 | g | raw\n"
+            "- Onion | 100 | g | raw\n\n"
+            "METHOD:\nMix and serve."
+        ),
+    )
+
+    assert result["servings"] == 2
+    assert result["total_calories"] == pytest.approx(305.9, abs=0.1)
+    assert result["calories"] == pytest.approx(152.95, abs=0.1)

@@ -518,7 +518,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                                 color: AppColors.card,
                                 borderRadius: BorderRadius.circular(16),
                                 border: Border.all(
-                              color: routine.isCustom ? AppColors.brandPrimary.withValues(alpha: 0.55) : AppColors.border,
+                                  color: routine.isCustom ? AppColors.brandPrimary.withValues(alpha: 0.55) : AppColors.border,
                                 ),
                               ),
                               child: Column(
@@ -648,87 +648,89 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
     final splitDays = [
       _SplitDay(
         day: 'Mon',
-        title: 'Push + HIIT + Core',
-        focus: 'Chest, Shoulders, Triceps',
-        length: '~55–65 min',
+        title: 'Upper A',
+        focus: 'Push emphasis · Chest, Shoulders, Triceps primary',
+        length: '~50–60 min',
         exercises: [
-          _SplitExercise('Barbell bench press', '4 × 8–10', 'Long bar, build toward ~26 kg. 3-sec lowering', 90, 24.0),
-          _SplitExercise('Overhead press', '3 × 8–12', 'EZ bar or long bar, seated or standing', 90, 16.0),
-          _SplitExercise('Incline DB press', '3 × 10–12', 'Bench at 30–45°, ~9.5 kg/hand', 75, 9.5),
-          _SplitExercise('EZ bar skullcrushers', '3 × 10–15', 'EZ bar, light load', 60, 8.0),
-          _SplitExercise('Push-up burnout', '1 × failure', 'Feet on bench once bodyweight is easy', 60, 0.0),
-          _SplitExercise('HIIT — elliptical', '8 rounds', '30s sprint (L5-7) / 30s recovery (L1-2)', 30, 0.0),
-          _SplitExercise('Core finisher', 'Plank 5×1m + leg raises 3×15', 'Mat', 45, 0.0),
+          _SplitExercise('Barbell bench press', '4 × 8–10', 'Long bar (~16–22 kg to start). 3-sec lowering. Last set: stop 1 rep before failure.', 120, 22.0, 'Retract shoulder blades, bar touches mid-chest'),
+          _SplitExercise('Incline DB press', '3 × 10–12', 'Bench at 30–45°, dumbbells ~8–9 kg/hand', 90, 9.0, 'Don\'t flare elbows >75° from torso'),
+          _SplitExercise('Overhead press (seated)', '3 × 10–12', 'EZ bar or long bar, bench upright', 90, 16.0, 'Chin back on the way up, don\'t arch lower back'),
+          _SplitExercise('Barbell bent-over row', '3 × 10–12', 'Long bar, hinge to ~45°, pull to lower ribs', 90, 20.0, 'Row for back, not biceps — lead with elbow'),
+          _SplitExercise('EZ bar skullcrusher', '3 × 12–15', 'Light load on EZ bar, elbows stay fixed', 60, 8.0, 'Keep upper arms perpendicular to floor'),
+          _SplitExercise('DB lateral raise', '3 × 15', '2–3 kg/hand only, strict form', 45, 2.5, 'Slight forward lean, lead with pinkies'),
+          _SplitExercise('Push-up burnout', '1 × failure', 'Bodyweight; feet on bench when easy', 0, 0.0, 'Full ROM — chest touches floor each rep'),
         ],
       ),
       _SplitDay(
         day: 'Tue',
-        title: 'Pull',
-        focus: 'Back, Biceps',
-        length: '~45–50 min',
+        title: 'Lower A + Core',
+        focus: 'Quad emphasis · Squat pattern',
+        length: '~50–60 min',
         exercises: [
-          _SplitExercise('Pull-ups', '4 × max', 'Bodyweight — log every set (8/6/5/4 style)', 120, 0.0),
-          _SplitExercise('Barbell rows', '4 × 8–12', 'Long bar, bent-over, up to ~26 kg', 90, 22.0),
-          _SplitExercise('DB bicep curls', '3 × 10–12', 'Dumbbells ~9.5 kg/hand', 60, 9.5),
-          _SplitExercise('Hammer curls', '3 × 10–12', 'EZ bar or dumbbells', 60, 9.5),
-          _SplitExercise('Band pull-aparts', '3 × 15–20', 'Resistance band, arms straight', 45, 0.0),
+          _SplitExercise('Barbell back squat', '4 × 8–10', 'Long bar on upper back, up to ~22–26 kg. Squat to parallel or below.', 120, 24.0, 'Knees track over toes, chest stays up'),
+          _SplitExercise('Romanian deadlift', '3 × 10–12', 'Long bar, hinge from hips, soft knee bend', 90, 24.0, 'Bar skims legs, feel hamstring stretch'),
+          _SplitExercise('DB walking lunge', '3 × 12/leg', 'Dumbbells ~8–9 kg/hand', 75, 9.0, 'Rear knee almost touches floor each rep'),
+          _SplitExercise('Standing calf raise', '4 × 20–25', 'Bodyweight, hold dumbbell once easy, full range', 45, 0.0, 'Pause 1s at top and bottom each rep'),
+          _SplitExercise('Plank', '3 × 45–60s', 'Mat, neutral spine', 45, 0.0, 'Squeeze glutes and abs simultaneously'),
+          _SplitExercise('Hanging leg raises', '3 × 10–15', 'Pull-up bar', 60, 0.0, 'No swing — control the lowering'),
         ],
       ),
       _SplitDay(
         day: 'Wed',
-        title: 'Zone 2 + Core',
-        focus: 'Conditioning',
-        length: '~35 min',
+        title: 'Zone 2 Conditioning',
+        focus: 'Aerobic base · Active recovery',
+        length: '~30–35 min',
         exercises: [
-          _SplitExercise('Elliptical, steady state', '25–30 min', 'Level 2–3, conversational pace', 0, 0.0),
-          _SplitExercise('Plank', '3 × 30–45s', 'Mat', 45, 0.0),
-          _SplitExercise('Leg raises', '3 × 12–15', 'Lying or hanging', 45, 0.0),
+          _SplitExercise('Elliptical steady state', '30 min continuous', 'Level 2–3, conversational pace (120–140 bpm). Flushes soreness and builds aerobic base.', 0, 0.0, 'Continuous conversational pace, 120–140 bpm. Active recovery.'),
         ],
       ),
       _SplitDay(
         day: 'Thu',
-        title: 'Legs',
-        focus: 'Quads, Hamstrings, Calves',
-        length: '~50–55 min',
+        title: 'Upper B',
+        focus: 'Pull emphasis · Back, Biceps primary',
+        length: '~50–60 min',
         exercises: [
-          _SplitExercise('Barbell back squat', '4 × 8–10', 'Long bar, up to ~26 kg', 120, 26.0),
-          _SplitExercise('Romanian deadlift', '3 × 10–12', 'Long bar', 90, 24.0),
-          _SplitExercise('DB walking lunges', '3 × 12/leg', 'Dumbbells ~9.5 kg/hand', 75, 9.5),
-          _SplitExercise('Standing calf raises', '4 × 15–20', 'Bodyweight, add DB once easy', 45, 0.0),
-          _SplitExercise('Goblet squat finisher', '2 × 15–20', 'Single dumbbell ~19 kg at chest', 60, 19.0),
+          _SplitExercise('Pull-ups', '4 × max (stop 2 short of failure)', 'Dead hang start, chin clears bar. Log every set: e.g. 8/6/5/4', 120, 0.0, 'Don\'t kip; scapular retraction at the top'),
+          _SplitExercise('DB bicep curl (supinated)', '3 × 10–12', 'Dumbbells ~8–9 kg/hand', 60, 9.0, 'Full extension at bottom — don\'t cut ROM'),
+          _SplitExercise('Hammer curl', '3 × 10–12', 'EZ bar or neutral-grip DBs', 60, 9.0, 'Builds brachialis — adds arm thickness'),
+          _SplitExercise('Resistance band pull-apart', '3 × 20', 'Band at chest height, arms straight', 30, 0.0, 'Rear deltoid and rotator cuff health'),
+          _SplitExercise('Incline DB chest press (lighter)', '3 × 12–15', 'Lower load than Mon — maintain volume, not max load', 75, 8.0, 'This is Upper B — chest still gets frequency'),
+          _SplitExercise('Overhead press (standing)', '3 × 10–12', 'EZ bar or light bar, strict form', 90, 14.0, 'Brace core; don\'t lean back'),
+          _SplitExercise('Wrist curl + reverse curl', '2+2 × 15–20', 'Light dumbbell, wrist only moves', 30, 4.0, 'Forearm strength — matches 30 cm forearm goal'),
         ],
       ),
       _SplitDay(
         day: 'Fri',
-        title: 'Core + HIIT',
-        focus: 'Abs, Shoulders, Conditioning',
-        length: '~35–40 min',
+        title: 'Lower B + HIIT + Core',
+        focus: 'Hinge pattern emphasis + Conditioning',
+        length: '~50 min',
         exercises: [
-          _SplitExercise('Plank', '3 × max hold', 'Mat', 60, 0.0),
-          _SplitExercise('Hanging leg raises', '3 × 12–15', 'Pull-up bar', 60, 0.0),
-          _SplitExercise('Lateral raises', '4 × 15', 'Light dumbbells, 2–2.5 kg/hand', 45, 2.5),
-          _SplitExercise('Wrist curls', '3 × 15–20', 'Light dumbbell or band', 30, 4.0),
-          _SplitExercise('HIIT — elliptical', '6 rounds', '30s sprint / 30s recovery', 30, 0.0),
+          _SplitExercise('Goblet squat', '3 × 15–20', 'Single dumbbell ~15–19 kg at chest — quad endurance', 75, 19.0, 'Elbows inside knees at bottom'),
+          _SplitExercise('Sumo DB deadlift', '3 × 10–12', 'One heavy dumbbell held with both hands, wide stance', 90, 19.0, 'Hinge at hips, not a squat'),
+          _SplitExercise('Reverse lunge', '3 × 12/leg', 'Bodyweight or light dumbbells', 60, 9.0, 'Variation from Tue\'s walking lunge'),
+          _SplitExercise('Calf raise single-leg', '3 × 15/leg', 'Hold wall for balance, bodyweight', 30, 0.0, 'More load per calf than both-leg version'),
+          _SplitExercise('HIIT — elliptical', '6–8 rounds', '2 min warm-up (L2) → 30s sprint (L6–7) : 30s recovery (L1). Total ~10 min', 30, 0.0, 'Sprint is actually sprinting — feel it'),
+          _SplitExercise('Plank holds', '3 × max', 'Mat', 60, 0.0, 'Goal: eventually 2 min continuous'),
+          _SplitExercise('Bicycle crunch', '3 × 20', 'Mat, controlled rotation', 45, 0.0, 'Don\'t yank neck — rotate from core'),
         ],
       ),
       _SplitDay(
         day: 'Sat',
-        title: 'Active Recovery',
-        focus: 'Walking, Mobility, Easy Core',
-        length: '~30–45 min',
+        title: 'Active Recovery Walk',
+        focus: 'NEAT + Weekly Grocery Run',
+        length: '~20–30 min',
         exercises: [
-          _SplitExercise('Brisk walk', '30–40 min', 'Easy conversational pace; keep recovery active', 0, 0.0),
-          _SplitExercise('Mobility flow', '10–15 min', 'Hips, shoulders, ankles, and thoracic spine', 0, 0.0),
+          _SplitExercise('Active recovery walk', '20–30 min', 'Easy walking for NEAT and weekly fresh grocery run', 0, 0.0, 'Buy chicken, curd, and fresh vegetables'),
         ],
       ),
       _SplitDay(
         day: 'Sun',
-        title: 'Rest + Reset',
-        focus: 'Recovery and weekly planning',
-        length: '~10–20 min',
+        title: 'Full Rest + Meal Prep',
+        focus: 'Recovery + Batch Cooking',
+        length: '~20–30 min',
         exercises: [
-          _SplitExercise('Easy mobility', '10–15 min', 'Gentle range of motion; no fatigue work', 0, 0.0),
-          _SplitExercise('Weekly reset', '5 min', 'Review progression, meals, and next week setup', 0, 0.0),
+          _SplitExercise('Weekly weigh-in & photo', '1 check-in', 'Morning weigh-in after wake-up, same lighting, record waist and biceps', 0, 0.0, 'Log weekly progress in Progress tab'),
+          _SplitExercise('Batch meal prep', 'Cook batch', 'Cook and portion chicken for weekday lunches, soak legumes overnight', 0, 0.0, 'Pre-measure 1-tsp oil portions for the week'),
         ],
       ),
     ];
@@ -741,7 +743,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
       children: [
         const SetRestTimerWidget(),
         const SizedBox(height: 12),
-        const Text('RECOMP SPLIT', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted)),
+        const Text('RECOMP SPLIT (V3 BLUEPRINT)', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: .8, color: AppColors.textMuted)),
         const SizedBox(height: 10),
         SizedBox(
           height: 54,
@@ -766,152 +768,149 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
         ),
         const SizedBox(height: 4),
         ExpansionTile(
-              initiallyExpanded: true,
-              tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-              backgroundColor: AppColors.card,
-              collapsedBackgroundColor: AppColors.card,
-              shape: RoundedRectangleBorder(
-                borderRadius: AppShapes.information,
-                side: const BorderSide(color: AppColors.border),
-              ),
-              collapsedShape: RoundedRectangleBorder(
-                borderRadius: AppShapes.information,
-                side: const BorderSide(color: AppColors.border),
-              ),
-              leading: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.surfaceElevated,
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Text(
-                  dayPlan.day,
-                  style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
-                ),
-              ),
-              title: Text(dayPlan.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-              children: [
-                if (isFriday)
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    child: SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton.icon(
-                        icon: const Icon(Icons.timer_outlined, color: Colors.black, size: 18),
-                        label: const Text('Launch HIIT Sprint Timer', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800)),
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.positive,
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                        ),
-                        onPressed: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
-                          );
-                        },
-                      ),
+          initiallyExpanded: true,
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+          backgroundColor: AppColors.card,
+          collapsedBackgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppShapes.information,
+            side: const BorderSide(color: AppColors.border),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: AppShapes.information,
+            side: const BorderSide(color: AppColors.border),
+          ),
+          leading: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            decoration: BoxDecoration(
+              color: AppColors.surfaceElevated,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              dayPlan.day,
+              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
+            ),
+          ),
+          title: Text(dayPlan.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+          children: [
+            if (isFriday)
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton.icon(
+                    icon: const Icon(Icons.timer_outlined, color: Colors.black, size: 18),
+                    label: const Text('Launch HIIT Sprint Timer', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800)),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.positive,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
                     ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
+                      );
+                    },
                   ),
-                const Divider(height: 1),
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: dayPlan.exercises.length,
-                  separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
-                  itemBuilder: (ctx, exIndex) {
-                    final ex = dayPlan.exercises[exIndex];
-                    final isHiitEx = ex.name.toLowerCase().contains('hiit');
+                ),
+              ),
+            const Divider(height: 1),
+            ListView.separated(
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: dayPlan.exercises.length,
+              separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+              itemBuilder: (ctx, exIndex) {
+                final ex = dayPlan.exercises[exIndex];
+                final isHiitEx = ex.name.toLowerCase().contains('hiit');
 
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              Expanded(
-                                child: Text(ex.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                              ),
-                              if (ex.restSec > 0) Text('${ex.restSec}s rest', style: const TextStyle(fontSize: 10, color: AppColors.textMuted)),
-                            ],
-                          ),
-                          const SizedBox(height: 4),
-                          Text(ex.setsReps, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                          const SizedBox(height: 2),
-                          Text(ex.setup, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                          const SizedBox(height: 8),
-                          SizedBox(
-                            width: double.infinity,
-                            child: isHiitEx
-                                ? ElevatedButton.icon(
-                                    icon: const Icon(Icons.timer_outlined, size: 16),
-                                    label: const Text('Launch HIIT timer'),
-                                    style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary, foregroundColor: AppColors.textInverse, minimumSize: const Size.fromHeight(38)),
-                                    onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen())),
-                                  )
-                                : OutlinedButton(
-                                    style: OutlinedButton.styleFrom(foregroundColor: AppColors.brandPrimary, side: const BorderSide(color: AppColors.brandPrimary), minimumSize: const Size.fromHeight(38)),
-                                    onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
-                                    child: const Text('Log sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    );
-                    /*
-                      Old horizontal exercise row intentionally removed: long setup
-                      copy and action buttons cannot share a phone-width row.
-                    return Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-                      child: Row(
+                return Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
                         children: [
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(ex.name, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                                const SizedBox(height: 2),
-                                Text('${ex.setsReps} · Setup: ${ex.setup}', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                                if (ex.restSec > 0)
-                                  Text('Rest: ${ex.restSec}s', style: const TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                              ],
-                            ),
+                            child: Text(ex.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           ),
-                          if (isHiitEx)
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.positive,
-                                foregroundColor: Colors.black,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                          if (ex.restSec > 0)
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                              decoration: BoxDecoration(
+                                color: AppColors.surfaceElevated,
+                                borderRadius: BorderRadius.circular(6),
                               ),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
-                                );
-                              },
-                              child: const Text('HIIT Timer', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800)),
-                            )
-                          else
-                            ElevatedButton(
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.cardElevated,
-                                foregroundColor: AppColors.textPrimary,
-                                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                              ),
-                              onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
-                              child: const Text('Log Sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                              child: Text('${ex.restSec}s rest', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
                             ),
                         ],
                       ),
-                    ); */
-                  },
-                ),
-              ],
+                      const SizedBox(height: 4),
+                      Text(ex.setsReps, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brandPrimary)),
+                      const SizedBox(height: 2),
+                      Text(ex.setup, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
+                      if (ex.cue.isNotEmpty) ...[
+                        const SizedBox(height: 3),
+                        Text('💡 Cue: ${ex.cue}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textMuted)),
+                      ],
+                      const SizedBox(height: 8),
+                      SizedBox(
+                        width: double.infinity,
+                        child: isHiitEx
+                            ? ElevatedButton.icon(
+                                icon: const Icon(Icons.timer_outlined, size: 16),
+                                label: const Text('Launch HIIT timer'),
+                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary, foregroundColor: AppColors.textInverse, minimumSize: const Size.fromHeight(38)),
+                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen())),
+                              )
+                            : OutlinedButton(
+                                style: OutlinedButton.styleFrom(foregroundColor: AppColors.brandPrimary, side: const BorderSide(color: AppColors.brandPrimary), minimumSize: const Size.fromHeight(38)),
+                                onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
+                                child: const Text('Log sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
+                              ),
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
+          ],
+        ),
+        const SizedBox(height: 16),
+
+        // Progression Rules Accordion
+        ExpansionTile(
+          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+          backgroundColor: AppColors.card,
+          collapsedBackgroundColor: AppColors.card,
+          shape: RoundedRectangleBorder(
+            borderRadius: AppShapes.information,
+            side: const BorderSide(color: AppColors.border),
+          ),
+          collapsedShape: RoundedRectangleBorder(
+            borderRadius: AppShapes.information,
+            side: const BorderSide(color: AppColors.border),
+          ),
+          leading: const Icon(Icons.trending_up_rounded, color: AppColors.brandPrimary, size: 20),
+          title: const Text('Progression Rules (Manual v3)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
+          children: [
+            const Divider(height: 1),
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                children: const [
+                  _ProgressionRuleRow(condition: 'Form is rough on any lift', action: 'Stay at current load — form first, always'),
+                  _ProgressionRuleRow(condition: 'Hit top of rep range on all sets (2 sessions in a row)', action: 'Add smallest plate available (+2 kg) next session'),
+                  _ProgressionRuleRow(condition: 'Bar maxed (26 kg) and reps still easy', action: 'Add 3-sec lowering → 2-sec pause → extra set → single-arm/single-leg variant'),
+                  _ProgressionRuleRow(condition: 'Pull-ups: 4 × 10 strict reps clean', action: 'Add +2 kg via loaded backpack'),
+                  _ProgressionRuleRow(condition: 'Push-ups: 3 × 25 easy', action: 'Feet on bench (decline) → one-arm negative → archer push-up'),
+                  _ProgressionRuleRow(condition: '3+ weeks without strength progress', action: 'Check sleep and calorie intake first before adding volume'),
+                ],
+              ),
+            ),
+          ],
+        ),
       ],
     );
   }
@@ -935,6 +934,10 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                 children: [
                   Text('Log: ${ex.name}', style: AppTypography.titleLarge),
                   Text('Target: ${ex.setsReps} · Rest: ${ex.restSec}s', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+                  if (ex.cue.isNotEmpty) ...[
+                    const SizedBox(height: 4),
+                    Text('💡 ${ex.cue}', style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textMuted)),
+                  ],
                   const SizedBox(height: 18),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -984,7 +987,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                     height: 48,
                     child: ElevatedButton(
                       style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.brandPrimary,
+                        backgroundColor: AppColors.brandPrimary,
                         foregroundColor: AppColors.textInverse,
                       ),
                       onPressed: () async {
@@ -1006,15 +1009,16 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                           ),
                         ]);
 
-                        // Auto-start rest timer based on exercise category
+                        // Auto-start rest timer based on exercise category and recomp v3 blueprint rest seconds
                         ref.read(setRestTimerProvider.notifier).startFor(
                           _categoryFor(ex.name),
+                          overrideSeconds: ex.restSec > 0 ? ex.restSec : null,
                         );
 
                         if (context.mounted) {
                           Navigator.pop(ctx);
                           ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(content: Text('Logged ${ex.name} — ${weight}kg × $reps reps (Rest timer started)')),
+                            SnackBar(content: Text('Logged ${ex.name} — ${weight}kg × $reps reps (${ex.restSec > 0 ? "${ex.restSec}s" : ""} Rest timer started)')),
                           );
                         }
                       },
@@ -1027,6 +1031,37 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
           },
         );
       },
+    );
+  }
+}
+
+class _ProgressionRuleRow extends StatelessWidget {
+  final String condition;
+  final String action;
+
+  const _ProgressionRuleRow({required this.condition, required this.action});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 6),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text('• ', style: TextStyle(color: AppColors.brandPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
+          Expanded(
+            child: RichText(
+              text: TextSpan(
+                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
+                children: [
+                  TextSpan(text: '$condition: ', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                  TextSpan(text: action),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -1127,6 +1162,7 @@ class _SplitExercise {
   final String setup;
   final int restSec;
   final double defaultWeight;
+  final String cue;
 
-  _SplitExercise(this.name, this.setsReps, this.setup, this.restSec, this.defaultWeight);
+  _SplitExercise(this.name, this.setsReps, this.setup, this.restSec, this.defaultWeight, [this.cue = '']);
 }

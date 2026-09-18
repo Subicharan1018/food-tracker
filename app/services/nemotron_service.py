@@ -67,6 +67,55 @@ class NemotronService:
         except Exception as e:
             raise RuntimeError(f"Nemotron complete failed: {e}") from e
 
+    async def extract_with_tool(
+        self,
+        system: str,
+        user: str,
+        tool_name: str,
+        tool_description: str,
+        tool_schema: dict,
+        max_tokens: int = 2500,
+    ) -> dict:
+        """Force one typed extraction tool call and return only its arguments.
+
+        OpenRouter's free Nemotron endpoint supports tool calling even though it
+        does not support native response_format JSON schema. The caller still
+        validates the returned arguments with Pydantic before using them.
+        """
+        async def _call():
+            return await self._client.chat.completions.create(
+                model=settings.nemotron_model,
+                messages=[
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": user},
+                ],
+                tools=[{
+                    "type": "function",
+                    "function": {
+                        "name": tool_name,
+                        "description": tool_description,
+                        "parameters": tool_schema,
+                    },
+                }],
+                tool_choice={"type": "function", "function": {"name": tool_name}},
+                max_tokens=max_tokens,
+            )
+
+        try:
+            response = await self._execute_with_retry(_call)
+            choice = response.choices[0] if response and response.choices else None
+            message = getattr(choice, "message", None)
+            tool_calls = getattr(message, "tool_calls", None) if message else None
+            if not tool_calls:
+                raise RuntimeError("Recipe extraction model did not call the required tool")
+            raw_args = tool_calls[0].function.arguments or "{}"
+            parsed = json.loads(raw_args) if isinstance(raw_args, str) else raw_args
+            if not isinstance(parsed, dict):
+                raise RuntimeError("Recipe extraction tool returned a non-object payload")
+            return parsed
+        except Exception as e:
+            raise RuntimeError(f"Structured recipe extraction failed: {e}") from e
+
     async def run_agent_loop(
         self,
         system: str,

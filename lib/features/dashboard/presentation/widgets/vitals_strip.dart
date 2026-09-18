@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
 
-/// A compact home for the two passive, daily metrics.
 class VitalsStrip extends StatelessWidget {
   final int waterMl;
   final int waterTargetMl;
@@ -22,77 +21,158 @@ class VitalsStrip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppShapes.information,
-        border: Border.all(color: AppColors.border),
-      ),
-      child: Row(
-        children: [
-          Expanded(
-            child: _Vital(
-              icon: Icons.water_drop_outlined,
-              label: 'Hydration',
-              value: '$waterMl',
-              suffix: ' / $waterTargetMl ml',
-              progress: waterTargetMl == 0 ? 0.0 : waterMl / waterTargetMl,
-              onTap: () => onAddWater(250),
-              action: '+250 ml',
-            ),
+    return Row(
+      children: [
+        Expanded(
+          child: _VitalCard(
+            icon: Icons.water_drop_rounded,
+            iconColor: const Color(0xFF60A5FA),
+            label: 'Hydration',
+            value: waterMl,
+            target: waterTargetMl,
+            unit: 'ml',
+            ctaLabel: '+ 250 ml',
+            onTap: () => onAddWater(250),
           ),
-          Container(width: 1, height: 86, color: AppColors.border),
-          Expanded(
-            child: _Vital(
-              icon: Icons.directions_walk_rounded,
-              label: 'Steps',
-              value: '$steps',
-              suffix: ' / $stepsTarget',
-              progress: stepsTarget == 0 ? 0.0 : steps / stepsTarget,
-              onTap: onStepsTap,
-              action: 'Details',
-            ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _VitalCard(
+            icon: Icons.directions_walk_rounded,
+            iconColor: const Color(0xFF34D399),
+            label: 'Steps',
+            value: steps,
+            target: stepsTarget,
+            unit: '',
+            ctaLabel: 'Details',
+            onTap: onStepsTap,
           ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }
 
-class _Vital extends StatelessWidget {
+class _VitalCard extends StatelessWidget {
   final IconData icon;
+  final Color iconColor;
   final String label;
-  final String value;
-  final String suffix;
-  final double progress;
+  final int value;
+  final int target;
+  final String unit;
+  final String ctaLabel;
   final VoidCallback onTap;
-  final String action;
 
-  const _Vital({required this.icon, required this.label, required this.value, required this.suffix, required this.progress, required this.onTap, required this.action});
+  const _VitalCard({
+    required this.icon,
+    required this.iconColor,
+    required this.label,
+    required this.value,
+    required this.target,
+    required this.unit,
+    required this.ctaLabel,
+    required this.onTap,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final met = progress >= 1;
-    final colour = met ? AppColors.positive : AppColors.brandPrimary;
-    return InkWell(
+    final progress =
+        target > 0 ? (value / target).clamp(0.0, 1.0) : 0.0;
+    final met = progress >= 1.0;
+    final barColor = met ? AppColors.positive : iconColor;
+
+    return GestureDetector(
       onTap: onTap,
-      borderRadius: BorderRadius.circular(10),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(18),
+          border: Border.all(color: AppColors.border),
+        ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(children: [Icon(icon, size: 17, color: colour), const SizedBox(width: 6), Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary))]),
-            const SizedBox(height: 8),
-            RichText(text: TextSpan(children: [TextSpan(text: value, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w800, color: AppColors.textPrimary)), TextSpan(text: suffix, style: const TextStyle(fontSize: 10, color: AppColors.textMuted))])),
-            const SizedBox(height: 7),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(4),
-              child: LinearProgressIndicator(value: progress.clamp(0.0, 1.0), minHeight: 5, backgroundColor: AppColors.cardElevated, valueColor: AlwaysStoppedAnimation(colour)),
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(7),
+                  decoration: BoxDecoration(
+                    color: iconColor.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  child: Icon(icon, color: iconColor, size: 16),
+                ),
+                const SizedBox(width: 8),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 5),
-            Text(action, style: TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: colour)),
+            const SizedBox(height: 12),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: '$value',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: -0.5,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  if (unit.isNotEmpty)
+                    TextSpan(
+                      text: ' $unit',
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: AppColors.textMuted,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 3),
+            Text(
+              '/ $target${unit.isNotEmpty ? ' $unit' : ''}',
+              style: const TextStyle(
+                fontSize: 10,
+                color: AppColors.textMuted,
+              ),
+            ),
+            const SizedBox(height: 10),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(6),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: AppColors.cardElevated,
+                valueColor: AlwaysStoppedAnimation<Color>(barColor),
+                minHeight: 5,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Container(
+              padding:
+                  const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+              decoration: BoxDecoration(
+                color: iconColor.withValues(alpha: 0.10),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Text(
+                ctaLabel,
+                style: TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w700,
+                  color: barColor,
+                ),
+              ),
+            ),
           ],
         ),
       ),

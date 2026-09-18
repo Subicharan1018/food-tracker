@@ -609,79 +609,35 @@ class GoogleFirestoreSyncService {
     return count;
   }
 
-  /// Scoped collection query: uses :runQuery under users/$userId with GET fallback and client-side timestamp filter
+  /// Scoped collection query: gets all documents under users/$userId/$collectionName reliably
   Future<List<Map<String, dynamic>>> _queryCollection(
     String collectionName,
     DateTime? since,
     Map<String, String> headers,
   ) async {
     final List<Map<String, dynamic>> results = [];
-    final isFreshInstall = since == null || since.millisecondsSinceEpoch == 0;
-
-    // 1. Try structured :runQuery scoped to the user subcollection
-    if (!isFreshInstall) {
-      try {
-        final queryUrl = '$_baseUrl/users/$userId:runQuery';
-        final Map<String, dynamic> structuredQuery = {
-          "from": [{"collectionId": collectionName}],
-          "where": {
-            "fieldFilter": {
-              "field": {"fieldPath": "updatedAt"},
-              "op": "GREATER_THAN",
-              "value": {"stringValue": since.toIso8601String()}
-            }
-          }
-        };
-
-        final res = await _dio.post(
-          queryUrl,
-          data: jsonEncode({"structuredQuery": structuredQuery}),
-          queryParameters: apiKey != null ? {'key': apiKey} : null,
-          options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
-        );
-
-        if (res.statusCode == 200 && res.data is List) {
-          for (final item in res.data) {
-            if (item is Map<String, dynamic> && item['document'] != null) {
-              results.add(item['document'] as Map<String, dynamic>);
-            }
-          }
-          return results;
-        }
-      } catch (e) {
-        debugPrint('Structured query on $collectionName failed, falling back to GET: $e');
-      }
-    }
-
-    // 2. GET Fallback (for fresh install OR if structured :runQuery returned error / no composite index)
     try {
       final listUrl = '$_baseUrl/users/$userId/$collectionName';
+      final queryParams = <String, dynamic>{
+        'pageSize': 300,
+      };
+      if (apiKey != null) queryParams['key'] = apiKey;
+
       final res = await _dio.get(
         listUrl,
-        queryParameters: apiKey != null ? {'key': apiKey} : null,
+        queryParameters: queryParams,
         options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
       );
 
       if (res.statusCode == 200 && res.data != null && res.data['documents'] is List) {
         for (final doc in res.data['documents']) {
           if (doc is Map<String, dynamic> && doc['fields'] != null) {
-            // Client-side timestamp filter guard when since is specified
-            if (since != null && since.millisecondsSinceEpoch > 0) {
-              final fields = doc['fields'] as Map<String, dynamic>;
-              final updatedAtStr = fields['updatedAt']?['stringValue'];
-              if (updatedAtStr != null) {
-                final docUpdatedAt = DateTime.tryParse(updatedAtStr);
-                if (docUpdatedAt != null && !docUpdatedAt.isAfter(since)) {
-                  continue; // Discard older/stale documents
-                }
-              }
-            }
             results.add(doc);
           }
         }
       }
     } catch (e) {
-      debugPrint('GET collection $collectionName fallback error: $e');
+      debugPrint('GET collection $collectionName error: $e');
     }
 
     return results;
@@ -718,6 +674,262 @@ class GoogleFirestoreSyncService {
       if (val['doubleValue'] != null) return (val['doubleValue'] as num).toInt();
     }
     return null;
+  }
+
+  /// Import and restore all data from an existing / previous Firestore User ID into local SQLite
+  Future<int> importFromUser(AppDatabase db, String fromUserId) async {
+    int count = 0;
+    final headers = await _getAuthHeaders() ?? {'Content-Type': 'application/json'};
+
+    Future<List<Map<String, dynamic>>> fetchSubcollection(String col) async {
+      final listUrl = '$_baseUrl/users/$fromUserId/$col';
+      final queryParams = <String, dynamic>{'pageSize': 300};
+      if (apiKey != null) queryParams['key'] = apiKey;
+      try {
+        final res = await _dio.get(
+          listUrl,
+          queryParameters: queryParams,
+          options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
+        );
+        if (res.statusCode == 200 && res.data != null && res.data['documents'] is List) {
+          return (res.data['documents'] as List).whereType<Map<String, dynamic>>().toList();
+        }
+      } catch (e) {
+        debugPrint('Import error for $col from $fromUserId: $e');
+      }
+      return [];
+    }
+
+    // 1. Diary entries
+    final diaryDocs = await fetchSubcollection('diary_entries');
+    final diaryCompanions = <DiaryEntriesCompanion>[];
+    for (final doc in diaryDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      diaryCompanions.add(
+        DiaryEntriesCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          mealSlot: Value(fields['mealSlot']?['stringValue'] ?? 'snack'),
+          foodName: Value(fields['foodName']?['stringValue'] ?? ''),
+          portionQty: Value(_parseDouble(fields['portionQty']) ?? 1.0),
+          portionUnit: Value(fields['portionUnit']?['stringValue'] ?? 'g'),
+          calories: Value(_parseDouble(fields['calories']) ?? 0.0),
+          proteinG: Value(_parseDouble(fields['proteinG']) ?? 0.0),
+          carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
+          fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
+          fiberG: Value(_parseDouble(fields['fiberG']) ?? 0.0),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(true),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (diaryCompanions.isNotEmpty) {
+      await db.upsertDiaryEntriesBatch(diaryCompanions);
+      count += diaryCompanions.length;
+    }
+
+    // 2. Workouts
+    final workoutDocs = await fetchSubcollection('workout_sessions');
+    final workoutCompanions = <WorkoutSessionsCompanion>[];
+    for (final doc in workoutDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      workoutCompanions.add(
+        WorkoutSessionsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          activityName: Value(fields['activityName']?['stringValue'] ?? ''),
+          durationMin: Value(_parseInt(fields['durationMin']) ?? 30),
+          intensity: Value(fields['intensity']?['stringValue'] ?? 'moderate'),
+          caloriesBurned: Value(_parseDouble(fields['caloriesBurned']) ?? 0.0),
+          source: Value(fields['source']?['stringValue'] ?? 'manual'),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(true),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (workoutCompanions.isNotEmpty) {
+      await db.upsertWorkoutsBatch(workoutCompanions);
+      count += workoutCompanions.length;
+    }
+
+    // 3. Water logs
+    final waterDocs = await fetchSubcollection('water_logs');
+    final waterCompanions = <WaterLogsCompanion>[];
+    for (final doc in waterDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      waterCompanions.add(
+        WaterLogsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          mlAdded: Value(_parseInt(fields['mlAdded']) ?? 250),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(true),
+        ),
+      );
+    }
+    if (waterCompanions.isNotEmpty) {
+      await db.upsertWaterLogsBatch(waterCompanions);
+      count += waterCompanions.length;
+    }
+
+    // 4. Weigh ins
+    final weighDocs = await fetchSubcollection('weigh_ins');
+    final weighCompanions = <WeighInsCompanion>[];
+    for (final doc in weighDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      weighCompanions.add(
+        WeighInsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          weightKg: Value(_parseDouble(fields['weightKg']) ?? 62.0),
+          rollingAvgKg: Value(_parseDouble(fields['rollingAvgKg'])),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(true),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (weighCompanions.isNotEmpty) {
+      await db.upsertWeighInsBatch(weighCompanions);
+      count += weighCompanions.length;
+    }
+
+    // 5. Measurements
+    final measurementDocs = await fetchSubcollection('measurements');
+    final measurementCompanions = <MeasurementsCompanion>[];
+    for (final doc in measurementDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      measurementCompanions.add(
+        MeasurementsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          date: Value(fields['date']?['stringValue'] ?? ''),
+          type: Value(fields['type']?['stringValue'] ?? 'waist'),
+          valueCm: Value(_parseDouble(fields['valueCm']) ?? 0.0),
+          loggedAt: Value(DateTime.tryParse(fields['loggedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+          isDirty: const Value(true),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (measurementCompanions.isNotEmpty) {
+      await db.upsertMeasurementsBatch(measurementCompanions);
+      count += measurementCompanions.length;
+    }
+
+    // 6. Custom Foods
+    final foodDocs = await fetchSubcollection('custom_foods');
+    final foodCompanions = <CustomFoodsCompanion>[];
+    for (final doc in foodDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      foodCompanions.add(
+        CustomFoodsCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          name: Value(fields['name']?['stringValue'] ?? ''),
+          servingSize: Value(_parseDouble(fields['servingSize']) ?? 100.0),
+          servingUnit: Value(fields['servingUnit']?['stringValue'] ?? 'g'),
+          calories: Value(_parseDouble(fields['calories']) ?? 0.0),
+          proteinG: Value(_parseDouble(fields['proteinG']) ?? 0.0),
+          carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
+          fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
+          fiberG: Value(_parseDouble(fields['fiberG']) ?? 0.0),
+          isDirty: const Value(true),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (foodCompanions.isNotEmpty) {
+      await db.upsertCustomFoodsBatch(foodCompanions);
+      count += foodCompanions.length;
+    }
+
+    // 7. Recipes
+    final recipeDocs = await fetchSubcollection('recipes');
+    final recipeCompanions = <RecipesCompanion>[];
+    for (final doc in recipeDocs) {
+      final fields = doc['fields'] as Map<String, dynamic>?;
+      if (fields == null) continue;
+      recipeCompanions.add(
+        RecipesCompanion(
+          id: Value(fields['id']?['stringValue'] ?? ''),
+          name: Value(fields['name']?['stringValue'] ?? ''),
+          mealSlot: Value(fields['mealSlot']?['stringValue'] ?? 'snack'),
+          calories: Value(_parseDouble(fields['calories']) ?? 0.0),
+          proteinG: Value(_parseDouble(fields['proteinG']) ?? 0.0),
+          carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
+          fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
+          ingredientsJson: Value(fields['ingredientsJson']?['stringValue'] ?? '[]'),
+          method: Value(fields['method']?['stringValue'] ?? ''),
+          updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+        ),
+      );
+    }
+    if (recipeCompanions.isNotEmpty) {
+      await db.insertRecipesBatch(recipeCompanions);
+      count += recipeCompanions.length;
+    }
+
+    // 8. User Profile
+    try {
+      final userRes = await _dio.get(
+        '$_baseUrl/users/$fromUserId',
+        queryParameters: apiKey != null ? {'key': apiKey} : null,
+        options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
+      );
+      if (userRes.statusCode == 200 && userRes.data != null) {
+        final fields = userRes.data['fields'] as Map<String, dynamic>?;
+        if (fields != null) {
+          await db.saveUserProfile(
+            UsersCompanion(
+              id: const Value('default_user'),
+              heightCm: Value(_parseDouble(fields['heightCm']) ?? 160.0),
+              weightKg: Value(_parseDouble(fields['weightKg']) ?? 62.0),
+              calorieTarget: Value(_parseInt(fields['calorieTarget']) ?? 2350),
+              proteinTargetG: Value(_parseDouble(fields['proteinTargetG']) ?? 155.0),
+              carbTargetG: Value(_parseDouble(fields['carbTargetG']) ?? 260.0),
+              fatTargetG: Value(_parseDouble(fields['fatTargetG']) ?? 70.0),
+              waterTargetMl: Value(_parseInt(fields['waterTargetMl']) ?? 3000),
+              stepsTarget: Value(_parseInt(fields['stepsTarget']) ?? 10000),
+              updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
+            ),
+          );
+          count++;
+        }
+      }
+    } catch (e) {
+      debugPrint('Profile restore error: $e');
+    }
+
+    // Immediately push newly restored dirty rows into current user collection
+    if (count > 0) {
+      await syncDirtyRecords(db);
+    }
+
+    return count;
+  }
+
+  /// Deletes a document or subcollection document in Firestore
+  Future<bool> deleteDocument(String relativePath) async {
+    final headers = await _getAuthHeaders();
+    if (headers == null) return false;
+    try {
+      final res = await _dio.delete(
+        '$_baseUrl/$relativePath',
+        queryParameters: apiKey != null ? {'key': apiKey} : null,
+        options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
+      );
+      return res.statusCode == 200 || res.statusCode == 204;
+    } catch (e) {
+      debugPrint('Delete doc $relativePath error: $e');
+      return false;
+    }
   }
 }
 

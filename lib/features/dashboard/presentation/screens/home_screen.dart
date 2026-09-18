@@ -195,18 +195,12 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
         actions: [
-          // Date Selector
+          // Keep the app bar compact on narrow phones. Date navigation lives
+          // in the first dashboard card below.
           IconButton(
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.chevron_left_rounded),
-            onPressed: () {
-              ref.read(selectedDateProvider.notifier).state =
-                  selectedDate.subtract(const Duration(days: 1));
-            },
-          ),
-          InkWell(
-            onTap: () async {
+            icon: const Icon(Icons.calendar_month_rounded, color: AppColors.textPrimary),
+            tooltip: 'Choose date',
+            onPressed: () async {
               final picked = await showDatePicker(
                 context: context,
                 initialDate: selectedDate,
@@ -217,32 +211,8 @@ class HomeScreen extends ConsumerWidget {
                 ref.read(selectedDateProvider.notifier).state = picked;
               }
             },
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Text(
-                isToday ? 'Today' : DateFormat('MMM d').format(selectedDate),
-                style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-              ),
-            ),
           ),
           IconButton(
-            constraints: const BoxConstraints(minWidth: 32, minHeight: 32),
-            padding: EdgeInsets.zero,
-            icon: const Icon(Icons.chevron_right_rounded),
-            onPressed: () {
-              ref.read(selectedDateProvider.notifier).state =
-                  selectedDate.add(const Duration(days: 1));
-            },
-          ),
-          // Macro source button
-          IconButton(
-            constraints: const BoxConstraints(minWidth: 36, minHeight: 36),
-            padding: const EdgeInsets.only(right: 8),
             icon: const Icon(Icons.pie_chart_rounded, color: AppColors.textPrimary),
             tooltip: 'Macro Source Breakdown',
             onPressed: () {
@@ -266,6 +236,42 @@ class HomeScreen extends ConsumerWidget {
         child: ListView(
           padding: const EdgeInsets.all(16),
           children: [
+            // Date navigation is deliberately outside the AppBar so the
+            // title and actions cannot overflow on small screens.
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: AppColors.card,
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                children: [
+                  IconButton(
+                    tooltip: 'Previous day',
+                    onPressed: () => ref.read(selectedDateProvider.notifier).state =
+                        selectedDate.subtract(const Duration(days: 1)),
+                    icon: const Icon(Icons.chevron_left_rounded),
+                  ),
+                  Expanded(
+                    child: Text(
+                      isToday ? 'Today' : DateFormat('EEEE, MMM d').format(selectedDate),
+                      textAlign: TextAlign.center,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Next day',
+                    onPressed: () => ref.read(selectedDateProvider.notifier).state =
+                        selectedDate.add(const Duration(days: 1)),
+                    icon: const Icon(Icons.chevron_right_rounded),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
             // 1. Calorie Hero Ring
             Container(
               padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),

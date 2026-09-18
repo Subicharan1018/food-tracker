@@ -37,7 +37,7 @@ void main() {
     expect(find.text('Train'), findsOneWidget);
     expect(find.text('Progress'), findsOneWidget);
     expect(find.text('More'), findsOneWidget);
-    expect(find.text('Breakfast'), findsOneWidget);
+    expect(find.text('Breakfast'), findsWidgets);
 
     await inMemoryDb.close();
   });

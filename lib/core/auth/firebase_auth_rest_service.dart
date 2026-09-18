@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../config/server_config.dart';
 
 sealed class AuthResult {
@@ -42,6 +43,10 @@ class FirebaseAuthRestService {
   static const _kUserId = 'firebase_user_id';
   static const _kTokenExpiry = 'firebase_token_expiry';
   static const _kLastSync = 'last_sync_timestamp';
+  static const _kCanonicalUserId = 'canonical_firebase_user_id';
+
+  /// The primary Firestore User ID where verified history & recipes live
+  static const String defaultPrimaryUserId = 'xglm2AMV46WgLwOr7CvEQm5I8x02';
 
   FirebaseAuthRestService({
     Dio? dio,
@@ -49,6 +54,52 @@ class FirebaseAuthRestService {
     this.apiKey = 'AIzaSyDemoKeyFallback',
   })  : _dio = dio ?? Dio(),
         _storage = storage ?? const FlutterSecureStorage();
+
+  Future<void> _writeStorage(String key, String value) async {
+    try {
+      await _storage.write(key: key, value: value);
+    } catch (e) {
+      debugPrint('SecureStorage write error: $e');
+    }
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(key, value);
+    } catch (e) {
+      debugPrint('SharedPreferences write error: $e');
+    }
+  }
+
+  Future<String?> _readStorage(String key) async {
+    String? val;
+    try {
+      val = await _storage.read(key: key);
+    } catch (_) {}
+    if (val != null && val.isNotEmpty) return val;
+
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      val = prefs.getString(key);
+    } catch (_) {}
+    return val;
+  }
+
+  Future<void> _deleteStorage(String key) async {
+    try {
+      await _storage.delete(key: key);
+    } catch (_) {}
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove(key);
+    } catch (_) {}
+  }
+
+  /// Lock or switch the canonical active Firestore User ID.
+  /// Resets sync timestamp to epoch 0 so all records from this account pull immediately.
+  Future<void> setCanonicalUserId(String userId) async {
+    await _writeStorage(_kCanonicalUserId, userId);
+    await _writeStorage(_kUserId, userId);
+    await _writeStorage(_kLastSync, DateTime.fromMillisecondsSinceEpoch(0).toIso8601String());
+  }
 
   /// Silently sign in anonymously using Firebase Auth REST API.
   /// Returns typed [AuthSuccess] or [AuthFailure]. Never returns a fake fallback token.
@@ -75,13 +126,17 @@ class FirebaseAuthRestService {
         final expiresIn = int.tryParse(data['expiresIn']?.toString() ?? '3600') ?? 3600;
         final expiresAt = DateTime.now().add(Duration(seconds: expiresIn));
 
-        await _storage.write(key: _kIdToken, value: idToken);
-        await _storage.write(key: _kRefreshToken, value: refreshToken);
-        await _storage.write(key: _kUserId, value: localId);
-        await _storage.write(key: _kTokenExpiry, value: expiresAt.toIso8601String());
+        // If a canonical user ID was already configured, preserve it
+        final existingCanonical = await _readStorage(_kCanonicalUserId) ?? defaultPrimaryUserId;
+        final effectiveUserId = existingCanonical.isNotEmpty ? existingCanonical : localId;
+
+        await _writeStorage(_kIdToken, idToken);
+        await _writeStorage(_kRefreshToken, refreshToken);
+        await _writeStorage(_kUserId, effectiveUserId);
+        await _writeStorage(_kTokenExpiry, expiresAt.toIso8601String());
 
         return AuthSuccess(
-          userId: localId,
+          userId: effectiveUserId,
           idToken: idToken,
           refreshToken: refreshToken,
           expiresAt: expiresAt,
@@ -140,7 +195,7 @@ class FirebaseAuthRestService {
 
   /// Proactive refresh of ID Token using refresh token
   Future<AuthResult> refreshIdToken() async {
-    final refreshToken = await _storage.read(key: _kRefreshToken);
+    final refreshToken = await _readStorage(_kRefreshToken);
     if (refreshToken == null || refreshToken.isEmpty || refreshToken == 'mock_refresh_token') {
       return signInAnonymously();
     }
@@ -162,13 +217,15 @@ class FirebaseAuthRestService {
         final data = response.data is String ? jsonDecode(response.data) : response.data;
         final newIdToken = data['id_token'] as String;
         final newRefreshToken = data['refresh_token'] as String;
-        final userId = data['user_id'] as String? ?? await _storage.read(key: _kUserId) ?? '';
+        final canonicalId = await _readStorage(_kCanonicalUserId) ?? defaultPrimaryUserId;
+        final userId = canonicalId.isNotEmpty ? canonicalId : (data['user_id'] as String? ?? await _readStorage(_kUserId) ?? '');
         final expiresIn = int.tryParse(data['expires_in']?.toString() ?? '3600') ?? 3600;
         final expiresAt = DateTime.now().add(Duration(seconds: expiresIn));
 
-        await _storage.write(key: _kIdToken, value: newIdToken);
-        await _storage.write(key: _kRefreshToken, value: newRefreshToken);
-        await _storage.write(key: _kTokenExpiry, value: expiresAt.toIso8601String());
+        await _writeStorage(_kIdToken, newIdToken);
+        await _writeStorage(_kRefreshToken, newRefreshToken);
+        await _writeStorage(_kUserId, userId);
+        await _writeStorage(_kTokenExpiry, expiresAt.toIso8601String());
 
         return AuthSuccess(
           userId: userId,
@@ -187,16 +244,14 @@ class FirebaseAuthRestService {
 
   /// Returns current [AuthResult], proactively refreshing if within 5 mins of expiry
   Future<AuthResult> getAuthState() async {
-    final storedToken = await _storage.read(key: _kIdToken);
-    final storedUserId = await _storage.read(key: _kUserId);
-    final expiryStr = await _storage.read(key: _kTokenExpiry);
-    final refreshToken = await _storage.read(key: _kRefreshToken);
+    final storedToken = await _readStorage(_kIdToken);
+    final storedUserId = await _readStorage(_kUserId) ?? await _readStorage(_kCanonicalUserId) ?? defaultPrimaryUserId;
+    final expiryStr = await _readStorage(_kTokenExpiry);
+    final refreshToken = await _readStorage(_kRefreshToken);
 
     if (storedToken == null ||
         storedToken.isEmpty ||
         storedToken == 'mock_firebase_id_token' ||
-        storedUserId == null ||
-        storedUserId.isEmpty ||
         expiryStr == null) {
       return signInAnonymously();
     }
@@ -230,11 +285,11 @@ class FirebaseAuthRestService {
     if (state is AuthSuccess) {
       return state.userId;
     }
-    return null;
+    return await _readStorage(_kCanonicalUserId) ?? defaultPrimaryUserId;
   }
 
   Future<DateTime?> getLastSyncTimestamp() async {
-    final str = await _storage.read(key: _kLastSync);
+    final str = await _readStorage(_kLastSync);
     if (str != null && str.isNotEmpty) {
       return DateTime.tryParse(str);
     }
@@ -243,19 +298,19 @@ class FirebaseAuthRestService {
   }
 
   Future<void> updateLastSyncTimestamp(DateTime time) async {
-    await _storage.write(key: _kLastSync, value: time.toIso8601String());
+    await _writeStorage(_kLastSync, time.toIso8601String());
   }
 
   Future<void> clearAuth() async {
-    await _storage.delete(key: _kIdToken);
-    await _storage.delete(key: _kRefreshToken);
-    await _storage.delete(key: _kUserId);
-    await _storage.delete(key: _kTokenExpiry);
+    await _deleteStorage(_kIdToken);
+    await _deleteStorage(_kRefreshToken);
+    await _deleteStorage(_kUserId);
+    await _deleteStorage(_kTokenExpiry);
   }
 
   /// Register device FCM token with backend server
   Future<void> registerFcmToken(String userId, {String? tokenOverride}) async {
-    final token = tokenOverride ?? await _storage.read(key: 'fcm_token');
+    final token = tokenOverride ?? await _readStorage('fcm_token');
     if (token == null || token.isEmpty) return;
 
     try {

@@ -27,6 +27,30 @@ async def test_nemotron_complete_error():
     with pytest.raises(RuntimeError, match="Nemotron complete failed"):
         await svc.complete("system", "user")
 
+
+@pytest.mark.asyncio
+async def test_nemotron_required_tool_extraction_returns_arguments_only():
+    mock_client = MagicMock()
+    tc = MagicMock()
+    tc.function.arguments = json.dumps({"name": "Rice Bowl", "ingredients": []})
+    message = MagicMock(tool_calls=[tc])
+    mock_client.chat.completions.create = AsyncMock(
+        return_value=MagicMock(choices=[MagicMock(message=message)])
+    )
+
+    svc = NemotronService(client=mock_client)
+    result = await svc.extract_with_tool(
+        system="Extract facts",
+        user="Rice bowl",
+        tool_name="extract_recipe",
+        tool_description="Extract recipe facts",
+        tool_schema={"type": "object", "properties": {}, "required": []},
+    )
+
+    assert result == {"name": "Rice Bowl", "ingredients": []}
+    kwargs = mock_client.chat.completions.create.call_args.kwargs
+    assert kwargs["tool_choice"]["function"]["name"] == "extract_recipe"
+
 @pytest.mark.asyncio
 async def test_nemotron_503_retry_and_recover():
     mock_client = MagicMock()

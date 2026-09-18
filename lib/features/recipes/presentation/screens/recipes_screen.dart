@@ -259,13 +259,15 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
       ]);
 
       final warnings = (response['warnings'] as List?)?.length ?? 0;
+      final totalCalories = _asDouble(response['total_calories']);
+      final servingCalories = _asDouble(response['calories']);
       if (!mounted) return;
       setState(() => _selectedSlot = draft.mealSlot);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
             warnings == 0
-                ? 'Recipe created and added to ${draft.mealSlot}. '
+                ? 'Recipe created: ${totalCalories.toInt()} kcal total · ${servingCalories.toInt()} kcal/serving.'
                 : 'Recipe created with $warnings nutrition warning${warnings == 1 ? '' : 's'}.',
           ),
         ),
@@ -593,7 +595,7 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                       children: [
                         Text('Create recipe with AI', style: AppTypography.titleLarge),
                         SizedBox(height: 3),
-                        Text('Paste ingredients exactly as you have them.', style: AppTypography.bodyMedium),
+                        Text('Paste the Kinetik recipe format from ChatGPT.', style: AppTypography.bodyMedium),
                       ],
                     ),
                   ),
@@ -613,7 +615,7 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Recipe text',
-                  hintText: 'Palak Paneer\n- Paneer — 150 g\n- Palak — 180 g\n- Onion — ½ medium',
+                  hintText: 'RECIPE: Chicken Biryani\nSERVINGS: 4\n\nINGREDIENTS:\n- chicken | 500 | g | raw\n- rice | 250 | g | dry\n\nMETHOD:\n...',
                   alignLabelWithHint: true,
                 ),
                 onChanged: (_) {
@@ -649,7 +651,10 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                 child: TextField(
                   controller: _servingsController,
                   keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                  decoration: const InputDecoration(labelText: 'Servings'),
+                  decoration: const InputDecoration(
+                    labelText: 'Servings override',
+                    helperText: 'Leave 1 to use SERVINGS from the pasted recipe.',
+                  ),
                 ),
               ),
               if (_error != null) ...[

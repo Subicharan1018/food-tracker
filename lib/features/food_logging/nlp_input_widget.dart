@@ -85,10 +85,12 @@ class _NlpInputWidgetState extends ConsumerState<NlpInputWidget> {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 6,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               const Icon(Icons.auto_awesome_rounded, color: AppColors.positive, size: 18),
-              const SizedBox(width: 8),
               const Text(
                 'Natural Language Food Parser',
                 style: TextStyle(
@@ -97,7 +99,6 @@ class _NlpInputWidgetState extends ConsumerState<NlpInputWidget> {
                   color: AppColors.positive,
                 ),
               ),
-              const Spacer(),
               if (_isParsing)
                 const Row(
                   children: [

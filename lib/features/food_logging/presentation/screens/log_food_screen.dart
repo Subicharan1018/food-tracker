@@ -217,8 +217,11 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                       borderRadius: BorderRadius.circular(16),
                       border: Border.all(color: AppColors.border),
                     ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    child: Wrap(
+                      alignment: WrapAlignment.spaceAround,
+                      runAlignment: WrapAlignment.center,
+                      spacing: 18,
+                      runSpacing: 10,
                       children: [
                         _MacroMini(label: 'Calories', value: '${calories.toInt()}', unit: 'kcal', color: AppColors.textPrimary),
                         _MacroMini(label: 'Protein', value: protein.toStringAsFixed(1), unit: 'g', color: AppColors.textPrimary),

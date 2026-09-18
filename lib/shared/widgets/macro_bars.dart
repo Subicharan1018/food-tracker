@@ -25,187 +25,196 @@ class MacroBarsGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        _MacroCard(
-          name: 'Protein',
-          consumed: proteinConsumed,
-          target: proteinTarget,
-          unit: 'g',
-          icon: Icons.fitness_center_rounded,
-          isProtein: true,
-          hero: true,
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MacroCard(
-                name: 'Carbs',
-                consumed: carbsConsumed,
-                target: carbsTarget,
-                unit: 'g',
-                icon: Icons.bolt_rounded,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _MacroCard(
-                name: 'Fat',
-                consumed: fatConsumed,
-                target: fatTarget,
-                unit: 'g',
-                icon: Icons.pie_chart_rounded,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-        Row(
-          children: [
-            Expanded(
-              child: _MacroCard(
-                name: 'Fiber',
-                consumed: fiberConsumed,
-                target: fiberTarget,
-                unit: 'g',
-                icon: Icons.eco_rounded,
-              ),
-            ),
-            const Spacer(),
-          ],
-        ),
-      ],
-    );
-  }
-}
-
-class _MacroCard extends StatelessWidget {
-  final String name;
-  final double consumed;
-  final double target;
-  final String unit;
-  final IconData icon;
-  final bool isProtein;
-  final bool hero;
-
-  const _MacroCard({
-    required this.name,
-    required this.consumed,
-    required this.target,
-    required this.unit,
-    required this.icon,
-    this.isProtein = false,
-    this.hero = false,
-  });
-
-  Color _resolveColor() {
-    if (target <= 0) return AppColors.textPrimary;
-    // Special-cased Protein: Orange in-progress, Green when reached or exceeded. NEVER turns Amber.
-    if (isProtein) {
-      return consumed >= target ? AppColors.positive : AppColors.brandPrimary;
-    }
-    // Carbs, Fat, Fiber: Orange in-progress, Green 95-105%, Amber over 105%
-    if (consumed > target * 1.05) {
-      return AppColors.attention;
-    }
-    if (consumed >= target * 0.95) {
-      return AppColors.positive;
-    }
-    return AppColors.brandPrimary;
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final progress = target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
-    final stateColor = _resolveColor();
-
-    final isExceeded = !isProtein && (consumed > target * 1.05);
-    final isTargetMet = isProtein
-        ? consumed >= target
-        : (consumed >= target * 0.95 && consumed <= target * 1.05);
-
-    final String statusLabel;
-    if (isExceeded) {
-      statusLabel = '${(consumed - target).toStringAsFixed(0)}$unit over';
-    } else if (isTargetMet) {
-      statusLabel = isProtein && consumed > target
-          ? '+${(consumed - target).toStringAsFixed(0)}$unit surplus'
-          : 'Goal reached';
-    } else {
-      final remaining = (target - consumed).clamp(0.0, target);
-      statusLabel = '${remaining.toStringAsFixed(0)}$unit left';
-    }
-
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: AppShapes.information,
+        borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          const Text(
+            'MACROS',
+            style: TextStyle(
+              fontSize: 11,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.2,
+              color: AppColors.textMuted,
+            ),
+          ),
+          const SizedBox(height: 14),
+          // Protein — full width hero row
+          _MacroRow(
+            name: 'Protein',
+            consumed: proteinConsumed,
+            target: proteinTarget,
+            unit: 'g',
+            isProtein: true,
+            accentColor: AppColors.brandPrimary,
+          ),
+          const SizedBox(height: 14),
+          // Carbs + Fat side by side
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              Expanded(
+                child: _MacroRow(
+                  name: 'Carbs',
+                  consumed: carbsConsumed,
+                  target: carbsTarget,
+                  unit: 'g',
+                  accentColor: const Color(0xFF60A5FA),
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: _MacroRow(
+                  name: 'Fat',
+                  consumed: fatConsumed,
+                  target: fatTarget,
+                  unit: 'g',
+                  accentColor: const Color(0xFFF59E0B),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          // Fiber
+          _MacroRow(
+            name: 'Fiber',
+            consumed: fiberConsumed,
+            target: fiberTarget,
+            unit: 'g',
+            accentColor: const Color(0xFF34D399),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MacroRow extends StatelessWidget {
+  final String name;
+  final double consumed;
+  final double target;
+  final String unit;
+  final Color accentColor;
+  final bool isProtein;
+
+  const _MacroRow({
+    required this.name,
+    required this.consumed,
+    required this.target,
+    required this.unit,
+    required this.accentColor,
+    this.isProtein = false,
+  });
+
+  Color _resolveColor() {
+    if (target <= 0) return accentColor;
+    if (isProtein) {
+      return consumed >= target ? AppColors.positive : accentColor;
+    }
+    if (consumed > target * 1.05) return AppColors.attention;
+    if (consumed >= target * 0.95) return AppColors.positive;
+    return accentColor;
+  }
+
+  String _statusLabel() {
+    if (target <= 0) return '';
+    final isExceeded = !isProtein && consumed > target * 1.05;
+    final isMet = isProtein
+        ? consumed >= target
+        : (consumed >= target * 0.95 && consumed <= target * 1.05);
+    if (isExceeded) {
+      return '+${(consumed - target).toStringAsFixed(0)}$unit over';
+    } else if (isMet) {
+      return isProtein && consumed > target
+          ? '+${(consumed - target).toStringAsFixed(0)}$unit surplus'
+          : '✓ Goal';
+    }
+    final rem = (target - consumed).clamp(0.0, target);
+    return '${rem.toStringAsFixed(0)}$unit left';
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final progress = target > 0 ? (consumed / target).clamp(0.0, 1.0) : 0.0;
+    final resolvedColor = _resolveColor();
+    final statusLabel = _statusLabel();
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                color: resolvedColor,
+                shape: BoxShape.circle,
+              ),
+            ),
+            const SizedBox(width: 7),
+            Expanded(
+              child: Text(
                 name,
                 style: const TextStyle(
-                  fontSize: 13,
+                  fontSize: 12,
                   fontWeight: FontWeight.w600,
                   color: AppColors.textSecondary,
                 ),
               ),
-              Icon(icon, size: 16, color: AppColors.textMuted),
-            ],
-          ),
-          SizedBox(height: hero ? 12 : 8),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Text(
-                consumed.toStringAsFixed(1),
-                style: TextStyle(
-                  fontSize: hero ? 26 : 18,
-                  fontWeight: FontWeight.w800,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              Text(
-                ' / ${target.toInt()}$unit',
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: AppColors.textMuted,
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: hero ? 10 : 6),
-          ClipRRect(
-            borderRadius: BorderRadius.circular(4),
-            child: LinearProgressIndicator(
-              value: progress,
-              backgroundColor: AppColors.cardElevated,
-              valueColor: AlwaysStoppedAnimation<Color>(stateColor),
-              minHeight: hero ? 8 : 6,
             ),
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: consumed.toStringAsFixed(isProtein ? 1 : 0),
+                    style: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w800,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' / ${target.toInt()}$unit',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.textMuted,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 7),
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: LinearProgressIndicator(
+            value: progress,
+            backgroundColor: AppColors.cardElevated,
+            valueColor: AlwaysStoppedAnimation<Color>(resolvedColor),
+            minHeight: isProtein ? 7 : 5,
           ),
+        ),
+        if (statusLabel.isNotEmpty) ...[
           const SizedBox(height: 4),
           Text(
             statusLabel,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: isTargetMet || isExceeded ? stateColor : AppColors.textMuted,
+              fontSize: 10,
+              fontWeight: FontWeight.w600,
+              color: resolvedColor == accentColor
+                  ? AppColors.textMuted
+                  : resolvedColor,
             ),
           ),
         ],
-      ),
+      ],
     );
   }
 }

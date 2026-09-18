@@ -189,7 +189,10 @@ class _MealPlanCardState extends ConsumerState<MealPlanCard> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    Row(
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
                         Text(
                           '$cal kcal',
@@ -208,7 +211,6 @@ class _MealPlanCardState extends ConsumerState<MealPlanCard> {
                             color: AppColors.positive,
                           ),
                         ),
-                        const Spacer(),
                         SizedBox(
                           height: 32,
                           child: ElevatedButton.icon(

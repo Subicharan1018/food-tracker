@@ -277,6 +277,35 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       ],
                     ),
                     const SizedBox(height: 12),
+                    FutureBuilder<String?>(
+                      future: ref.read(firebaseAuthRestServiceProvider).getUserId(),
+                      builder: (context, snapshot) {
+                        final activeUid = snapshot.data ?? 'xglm2AMV46WgLwOr7CvEQm5I8x02';
+                        return Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                          decoration: BoxDecoration(
+                            color: AppColors.surfaceElevated,
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(color: AppColors.border),
+                          ),
+                          child: Row(
+                            children: [
+                              const Icon(Icons.account_circle_outlined, size: 14, color: AppColors.textSecondary),
+                              const SizedBox(width: 6),
+                              Expanded(
+                                child: Text(
+                                  'Active Cloud UID: $activeUid',
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(fontSize: 11, fontFamily: 'monospace', color: AppColors.textPrimary, fontWeight: FontWeight.w600),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -354,6 +383,120 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                           ),
                         ),
                       ],
+                    ),
+                    const SizedBox(height: 10),
+                    OutlinedButton.icon(
+                      style: OutlinedButton.styleFrom(
+                        side: const BorderSide(color: AppColors.border),
+                        minimumSize: const Size(double.infinity, 38),
+                      ),
+                      onPressed: () {
+                        final controller = TextEditingController(text: 'xglm2AMV46WgLwOr7CvEQm5I8x02');
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            backgroundColor: AppColors.card,
+                            title: const Text('Manage & Merge Cloud Accounts', style: TextStyle(color: AppColors.textPrimary, fontSize: 16, fontWeight: FontWeight.bold)),
+                            content: SingleChildScrollView(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Adopt or merge data from any previous Firestore User document into your local app & cloud storage:',
+                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                                  ),
+                                  const SizedBox(height: 12),
+                                  TextField(
+                                    controller: controller,
+                                    style: const TextStyle(color: AppColors.textPrimary, fontSize: 12, fontFamily: 'monospace'),
+                                    decoration: const InputDecoration(
+                                      labelText: 'Firestore User ID',
+                                      border: OutlineInputBorder(),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 10),
+                                  const Text('Quick Select from Firestore:', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.textMuted)),
+                                  const SizedBox(height: 6),
+                                  Wrap(
+                                    spacing: 6,
+                                    runSpacing: 4,
+                                    children: [
+                                      ActionChip(
+                                        backgroundColor: AppColors.brandPrimary.withValues(alpha: 0.15),
+                                        label: const Text('Main Verified (xglm2...)', style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: AppColors.brandPrimary)),
+                                        onPressed: () => controller.text = 'xglm2AMV46WgLwOr7CvEQm5I8x02',
+                                      ),
+                                      ActionChip(
+                                        label: const Text('Sep 15 (qJBJ...)', style: TextStyle(fontSize: 11)),
+                                        onPressed: () => controller.text = 'qJBJWa4OHut6ipBUWz71lr4r4uR2',
+                                      ),
+                                      ActionChip(
+                                        label: const Text('Sep 07 (xGcC...)', style: TextStyle(fontSize: 11)),
+                                        onPressed: () => controller.text = 'xGcChyCdwd08zm8QVCe0VW0bV7B3',
+                                      ),
+                                      ActionChip(
+                                        label: const Text('Legacy (FkCX...)', style: TextStyle(fontSize: 11)),
+                                        onPressed: () => controller.text = 'FkCXgOvC3pdw7njAez5RV09JgFH2',
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 14),
+                                  Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      color: AppColors.surfaceElevated,
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      '💡 Tip for Firestore Console:\nIn Firebase Console > Firestore, document "xglm2AMV46WgLwOr7CvEQm5I8x02" is your primary account. You can safely delete the other 3 orphan documents (FkCX..., qJBJ..., xGcC...).',
+                                      style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.35),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Cancel', style: TextStyle(color: AppColors.textSecondary)),
+                              ),
+                              ElevatedButton(
+                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary),
+                                onPressed: () async {
+                                  final id = controller.text.trim();
+                                  if (id.isEmpty) return;
+                                  Navigator.pop(ctx);
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text('Setting $id as primary and syncing...')),
+                                  );
+                                  final auth = ref.read(firebaseAuthRestServiceProvider);
+                                  await auth.setCanonicalUserId(id);
+
+                                  final db = ref.read(databaseProvider);
+                                  final syncService = ref.read(firestoreSyncServiceProvider);
+                                  final count = await syncService.importFromUser(db, id);
+
+                                  // Trigger immediate two-way sync
+                                  await ref.read(syncSchedulerProvider).syncNow();
+
+                                  if (context.mounted) {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Linked account $id! Merged $count cloud records.'),
+                                        backgroundColor: AppColors.positive.withValues(alpha: 0.15),
+                                      ),
+                                    );
+                                  }
+                                },
+                                child: const Text('Set & Sync Account', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.manage_accounts_rounded, size: 16, color: AppColors.textPrimary),
+                      label: const Text('Manage & Merge Cloud Accounts', style: TextStyle(color: AppColors.textPrimary, fontSize: 12)),
                     ),
                   ],
                 ),
