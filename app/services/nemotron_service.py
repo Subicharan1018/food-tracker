@@ -15,27 +15,28 @@ class NemotronService:
             timeout=settings.ai_timeout_seconds,
         )
 
-    async def _execute_with_retry(self, api_call_coro):
-        """Retries on HTTP 503 up to 3 attempts with 10-second delay and enforces hard timeout."""
-        max_attempts = 3
+    async def _execute_with_retry(self, api_call_coro, timeout_seconds: float | None = None):
+        """Retries on HTTP 503 up to 2 attempts with 5-second delay and enforces timeout."""
+        call_timeout = timeout_seconds if timeout_seconds is not None else settings.ai_timeout_seconds
+        max_attempts = 2
         for attempt in range(1, max_attempts + 1):
             try:
                 return await asyncio.wait_for(
                     api_call_coro(),
-                    timeout=settings.ai_timeout_seconds,
+                    timeout=call_timeout,
                 )
             except APIStatusError as e:
                 if e.status_code == 503 and attempt < max_attempts:
                     logger.warning(
-                        "OpenRouter returned 503. Retrying in 10s (attempt %d/%d)...",
+                        "OpenRouter returned 503. Retrying in 5s (attempt %d/%d)...",
                         attempt, max_attempts
                     )
-                    await asyncio.sleep(10)
+                    await asyncio.sleep(5)
                 else:
                     raise
             except (asyncio.TimeoutError, TimeoutError):
-                logger.error("AI call timed out after %ds", settings.ai_timeout_seconds)
-                raise TimeoutError(f"AI call timed out after {settings.ai_timeout_seconds}s")
+                logger.error("AI call timed out after %ds", int(call_timeout))
+                raise TimeoutError(f"AI call timed out after {int(call_timeout)}s")
             except Exception:
                 raise
 
@@ -75,13 +76,9 @@ class NemotronService:
         tool_description: str,
         tool_schema: dict,
         max_tokens: int = 2500,
+        timeout_seconds: float = 15.0,
     ) -> dict:
-        """Force one typed extraction tool call and return only its arguments.
-
-        OpenRouter's free Nemotron endpoint supports tool calling even though it
-        does not support native response_format JSON schema. The caller still
-        validates the returned arguments with Pydantic before using them.
-        """
+        """Force one typed extraction tool call and return only its arguments."""
         async def _call():
             return await self._client.chat.completions.create(
                 model=settings.nemotron_model,
@@ -102,7 +99,7 @@ class NemotronService:
             )
 
         try:
-            response = await self._execute_with_retry(_call)
+            response = await self._execute_with_retry(_call, timeout_seconds=timeout_seconds)
             choice = response.choices[0] if response and response.choices else None
             message = getattr(choice, "message", None)
             tool_calls = getattr(message, "tool_calls", None) if message else None

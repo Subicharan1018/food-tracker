@@ -18,10 +18,23 @@ if not firebase_admin._apps:
         except Exception as e:
             logger.warning("Firebase Admin default init fallback: %s", e)
 
-try:
-    db = fs.client()
-except Exception:
-    db = None
+_db_client = None
+_db_client_initialized = False
+
+
+def _get_db_client():
+    """Lazily initialize the Firestore client to avoid blocking the GCE metadata
+    ping at import time when running locally without a service-account.json."""
+    global _db_client, _db_client_initialized
+    if _db_client_initialized:
+        return _db_client
+    _db_client_initialized = True
+    try:
+        _db_client = fs.client()
+    except Exception as exc:
+        logger.warning("Firestore client init failed (will run without Firestore): %s", exc)
+        _db_client = None
+    return _db_client
 
 class FirestoreService:
     def __init__(self, client=None):
@@ -29,7 +42,7 @@ class FirestoreService:
 
     @property
     def db(self):
-        return self._db if self._db is not None else db
+        return self._db if self._db is not None else _get_db_client()
 
     # ── reads ────────────────────────────────────────────────────────
 

@@ -22,13 +22,15 @@ class _PortionSpec {
 }
 
 _PortionSpec _portionSpec(FoodItem food) {
-  final raw = food.servingUnit.trim().toLowerCase();
+  // Strip any parenthesized weight suffix, e.g. "cup (200g)" -> "cup"
+  final rawFull = food.servingUnit.trim();
+  final raw = rawFull.replaceAll(RegExp(r'\s*\(.*?\)'), '').trim().toLowerCase();
   final isKg = raw == 'kg' || raw.startsWith('kg ') || raw.startsWith('kilogram');
   final isGram = raw == 'g' || raw.startsWith('g ') || raw.startsWith('gram');
   final isMl = raw == 'ml' || raw.startsWith('ml ') || raw.startsWith('milliliter');
   final isLiter = raw == 'l' || raw.startsWith('l ') || raw.startsWith('liter');
   final isMass = isKg || isGram || isMl || isLiter;
-  final unit = isKg ? 'kg' : (isGram ? 'g' : (isMl ? 'ml' : (isLiter ? 'L' : food.servingUnit)));
+  final unit = isKg ? 'kg' : (isGram ? 'g' : (isMl ? 'ml' : (isLiter ? 'L' : raw)));
   final step = (isKg || isLiter) ? 0.1 : (isMass ? 10.0 : 0.25);
   return _PortionSpec(
     servingSize: food.servingSize > 0 ? food.servingSize : 1.0,
@@ -39,6 +41,23 @@ _PortionSpec _portionSpec(FoodItem food) {
 }
 
 double _portionFactor(_PortionSpec spec, double amount) => amount / spec.servingSize;
+
+/// Returns the unit string with correct pluralisation for count-based units.
+String _pluraliseUnit(String unit, double amount) {
+  if (amount == 1.0) return unit;
+  switch (unit) {
+    case 'cup':
+      return 'cups';
+    case 'tbsp':
+    case 'tablespoon':
+      return 'tbsp';
+    case 'tsp':
+    case 'teaspoon':
+      return 'tsp';
+    default:
+      return unit;
+  }
+}
 
 double _convertMass(double amount, String? from, String to) {
   if (from == null) return amount;
@@ -300,7 +319,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             ),
                           ),
                           child: Text(
-                            '${spec.format(preset)} ${spec.unit}',
+                            '${spec.format(preset)} ${_pluraliseUnit(spec.unit, preset)}',
                             style: TextStyle(
                               fontSize: 13,
                               fontWeight: FontWeight.w700,

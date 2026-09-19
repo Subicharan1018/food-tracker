@@ -113,9 +113,29 @@ _ALIASES = {
     "curd": "curd",
     "yogurt": "curd",
     "chilli powder": "chillies red",
-    "red chilli powder": "chillies red",
     "coriander powder": "coriander seeds",
     "cumin powder": "cumin seeds",
+    # Common Indian cooking additions
+    "pasta": "macaroni",
+    "macaroni pasta": "macaroni",
+    "wheat flour": "wheat flour refined",
+    "maida": "wheat flour refined",
+    "milk": "milk buffalo",
+    "low fat milk": "milk cow",
+    "butter": "butter",
+    "paneer": "paneer",
+    "white pepper": "pepper black",
+    "oregano": "coriander seeds",
+    "basil": "coriander leaves",
+    "chilli sauce": "chillies green",
+    "red chilli sauce": "chillies red",
+    "hot chilli sauce": "chillies red",
+    "black salt": "salt",
+    "chicken tikka masala": "chillies red",
+    "garam masala": "pepper black",
+    "kashmiri chili": "chillies red",
+    "kashmiri chili powder": "chillies red",
+    "salt": "salt",
 }
 
 # Small, explicit fallbacks for ingredients that are common in Indian recipes
@@ -252,6 +272,22 @@ def _split_ingredient_line(line: str) -> tuple[str, float | None, str | None]:
     line = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", line)
     line = re.sub(r"\*\*|__", "", html.unescape(line)).strip()
 
+    # Handle the canonical pipe format: name | amount | unit [| state]
+    # This can appear in the fallback path when _parse_kinetik_format rejects
+    # the whole recipe but individual lines are still pipe-delimited.
+    if "|" in line:
+        parts = [p.strip() for p in line.split("|")]
+        if len(parts) >= 2:
+            name = parts[0]
+            amount_str = parts[1] if len(parts) > 1 else ""
+            unit_str = parts[2] if len(parts) > 2 else ""
+            normalised_amount = _normalise(amount_str)
+            if normalised_amount in {"to taste", "as needed", "as required", ""}:
+                return name, None, "to taste" if normalised_amount else None
+            amount = _parse_number(amount_str)
+            unit = _canonical_unit(unit_str) if unit_str else None
+            return name, amount, unit
+
     separator = re.split(r"\s+[—–]\s+|\s+-\s+|\s*:\s*", line, maxsplit=1)
     if len(separator) == 2:
         left, right = separator
@@ -369,25 +405,40 @@ class RecipeIngestionService:
         title = re.sub(r"^#+\s*", "", lines[0]).strip(" -*–—:")
         if "—" in title:
             title = title.split("—", 1)[0].strip()
-        if not title or title.lower() in {"ingredients", "recipe"}:
+        if not title or title.lower() in {"ingredients", "recipe", "ingredients:", "recipe:"}:
             title = "Untitled recipe"
 
         ingredients = []
+        method_lines = []
+        in_method = False
+
         for line in lines[1:]:
-            if line.lower().startswith(("method:", "directions:", "instructions:")):
-                break
-            if not (line.startswith(("-", "*", "•")) or "—" in line or "–" in line or " : " in line):
+            if line.lower().startswith(("method:", "directions:", "instructions:", "preparation:", "steps:")):
+                in_method = True
                 continue
+            if in_method:
+                method_lines.append(line)
+                continue
+            if line.lower().startswith(("ingredients:", "for the marinade:", "for the gravy:", "for the rice:")):
+                continue
+
             name, amount, unit = _split_ingredient_line(line)
-            if name and _normalise(name) not in {"ingredients", "method", "directions"}:
+            if name and _normalise(name) not in {"ingredients", "method", "directions", "instructions", "recipe"}:
                 ingredients.append({
                     "name": name,
                     "amount": amount,
                     "unit": unit,
                     "grams": _estimate_grams(name, amount, unit),
+                    "state": "unclear",
+                    "confidence": 0.9,
                 })
 
-        return {"name": title, "meal_slot": meal_slot, "ingredients": ingredients, "method": ""}
+        return {
+            "name": title,
+            "meal_slot": meal_slot,
+            "ingredients": ingredients,
+            "method": " ".join(method_lines).strip(),
+        }
 
     def _parse_kinetik_format(self, recipe_text: str, meal_slot: str) -> dict[str, Any] | None:
         """Parse the canonical ChatGPT-to-Kinetik format without an LLM.
@@ -399,10 +450,18 @@ class RecipeIngestionService:
           - chicken | 500 | g | raw
           METHOD:
           ...
+
+        Tolerates bullet characters (-, •, *) and gracefully handles
+        "to taste" amounts and quantity ranges (e.g. 50–100 ml).
+        Returns None only when the text does not look like the Kinetik
+        format at all (no RECIPE: header or no pipe-delimited ingredients).
         """
         lines = [line.strip() for line in recipe_text.replace("\r", "").split("\n")]
         title = next((line.split(":", 1)[1].strip() for line in lines
                       if line.upper().startswith("RECIPE:") and ":" in line), "")
+        if not title:
+            return None  # Not Kinetik format — let the AI / fallback handle it.
+
         servings = 1.0
         for line in lines:
             if line.upper().startswith("SERVINGS:") and ":" in line:
@@ -413,6 +472,7 @@ class RecipeIngestionService:
         section = ""
         ingredients: list[dict[str, Any]] = []
         method_lines: list[str] = []
+        has_pipe_line = False
         for raw_line in lines:
             upper = raw_line.upper()
             if upper in {"INGREDIENTS:", "INGREDIENTS"}:
@@ -423,28 +483,61 @@ class RecipeIngestionService:
                 continue
             if not raw_line:
                 continue
-            if section == "ingredients" and raw_line.startswith("-"):
-                parts = [part.strip() for part in raw_line[1:].split("|")]
-                if len(parts) < 3:
-                    return None
+            if section == "ingredients":
+                # Accept -, •, *, and numbered prefixes
+                stripped = re.sub(r"^\s*(?:[-*•]|\d+[.)])\s*", "", raw_line)
+                if not stripped or stripped == raw_line:
+                    # No recognised bullet — only skip if this line has no pipes
+                    if "|" not in raw_line:
+                        continue
+                    stripped = raw_line
+
+                if "|" not in stripped:
+                    continue  # Not a pipe line — ignore in strict mode
+
+                has_pipe_line = True
+                parts = [part.strip() for part in stripped.split("|")]
                 name = parts[0]
-                amount = _parse_number(parts[1])
-                unit = _canonical_unit(parts[2])
-                state = parts[3].lower() if len(parts) > 3 else "unclear"
-                if not name or amount is None or not unit:
-                    return None
+                if not name:
+                    continue
+
+                raw_amount = parts[1] if len(parts) > 1 else ""
+                raw_unit = parts[2] if len(parts) > 2 else ""
+                state_raw = parts[3].lower() if len(parts) > 3 else "unclear"
+
+                normalised_amount = _normalise(raw_amount)
+                if normalised_amount in {"to taste", "as needed", "as required", ""}:
+                    # Explicitly "to taste" — include ingredient but with 0 g
+                    ingredients.append({
+                        "name": name,
+                        "amount": None,
+                        "unit": "to taste",
+                        "grams": 0.0,
+                        "state": "unclear",
+                        "confidence": 1.0,
+                    })
+                    continue
+
+                amount = _parse_number(raw_amount)
+                unit = _canonical_unit(raw_unit) if raw_unit else None
+
+                if amount is None or not unit:
+                    # Malformed line — skip without aborting the whole recipe
+                    logger.debug("Skipping malformed ingredient line in Kinetik format: %r", raw_line)
+                    continue
+
                 ingredients.append({
                     "name": name,
                     "amount": amount,
                     "unit": unit,
                     "grams": _estimate_grams(name, amount, unit),
-                    "state": state if state in {"raw", "dry", "cooked"} else "unclear",
+                    "state": state_raw if state_raw in {"raw", "dry", "cooked"} else "unclear",
                     "confidence": 1.0,
                 })
             elif section == "method":
                 method_lines.append(raw_line)
 
-        if not title or not ingredients:
+        if not has_pipe_line or not ingredients:
             return None
         return {
             "name": title,
@@ -555,12 +648,13 @@ class RecipeIngestionService:
                 tool_description="Extract recipe facts only. Never calculate calories or macros.",
                 tool_schema=extraction_schema,
                 max_tokens=2500,
+                timeout_seconds=12.0,
             )
             validated = RecipeExtraction.model_validate(raw)
             parsed = self._normalise_ai_data(validated.model_dump(), recipe_text, meal_slot)
             return parsed or fallback
         except Exception as exc:
-            logger.warning("Recipe AI parsing failed; using deterministic parser: %s", exc)
+            logger.warning("Recipe AI parsing failed / timed out; using deterministic parser: %s", exc)
             return fallback
 
     def _resolve_food(self, ingredient_name: str, state: str | None = None) -> dict | None:
