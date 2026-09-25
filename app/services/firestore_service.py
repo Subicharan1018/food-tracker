@@ -182,4 +182,66 @@ class FirestoreService:
         doc = self.db.collection("users").document(user_id).collection("daily_pace_status").document(date_key).get()
         return doc.to_dict() if doc.exists else None
 
+    # ── Shopping Cart ─────────────────────────────────────────────────
+
+    def get_cart_items(self, user_id: str) -> list[dict]:
+        """Return all active (not-yet-checked-out) shopping cart items."""
+        if not self.db:
+            return []
+        docs = (
+            self.db.collection("users").document(user_id)
+            .collection("shopping_cart_items")
+            .stream()
+        )
+        return [{**(doc.to_dict() or {}), "id": doc.id} for doc in docs]
+
+    def upsert_cart_item(self, user_id: str, item_id: str, item: dict) -> bool:
+        """Write or overwrite a single cart item.  Caller is responsible for
+        deduplication by canonical_name before calling this method."""
+        if not self.db:
+            return False
+        self.db.collection("users").document(user_id) \
+            .collection("shopping_cart_items").document(item_id) \
+            .set({**item, "id": item_id})
+        return True
+
+    def delete_checked_cart_items(self, user_id: str) -> int:
+        """Delete all cart items where checked==True.  Returns count deleted."""
+        if not self.db:
+            return 0
+        docs = (
+            self.db.collection("users").document(user_id)
+            .collection("shopping_cart_items")
+            .where("checked", "==", True)
+            .stream()
+        )
+        count = 0
+        for doc in docs:
+            doc.reference.delete()
+            count += 1
+        return count
+
+    def delete_cart_item(self, user_id: str, item_id: str) -> bool:
+        if not self.db:
+            return False
+        self.db.collection("users").document(user_id) \
+            .collection("shopping_cart_items").document(item_id).delete()
+        return True
+
+    def save_shopping_list(self, user_id: str, week: str, content: dict) -> bool:
+        """Persist the weekly shopping list (ceiling + structural gaps detail)."""
+        if not self.db:
+            return False
+        self.db.collection("users").document(user_id) \
+            .collection("shopping_lists").document(week) \
+            .set({**content, "generatedAt": datetime.now().isoformat()})
+        return True
+
+    def get_shopping_list(self, user_id: str, week: str) -> dict | None:
+        if not self.db:
+            return None
+        doc = self.db.collection("users").document(user_id) \
+            .collection("shopping_lists").document(week).get()
+        return doc.to_dict() if doc.exists else None
+
 firestore_service = FirestoreService()

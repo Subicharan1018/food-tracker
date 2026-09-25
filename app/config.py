@@ -15,6 +15,7 @@ class Settings(BaseSettings):
     server_api_key: str | None = None
     recomp_manual_path: str = "assets/recomp_manual_v3.txt"
     ifct_db_path: str = "app/data/ifct2017.db"
+    usda_fdc_api_key: str = "DEMO_KEY"  # Free key from https://api.data.gov/signup/
 
     model_config = SettingsConfigDict(
         env_file=".env",
