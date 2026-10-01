@@ -8,7 +8,10 @@ class MealRailItem {
   final String keyName, title, subtitle, time;
   final IconData icon;
   final List<DiaryEntry> entries;
-  const MealRailItem({required this.keyName, required this.title, required this.subtitle, required this.time, required this.icon, required this.entries});
+  /// "Same as Tue: …" — offered while the slot is still empty.
+  final String? repeatLabel;
+  final VoidCallback? onRepeat;
+  const MealRailItem({required this.keyName, required this.title, required this.subtitle, required this.time, required this.icon, required this.entries, this.repeatLabel, this.onRepeat});
 }
 
 /// Shows the day's meals as a sequence, with only the selected slot expanded.
@@ -89,7 +92,7 @@ class _MealRailState extends State<MealRail> {
             },
           ),
         ),
-        MealSlotCard(slotKey: selected.keyName, title: selected.title, subtitle: selected.subtitle, timeRange: selected.time, entries: selected.entries, onAddTap: () => widget.onAdd(selected.keyName), onDeleteEntry: widget.onDelete),
+        MealSlotCard(slotKey: selected.keyName, title: selected.title, subtitle: selected.subtitle, timeRange: selected.time, entries: selected.entries, onAddTap: () => widget.onAdd(selected.keyName), onDeleteEntry: widget.onDelete, repeatLabel: selected.repeatLabel, onRepeat: selected.onRepeat),
       ],
     );
   }

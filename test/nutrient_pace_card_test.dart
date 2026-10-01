@@ -13,13 +13,13 @@ void main() {
   setUp(() => db = AppDatabase(NativeDatabase.memory()));
   tearDown(() => db.close());
 
-  Future<void> pump(WidgetTester tester, Map<String, dynamic> status) => tester.pumpWidget(
+  Future<void> pump(WidgetTester tester, Map<String, dynamic>? status, {bool unreachable = false}) => tester.pumpWidget(
         ProviderScope(
           overrides: [
             databaseProvider.overrideWithValue(db),
             shoppingCartServiceProvider.overrideWithValue(ShoppingCartService(db)),
           ],
-          child: MaterialApp(home: Scaffold(body: SingleChildScrollView(child: NutrientPaceCard(status: status)))),
+          child: MaterialApp(home: Scaffold(body: SingleChildScrollView(child: NutrientPaceCard(status: status, unreachable: unreachable)))),
         ),
       );
 
@@ -75,6 +75,25 @@ void main() {
       await tester.pump();
       expect(find.text('Fix with what you have'), findsOneWidget);
       expect(find.text('+ Add'), findsNothing);
+    });
+    await _unmount(tester);
+  });
+
+  testWidgets('a down server says so instead of looking like an empty day', (tester) async {
+    await tester.runAsync(() async {
+      await pump(tester, null, unreachable: true);
+      await tester.pump();
+      expect(find.textContaining("Can't reach the Kinetik server"), findsOneWidget);
+      expect(find.textContaining('No check has run yet'), findsNothing);
+    });
+    await _unmount(tester);
+  });
+
+  testWidgets('foods the server could not count are listed', (tester) async {
+    await tester.runAsync(() async {
+      await pump(tester, {...status(makeable: true), 'uncounted_foods': ['Homemade sambar']});
+      await tester.pump();
+      expect(find.textContaining('Not counted (no cited data or no weight): Homemade sambar'), findsOneWidget);
     });
     await _unmount(tester);
   });

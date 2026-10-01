@@ -126,11 +126,12 @@ class AiApiClient {
     final response = await _client
         .get(Uri.parse('$_base/ai/pacing-status/$userId'))
         .timeout(_timeout);
-    if (response.statusCode == 200) {
-      final decoded = jsonDecode(response.body);
-      return decoded is Map<String, dynamic> ? decoded : null;
+    // A down server (502 via the tunnel) must look offline, not "no data yet".
+    if (response.statusCode != 200) {
+      throw Exception('Server error ${response.statusCode}');
     }
-    return null;
+    final decoded = jsonDecode(response.body);
+    return decoded is Map<String, dynamic> ? decoded : null;
   }
 
   /// This week's server-computed shopping list, or `null` if none exists yet.

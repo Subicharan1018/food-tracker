@@ -35,6 +35,7 @@ class WaterNotificationService {
         exact: true,
         wakeup: true,
         alarmClock: true,
+        params: {'body': slot.msg},
       );
     }
   }
@@ -56,13 +57,12 @@ class WaterNotificationService {
 
 /// Top-level function required by android_alarm_manager_plus.
 @pragma('vm:entry-point')
-Future<void> _fireWaterReminder() async {
+Future<void> _fireWaterReminder(int id, Map<String, dynamic> params) async {
   final plugin = FlutterLocalNotificationsPlugin();
-  final hour = DateTime.now().hour;
   await plugin.show(
-    hour,
-    'Hydration Check',
-    'Time to drink water.',
+    id,
+    'Hydration check',
+    params['body'] as String? ?? 'Time to drink water.',
     const NotificationDetails(
       android: AndroidNotificationDetails(
         'water_reminders', 'Water Reminders',

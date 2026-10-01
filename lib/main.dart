@@ -74,6 +74,10 @@ class _KinetikFitnessAppState extends ConsumerState<KinetikFitnessApp>
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      // Pull last nights' sleep from Health Connect before the first sync,
+      // so the weekly digest has real sleep data to reason over.
+      await _importSleep();
+
       // Cold start auto-sync
       ref.read(syncSchedulerProvider).syncNow();
 
@@ -100,11 +104,22 @@ class _KinetikFitnessAppState extends ConsumerState<KinetikFitnessApp>
     });
   }
 
+  Future<void> _importSleep() async {
+    try {
+      final health = ref.read(healthSyncServiceProvider);
+      if (await health.checkConnectionStatus()) {
+        await health.importSleep(ref.read(databaseProvider));
+      }
+    } catch (e) {
+      debugPrint('Sleep import notice: $e');
+    }
+  }
+
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
-      // Foreground resume auto-sync
-      ref.read(syncSchedulerProvider).syncNow();
+      // Foreground resume: pick up last night's sleep, then sync.
+      _importSleep().then((_) => ref.read(syncSchedulerProvider).syncNow());
     }
   }
 

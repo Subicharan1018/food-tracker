@@ -96,11 +96,20 @@ def compute_weekly_nutrient_ceiling(
     }
 
 
+def _in_stock(item: dict[str, Any]) -> bool:
+    quantity = item.get("quantity")
+    try:
+        return quantity is None or float(quantity) > 0
+    except (TypeError, ValueError):
+        return True
+
+
 def inventory_canonical_names(inventory: list[dict[str, Any]]) -> set[str]:
+    """Canonical names of what's actually in stock (used-up rows don't count)."""
     return {
         canonicalize(str(item.get("canonicalName") or item.get("name") or ""))
         for item in inventory
-        if item.get("canonicalName") or item.get("name")
+        if (item.get("canonicalName") or item.get("name")) and _in_stock(item)
     } - {""}
 
 

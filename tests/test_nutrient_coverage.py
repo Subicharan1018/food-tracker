@@ -145,8 +145,11 @@ async def test_pacing_alert_discards_ai_numbers_and_names_precomputed_recipe(mon
     monkeypatch.setattr("app.routers.pacing.load_nutrient_profiles", lambda: NUTRIENT_DB)
     today = datetime.now().strftime("%Y-%m-%d")
     firestore = MagicMock()
-    firestore.get_diary_history.return_value = [{"date": today, "foodName": "toast", "proteinG": 10}]
-    firestore.get_recipes.return_value = [_recipe("Keerai Kootu", {"name": "spinach", "amount": 150, "unit": "g"})]
+    firestore.get_diary_history.return_value = [{"date": today, "foodName": "Toast", "proteinG": 10, "portionQty": 1}]
+    firestore.get_recipes.return_value = [
+        {**_recipe("Toast", {"name": "bread", "amount": 60, "unit": "g"}), "nutrients": {"iron_mg": 0.5}},
+        _recipe("Keerai Kootu", {"name": "spinach", "amount": 150, "unit": "g"}),
+    ]
     firestore.get_user_profile.return_value = {}
     firestore.get_inventory.return_value = [{"name": "spinach", "quantity": 500, "unit": "g"}]
     nemotron = MagicMock()
@@ -158,3 +161,57 @@ async def test_pacing_alert_discards_ai_numbers_and_names_precomputed_recipe(mon
     assert status["candidate_recipe"]["makeable"] is True
     assert "300" not in status["message"]
     assert "Keerai Kootu" in status["message"]
+
+
+# ── Diary micronutrients: every cited food counts, nothing is zero-filled ──
+
+from app.services.pacing_service import detect_gaps, diary_micronutrients, entry_grams
+
+
+class _IfctDb:
+    def get_food_by_code(self, code):
+        return {"code": code, "name": "Spinach", "iron_mg": 2.7, "calcium_mg": 99.0} if code == "D032" else None
+
+
+def test_foods_logged_from_ifct_search_count_by_weight():
+    diary = [{"foodName": "Spinach (Palak)", "foodItemId": "ifct_d032", "portionQty": 200, "portionUnit": "g"}]
+    result = diary_micronutrients(diary, [], _IfctDb())
+    assert result["totals"]["iron_mg"] == pytest.approx(5.4)
+    assert result["counted"] == ["Spinach (Palak)"]
+    assert result["measured"] == {"iron_mg", "calcium_mg"}
+
+
+def test_unweighable_and_unknown_foods_are_listed_not_zeroed():
+    diary = [
+        {"foodName": "Spinach", "foodItemId": "ifct_d032", "portionQty": 1, "portionUnit": "serving"},
+        {"foodName": "Homemade sambar", "portionQty": 1, "portionUnit": "bowl"},
+    ]
+    result = diary_micronutrients(diary, [], _IfctDb())
+    assert result["uncounted"] == ["Spinach", "Homemade sambar"]
+    assert result["measured"] == set()
+
+
+def test_unmeasured_nutrients_are_never_flagged_behind():
+    diary = [{"foodName": "Spinach", "foodItemId": "ifct_d032", "portionQty": 100, "portionUnit": "g", "proteinG": 200}]
+    issues = detect_gaps(diary, [], 21, food_db=_IfctDb())
+    # Iron and calcium were measured (and are low); B12 had no source, so it isn't claimed.
+    assert set(issues["nutrient_gaps"]) == {"iron_mg", "calcium_mg"}
+
+
+def test_recipe_match_uses_canonical_names():
+    recipes = [{"name": "Keerai Kootu", "nutrients": {"iron_mg": 4.0}}]
+    diary = [{"foodName": "  keerai kootu ", "portionQty": 2}]
+    assert diary_micronutrients(diary, recipes)["totals"]["iron_mg"] == 8.0
+
+
+def test_entry_grams_reads_weight_from_count_units():
+    assert entry_grams({"portionQty": 2, "portionUnit": "egg (~55g)"}) == 110
+    assert entry_grams({"portionQty": 0.5, "portionUnit": "kg"}) == 500
+    assert entry_grams({"portionQty": 1, "portionUnit": "cup"}) is None
+
+
+def test_used_up_pantry_rows_do_not_count_as_owned():
+    recipes = [_recipe("Keerai Kootu", {"name": "spinach", "amount": 150, "unit": "g"})]
+    used_up = [{"name": "spinach", "quantity": 0, "unit": "g"}]
+    candidate = find_candidate_recipe(["iron_mg"], recipes, used_up, NUTRIENT_DB)
+    assert candidate["makeable"] is False

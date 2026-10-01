@@ -6847,6 +6847,18 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _servingsMeta = const VerificationMeta(
+    'servings',
+  );
+  @override
+  late final GeneratedColumn<double> servings = GeneratedColumn<double>(
+    'servings',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
   static const VerificationMeta _methodMeta = const VerificationMeta('method');
   @override
   late final GeneratedColumn<String> method = GeneratedColumn<String>(
@@ -6901,6 +6913,7 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     fatG,
     fiberG,
     ingredientsJson,
+    servings,
     method,
     shelfLifeTip,
     tags,
@@ -7000,6 +7013,12 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
     } else if (isInserting) {
       context.missing(_ingredientsJsonMeta);
     }
+    if (data.containsKey('servings')) {
+      context.handle(
+        _servingsMeta,
+        servings.isAcceptableOrUnknown(data['servings']!, _servingsMeta),
+      );
+    }
     if (data.containsKey('method')) {
       context.handle(
         _methodMeta,
@@ -7082,6 +7101,10 @@ class $RecipesTable extends Recipes with TableInfo<$RecipesTable, Recipe> {
         DriftSqlType.string,
         data['${effectivePrefix}ingredients_json'],
       )!,
+      servings: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}servings'],
+      )!,
       method: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}method'],
@@ -7119,6 +7142,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
   final double fatG;
   final double fiberG;
   final String ingredientsJson;
+  final double servings;
   final String method;
   final String? shelfLifeTip;
   final String? tags;
@@ -7135,6 +7159,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     required this.fatG,
     required this.fiberG,
     required this.ingredientsJson,
+    required this.servings,
     required this.method,
     this.shelfLifeTip,
     this.tags,
@@ -7158,6 +7183,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     map['fat_g'] = Variable<double>(fatG);
     map['fiber_g'] = Variable<double>(fiberG);
     map['ingredients_json'] = Variable<String>(ingredientsJson);
+    map['servings'] = Variable<double>(servings);
     map['method'] = Variable<String>(method);
     if (!nullToAbsent || shelfLifeTip != null) {
       map['shelf_life_tip'] = Variable<String>(shelfLifeTip);
@@ -7186,6 +7212,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       fatG: Value(fatG),
       fiberG: Value(fiberG),
       ingredientsJson: Value(ingredientsJson),
+      servings: Value(servings),
       method: Value(method),
       shelfLifeTip: shelfLifeTip == null && nullToAbsent
           ? const Value.absent()
@@ -7212,6 +7239,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       fatG: serializer.fromJson<double>(json['fatG']),
       fiberG: serializer.fromJson<double>(json['fiberG']),
       ingredientsJson: serializer.fromJson<String>(json['ingredientsJson']),
+      servings: serializer.fromJson<double>(json['servings']),
       method: serializer.fromJson<String>(json['method']),
       shelfLifeTip: serializer.fromJson<String?>(json['shelfLifeTip']),
       tags: serializer.fromJson<String?>(json['tags']),
@@ -7233,6 +7261,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       'fatG': serializer.toJson<double>(fatG),
       'fiberG': serializer.toJson<double>(fiberG),
       'ingredientsJson': serializer.toJson<String>(ingredientsJson),
+      'servings': serializer.toJson<double>(servings),
       'method': serializer.toJson<String>(method),
       'shelfLifeTip': serializer.toJson<String?>(shelfLifeTip),
       'tags': serializer.toJson<String?>(tags),
@@ -7252,6 +7281,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     double? fatG,
     double? fiberG,
     String? ingredientsJson,
+    double? servings,
     String? method,
     Value<String?> shelfLifeTip = const Value.absent(),
     Value<String?> tags = const Value.absent(),
@@ -7268,6 +7298,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     fatG: fatG ?? this.fatG,
     fiberG: fiberG ?? this.fiberG,
     ingredientsJson: ingredientsJson ?? this.ingredientsJson,
+    servings: servings ?? this.servings,
     method: method ?? this.method,
     shelfLifeTip: shelfLifeTip.present ? shelfLifeTip.value : this.shelfLifeTip,
     tags: tags.present ? tags.value : this.tags,
@@ -7288,6 +7319,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
       ingredientsJson: data.ingredientsJson.present
           ? data.ingredientsJson.value
           : this.ingredientsJson,
+      servings: data.servings.present ? data.servings.value : this.servings,
       method: data.method.present ? data.method.value : this.method,
       shelfLifeTip: data.shelfLifeTip.present
           ? data.shelfLifeTip.value
@@ -7311,6 +7343,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           ..write('fatG: $fatG, ')
           ..write('fiberG: $fiberG, ')
           ..write('ingredientsJson: $ingredientsJson, ')
+          ..write('servings: $servings, ')
           ..write('method: $method, ')
           ..write('shelfLifeTip: $shelfLifeTip, ')
           ..write('tags: $tags, ')
@@ -7332,6 +7365,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
     fatG,
     fiberG,
     ingredientsJson,
+    servings,
     method,
     shelfLifeTip,
     tags,
@@ -7352,6 +7386,7 @@ class Recipe extends DataClass implements Insertable<Recipe> {
           other.fatG == this.fatG &&
           other.fiberG == this.fiberG &&
           other.ingredientsJson == this.ingredientsJson &&
+          other.servings == this.servings &&
           other.method == this.method &&
           other.shelfLifeTip == this.shelfLifeTip &&
           other.tags == this.tags &&
@@ -7370,6 +7405,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   final Value<double> fatG;
   final Value<double> fiberG;
   final Value<String> ingredientsJson;
+  final Value<double> servings;
   final Value<String> method;
   final Value<String?> shelfLifeTip;
   final Value<String?> tags;
@@ -7387,6 +7423,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     this.fatG = const Value.absent(),
     this.fiberG = const Value.absent(),
     this.ingredientsJson = const Value.absent(),
+    this.servings = const Value.absent(),
     this.method = const Value.absent(),
     this.shelfLifeTip = const Value.absent(),
     this.tags = const Value.absent(),
@@ -7405,6 +7442,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     required double fatG,
     this.fiberG = const Value.absent(),
     required String ingredientsJson,
+    this.servings = const Value.absent(),
     required String method,
     this.shelfLifeTip = const Value.absent(),
     this.tags = const Value.absent(),
@@ -7431,6 +7469,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Expression<double>? fatG,
     Expression<double>? fiberG,
     Expression<String>? ingredientsJson,
+    Expression<double>? servings,
     Expression<String>? method,
     Expression<String>? shelfLifeTip,
     Expression<String>? tags,
@@ -7449,6 +7488,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       if (fatG != null) 'fat_g': fatG,
       if (fiberG != null) 'fiber_g': fiberG,
       if (ingredientsJson != null) 'ingredients_json': ingredientsJson,
+      if (servings != null) 'servings': servings,
       if (method != null) 'method': method,
       if (shelfLifeTip != null) 'shelf_life_tip': shelfLifeTip,
       if (tags != null) 'tags': tags,
@@ -7469,6 +7509,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     Value<double>? fatG,
     Value<double>? fiberG,
     Value<String>? ingredientsJson,
+    Value<double>? servings,
     Value<String>? method,
     Value<String?>? shelfLifeTip,
     Value<String?>? tags,
@@ -7487,6 +7528,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
       fatG: fatG ?? this.fatG,
       fiberG: fiberG ?? this.fiberG,
       ingredientsJson: ingredientsJson ?? this.ingredientsJson,
+      servings: servings ?? this.servings,
       method: method ?? this.method,
       shelfLifeTip: shelfLifeTip ?? this.shelfLifeTip,
       tags: tags ?? this.tags,
@@ -7531,6 +7573,9 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
     if (ingredientsJson.present) {
       map['ingredients_json'] = Variable<String>(ingredientsJson.value);
     }
+    if (servings.present) {
+      map['servings'] = Variable<double>(servings.value);
+    }
     if (method.present) {
       map['method'] = Variable<String>(method.value);
     }
@@ -7563,6 +7608,7 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
           ..write('fatG: $fatG, ')
           ..write('fiberG: $fiberG, ')
           ..write('ingredientsJson: $ingredientsJson, ')
+          ..write('servings: $servings, ')
           ..write('method: $method, ')
           ..write('shelfLifeTip: $shelfLifeTip, ')
           ..write('tags: $tags, ')
@@ -8788,6 +8834,1342 @@ class ShoppingCartItemsCompanion extends UpdateCompanion<ShoppingCartItem> {
   }
 }
 
+class $SleepLogsTable extends SleepLogs
+    with TableInfo<$SleepLogsTable, SleepLog> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SleepLogsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _minutesMeta = const VerificationMeta(
+    'minutes',
+  );
+  @override
+  late final GeneratedColumn<int> minutes = GeneratedColumn<int>(
+    'minutes',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bedtimeMeta = const VerificationMeta(
+    'bedtime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> bedtime = GeneratedColumn<DateTime>(
+    'bedtime',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _wakeTimeMeta = const VerificationMeta(
+    'wakeTime',
+  );
+  @override
+  late final GeneratedColumn<DateTime> wakeTime = GeneratedColumn<DateTime>(
+    'wake_time',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sourceMeta = const VerificationMeta('source');
+  @override
+  late final GeneratedColumn<String> source = GeneratedColumn<String>(
+    'source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('health_connect'),
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    date,
+    minutes,
+    bedtime,
+    wakeTime,
+    source,
+    isDirty,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sleep_logs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SleepLog> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('minutes')) {
+      context.handle(
+        _minutesMeta,
+        minutes.isAcceptableOrUnknown(data['minutes']!, _minutesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_minutesMeta);
+    }
+    if (data.containsKey('bedtime')) {
+      context.handle(
+        _bedtimeMeta,
+        bedtime.isAcceptableOrUnknown(data['bedtime']!, _bedtimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bedtimeMeta);
+    }
+    if (data.containsKey('wake_time')) {
+      context.handle(
+        _wakeTimeMeta,
+        wakeTime.isAcceptableOrUnknown(data['wake_time']!, _wakeTimeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_wakeTimeMeta);
+    }
+    if (data.containsKey('source')) {
+      context.handle(
+        _sourceMeta,
+        source.isAcceptableOrUnknown(data['source']!, _sourceMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  SleepLog map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SleepLog(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      minutes: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}minutes'],
+      )!,
+      bedtime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}bedtime'],
+      )!,
+      wakeTime: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}wake_time'],
+      )!,
+      source: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}source'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SleepLogsTable createAlias(String alias) {
+    return $SleepLogsTable(attachedDatabase, alias);
+  }
+}
+
+class SleepLog extends DataClass implements Insertable<SleepLog> {
+  final String date;
+  final int minutes;
+  final DateTime bedtime;
+  final DateTime wakeTime;
+  final String source;
+  final bool isDirty;
+  final DateTime updatedAt;
+  const SleepLog({
+    required this.date,
+    required this.minutes,
+    required this.bedtime,
+    required this.wakeTime,
+    required this.source,
+    required this.isDirty,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<String>(date);
+    map['minutes'] = Variable<int>(minutes);
+    map['bedtime'] = Variable<DateTime>(bedtime);
+    map['wake_time'] = Variable<DateTime>(wakeTime);
+    map['source'] = Variable<String>(source);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SleepLogsCompanion toCompanion(bool nullToAbsent) {
+    return SleepLogsCompanion(
+      date: Value(date),
+      minutes: Value(minutes),
+      bedtime: Value(bedtime),
+      wakeTime: Value(wakeTime),
+      source: Value(source),
+      isDirty: Value(isDirty),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SleepLog.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SleepLog(
+      date: serializer.fromJson<String>(json['date']),
+      minutes: serializer.fromJson<int>(json['minutes']),
+      bedtime: serializer.fromJson<DateTime>(json['bedtime']),
+      wakeTime: serializer.fromJson<DateTime>(json['wakeTime']),
+      source: serializer.fromJson<String>(json['source']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<String>(date),
+      'minutes': serializer.toJson<int>(minutes),
+      'bedtime': serializer.toJson<DateTime>(bedtime),
+      'wakeTime': serializer.toJson<DateTime>(wakeTime),
+      'source': serializer.toJson<String>(source),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SleepLog copyWith({
+    String? date,
+    int? minutes,
+    DateTime? bedtime,
+    DateTime? wakeTime,
+    String? source,
+    bool? isDirty,
+    DateTime? updatedAt,
+  }) => SleepLog(
+    date: date ?? this.date,
+    minutes: minutes ?? this.minutes,
+    bedtime: bedtime ?? this.bedtime,
+    wakeTime: wakeTime ?? this.wakeTime,
+    source: source ?? this.source,
+    isDirty: isDirty ?? this.isDirty,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SleepLog copyWithCompanion(SleepLogsCompanion data) {
+    return SleepLog(
+      date: data.date.present ? data.date.value : this.date,
+      minutes: data.minutes.present ? data.minutes.value : this.minutes,
+      bedtime: data.bedtime.present ? data.bedtime.value : this.bedtime,
+      wakeTime: data.wakeTime.present ? data.wakeTime.value : this.wakeTime,
+      source: data.source.present ? data.source.value : this.source,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SleepLog(')
+          ..write('date: $date, ')
+          ..write('minutes: $minutes, ')
+          ..write('bedtime: $bedtime, ')
+          ..write('wakeTime: $wakeTime, ')
+          ..write('source: $source, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode =>
+      Object.hash(date, minutes, bedtime, wakeTime, source, isDirty, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SleepLog &&
+          other.date == this.date &&
+          other.minutes == this.minutes &&
+          other.bedtime == this.bedtime &&
+          other.wakeTime == this.wakeTime &&
+          other.source == this.source &&
+          other.isDirty == this.isDirty &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SleepLogsCompanion extends UpdateCompanion<SleepLog> {
+  final Value<String> date;
+  final Value<int> minutes;
+  final Value<DateTime> bedtime;
+  final Value<DateTime> wakeTime;
+  final Value<String> source;
+  final Value<bool> isDirty;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SleepLogsCompanion({
+    this.date = const Value.absent(),
+    this.minutes = const Value.absent(),
+    this.bedtime = const Value.absent(),
+    this.wakeTime = const Value.absent(),
+    this.source = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SleepLogsCompanion.insert({
+    required String date,
+    required int minutes,
+    required DateTime bedtime,
+    required DateTime wakeTime,
+    this.source = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       minutes = Value(minutes),
+       bedtime = Value(bedtime),
+       wakeTime = Value(wakeTime);
+  static Insertable<SleepLog> custom({
+    Expression<String>? date,
+    Expression<int>? minutes,
+    Expression<DateTime>? bedtime,
+    Expression<DateTime>? wakeTime,
+    Expression<String>? source,
+    Expression<bool>? isDirty,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (minutes != null) 'minutes': minutes,
+      if (bedtime != null) 'bedtime': bedtime,
+      if (wakeTime != null) 'wake_time': wakeTime,
+      if (source != null) 'source': source,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SleepLogsCompanion copyWith({
+    Value<String>? date,
+    Value<int>? minutes,
+    Value<DateTime>? bedtime,
+    Value<DateTime>? wakeTime,
+    Value<String>? source,
+    Value<bool>? isDirty,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SleepLogsCompanion(
+      date: date ?? this.date,
+      minutes: minutes ?? this.minutes,
+      bedtime: bedtime ?? this.bedtime,
+      wakeTime: wakeTime ?? this.wakeTime,
+      source: source ?? this.source,
+      isDirty: isDirty ?? this.isDirty,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (minutes.present) {
+      map['minutes'] = Variable<int>(minutes.value);
+    }
+    if (bedtime.present) {
+      map['bedtime'] = Variable<DateTime>(bedtime.value);
+    }
+    if (wakeTime.present) {
+      map['wake_time'] = Variable<DateTime>(wakeTime.value);
+    }
+    if (source.present) {
+      map['source'] = Variable<String>(source.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SleepLogsCompanion(')
+          ..write('date: $date, ')
+          ..write('minutes: $minutes, ')
+          ..write('bedtime: $bedtime, ')
+          ..write('wakeTime: $wakeTime, ')
+          ..write('source: $source, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $PantryUsagesTable extends PantryUsages
+    with TableInfo<$PantryUsagesTable, PantryUsage> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PantryUsagesTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _diaryEntryIdMeta = const VerificationMeta(
+    'diaryEntryId',
+  );
+  @override
+  late final GeneratedColumn<String> diaryEntryId = GeneratedColumn<String>(
+    'diary_entry_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _inventoryItemIdMeta = const VerificationMeta(
+    'inventoryItemId',
+  );
+  @override
+  late final GeneratedColumn<String> inventoryItemId = GeneratedColumn<String>(
+    'inventory_item_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _canonicalNameMeta = const VerificationMeta(
+    'canonicalName',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalName = GeneratedColumn<String>(
+    'canonical_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _amountMeta = const VerificationMeta('amount');
+  @override
+  late final GeneratedColumn<double> amount = GeneratedColumn<double>(
+    'amount',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    diaryEntryId,
+    inventoryItemId,
+    name,
+    canonicalName,
+    amount,
+    unit,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'pantry_usages';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PantryUsage> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('diary_entry_id')) {
+      context.handle(
+        _diaryEntryIdMeta,
+        diaryEntryId.isAcceptableOrUnknown(
+          data['diary_entry_id']!,
+          _diaryEntryIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_diaryEntryIdMeta);
+    }
+    if (data.containsKey('inventory_item_id')) {
+      context.handle(
+        _inventoryItemIdMeta,
+        inventoryItemId.isAcceptableOrUnknown(
+          data['inventory_item_id']!,
+          _inventoryItemIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_inventoryItemIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('canonical_name')) {
+      context.handle(
+        _canonicalNameMeta,
+        canonicalName.isAcceptableOrUnknown(
+          data['canonical_name']!,
+          _canonicalNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalNameMeta);
+    }
+    if (data.containsKey('amount')) {
+      context.handle(
+        _amountMeta,
+        amount.isAcceptableOrUnknown(data['amount']!, _amountMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_amountMeta);
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_unitMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PantryUsage map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PantryUsage(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      diaryEntryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}diary_entry_id'],
+      )!,
+      inventoryItemId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}inventory_item_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      canonicalName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_name'],
+      )!,
+      amount: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}amount'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+    );
+  }
+
+  @override
+  $PantryUsagesTable createAlias(String alias) {
+    return $PantryUsagesTable(attachedDatabase, alias);
+  }
+}
+
+class PantryUsage extends DataClass implements Insertable<PantryUsage> {
+  final int id;
+  final String diaryEntryId;
+  final String inventoryItemId;
+  final String name;
+  final String canonicalName;
+  final double amount;
+  final String unit;
+  const PantryUsage({
+    required this.id,
+    required this.diaryEntryId,
+    required this.inventoryItemId,
+    required this.name,
+    required this.canonicalName,
+    required this.amount,
+    required this.unit,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['diary_entry_id'] = Variable<String>(diaryEntryId);
+    map['inventory_item_id'] = Variable<String>(inventoryItemId);
+    map['name'] = Variable<String>(name);
+    map['canonical_name'] = Variable<String>(canonicalName);
+    map['amount'] = Variable<double>(amount);
+    map['unit'] = Variable<String>(unit);
+    return map;
+  }
+
+  PantryUsagesCompanion toCompanion(bool nullToAbsent) {
+    return PantryUsagesCompanion(
+      id: Value(id),
+      diaryEntryId: Value(diaryEntryId),
+      inventoryItemId: Value(inventoryItemId),
+      name: Value(name),
+      canonicalName: Value(canonicalName),
+      amount: Value(amount),
+      unit: Value(unit),
+    );
+  }
+
+  factory PantryUsage.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PantryUsage(
+      id: serializer.fromJson<int>(json['id']),
+      diaryEntryId: serializer.fromJson<String>(json['diaryEntryId']),
+      inventoryItemId: serializer.fromJson<String>(json['inventoryItemId']),
+      name: serializer.fromJson<String>(json['name']),
+      canonicalName: serializer.fromJson<String>(json['canonicalName']),
+      amount: serializer.fromJson<double>(json['amount']),
+      unit: serializer.fromJson<String>(json['unit']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'diaryEntryId': serializer.toJson<String>(diaryEntryId),
+      'inventoryItemId': serializer.toJson<String>(inventoryItemId),
+      'name': serializer.toJson<String>(name),
+      'canonicalName': serializer.toJson<String>(canonicalName),
+      'amount': serializer.toJson<double>(amount),
+      'unit': serializer.toJson<String>(unit),
+    };
+  }
+
+  PantryUsage copyWith({
+    int? id,
+    String? diaryEntryId,
+    String? inventoryItemId,
+    String? name,
+    String? canonicalName,
+    double? amount,
+    String? unit,
+  }) => PantryUsage(
+    id: id ?? this.id,
+    diaryEntryId: diaryEntryId ?? this.diaryEntryId,
+    inventoryItemId: inventoryItemId ?? this.inventoryItemId,
+    name: name ?? this.name,
+    canonicalName: canonicalName ?? this.canonicalName,
+    amount: amount ?? this.amount,
+    unit: unit ?? this.unit,
+  );
+  PantryUsage copyWithCompanion(PantryUsagesCompanion data) {
+    return PantryUsage(
+      id: data.id.present ? data.id.value : this.id,
+      diaryEntryId: data.diaryEntryId.present
+          ? data.diaryEntryId.value
+          : this.diaryEntryId,
+      inventoryItemId: data.inventoryItemId.present
+          ? data.inventoryItemId.value
+          : this.inventoryItemId,
+      name: data.name.present ? data.name.value : this.name,
+      canonicalName: data.canonicalName.present
+          ? data.canonicalName.value
+          : this.canonicalName,
+      amount: data.amount.present ? data.amount.value : this.amount,
+      unit: data.unit.present ? data.unit.value : this.unit,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryUsage(')
+          ..write('id: $id, ')
+          ..write('diaryEntryId: $diaryEntryId, ')
+          ..write('inventoryItemId: $inventoryItemId, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    diaryEntryId,
+    inventoryItemId,
+    name,
+    canonicalName,
+    amount,
+    unit,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PantryUsage &&
+          other.id == this.id &&
+          other.diaryEntryId == this.diaryEntryId &&
+          other.inventoryItemId == this.inventoryItemId &&
+          other.name == this.name &&
+          other.canonicalName == this.canonicalName &&
+          other.amount == this.amount &&
+          other.unit == this.unit);
+}
+
+class PantryUsagesCompanion extends UpdateCompanion<PantryUsage> {
+  final Value<int> id;
+  final Value<String> diaryEntryId;
+  final Value<String> inventoryItemId;
+  final Value<String> name;
+  final Value<String> canonicalName;
+  final Value<double> amount;
+  final Value<String> unit;
+  const PantryUsagesCompanion({
+    this.id = const Value.absent(),
+    this.diaryEntryId = const Value.absent(),
+    this.inventoryItemId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.canonicalName = const Value.absent(),
+    this.amount = const Value.absent(),
+    this.unit = const Value.absent(),
+  });
+  PantryUsagesCompanion.insert({
+    this.id = const Value.absent(),
+    required String diaryEntryId,
+    required String inventoryItemId,
+    required String name,
+    required String canonicalName,
+    required double amount,
+    required String unit,
+  }) : diaryEntryId = Value(diaryEntryId),
+       inventoryItemId = Value(inventoryItemId),
+       name = Value(name),
+       canonicalName = Value(canonicalName),
+       amount = Value(amount),
+       unit = Value(unit);
+  static Insertable<PantryUsage> custom({
+    Expression<int>? id,
+    Expression<String>? diaryEntryId,
+    Expression<String>? inventoryItemId,
+    Expression<String>? name,
+    Expression<String>? canonicalName,
+    Expression<double>? amount,
+    Expression<String>? unit,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (diaryEntryId != null) 'diary_entry_id': diaryEntryId,
+      if (inventoryItemId != null) 'inventory_item_id': inventoryItemId,
+      if (name != null) 'name': name,
+      if (canonicalName != null) 'canonical_name': canonicalName,
+      if (amount != null) 'amount': amount,
+      if (unit != null) 'unit': unit,
+    });
+  }
+
+  PantryUsagesCompanion copyWith({
+    Value<int>? id,
+    Value<String>? diaryEntryId,
+    Value<String>? inventoryItemId,
+    Value<String>? name,
+    Value<String>? canonicalName,
+    Value<double>? amount,
+    Value<String>? unit,
+  }) {
+    return PantryUsagesCompanion(
+      id: id ?? this.id,
+      diaryEntryId: diaryEntryId ?? this.diaryEntryId,
+      inventoryItemId: inventoryItemId ?? this.inventoryItemId,
+      name: name ?? this.name,
+      canonicalName: canonicalName ?? this.canonicalName,
+      amount: amount ?? this.amount,
+      unit: unit ?? this.unit,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (diaryEntryId.present) {
+      map['diary_entry_id'] = Variable<String>(diaryEntryId.value);
+    }
+    if (inventoryItemId.present) {
+      map['inventory_item_id'] = Variable<String>(inventoryItemId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (canonicalName.present) {
+      map['canonical_name'] = Variable<String>(canonicalName.value);
+    }
+    if (amount.present) {
+      map['amount'] = Variable<double>(amount.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PantryUsagesCompanion(')
+          ..write('id: $id, ')
+          ..write('diaryEntryId: $diaryEntryId, ')
+          ..write('inventoryItemId: $inventoryItemId, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('amount: $amount, ')
+          ..write('unit: $unit')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SyncDeletionsTable extends SyncDeletions
+    with TableInfo<$SyncDeletionsTable, SyncDeletion> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncDeletionsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [path];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_deletions';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncDeletion> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {path};
+  @override
+  SyncDeletion map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncDeletion(
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncDeletionsTable createAlias(String alias) {
+    return $SyncDeletionsTable(attachedDatabase, alias);
+  }
+}
+
+class SyncDeletion extends DataClass implements Insertable<SyncDeletion> {
+  final String path;
+  const SyncDeletion({required this.path});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['path'] = Variable<String>(path);
+    return map;
+  }
+
+  SyncDeletionsCompanion toCompanion(bool nullToAbsent) {
+    return SyncDeletionsCompanion(path: Value(path));
+  }
+
+  factory SyncDeletion.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncDeletion(path: serializer.fromJson<String>(json['path']));
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{'path': serializer.toJson<String>(path)};
+  }
+
+  SyncDeletion copyWith({String? path}) =>
+      SyncDeletion(path: path ?? this.path);
+  SyncDeletion copyWithCompanion(SyncDeletionsCompanion data) {
+    return SyncDeletion(path: data.path.present ? data.path.value : this.path);
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncDeletion(')
+          ..write('path: $path')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => path.hashCode;
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncDeletion && other.path == this.path);
+}
+
+class SyncDeletionsCompanion extends UpdateCompanion<SyncDeletion> {
+  final Value<String> path;
+  final Value<int> rowid;
+  const SyncDeletionsCompanion({
+    this.path = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncDeletionsCompanion.insert({
+    required String path,
+    this.rowid = const Value.absent(),
+  }) : path = Value(path);
+  static Insertable<SyncDeletion> custom({
+    Expression<String>? path,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (path != null) 'path': path,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncDeletionsCompanion copyWith({Value<String>? path, Value<int>? rowid}) {
+    return SyncDeletionsCompanion(
+      path: path ?? this.path,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncDeletionsCompanion(')
+          ..write('path: $path, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProgressPhotosTable extends ProgressPhotos
+    with TableInfo<$ProgressPhotosTable, ProgressPhoto> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProgressPhotosTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<String> date = GeneratedColumn<String>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pathMeta = const VerificationMeta('path');
+  @override
+  late final GeneratedColumn<String> path = GeneratedColumn<String>(
+    'path',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _takenAtMeta = const VerificationMeta(
+    'takenAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> takenAt = GeneratedColumn<DateTime>(
+    'taken_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [date, path, takenAt];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'progress_photos';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProgressPhoto> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('path')) {
+      context.handle(
+        _pathMeta,
+        path.isAcceptableOrUnknown(data['path']!, _pathMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_pathMeta);
+    }
+    if (data.containsKey('taken_at')) {
+      context.handle(
+        _takenAtMeta,
+        takenAt.isAcceptableOrUnknown(data['taken_at']!, _takenAtMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {date};
+  @override
+  ProgressPhoto map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProgressPhoto(
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}date'],
+      )!,
+      path: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}path'],
+      )!,
+      takenAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}taken_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProgressPhotosTable createAlias(String alias) {
+    return $ProgressPhotosTable(attachedDatabase, alias);
+  }
+}
+
+class ProgressPhoto extends DataClass implements Insertable<ProgressPhoto> {
+  final String date;
+  final String path;
+  final DateTime takenAt;
+  const ProgressPhoto({
+    required this.date,
+    required this.path,
+    required this.takenAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['date'] = Variable<String>(date);
+    map['path'] = Variable<String>(path);
+    map['taken_at'] = Variable<DateTime>(takenAt);
+    return map;
+  }
+
+  ProgressPhotosCompanion toCompanion(bool nullToAbsent) {
+    return ProgressPhotosCompanion(
+      date: Value(date),
+      path: Value(path),
+      takenAt: Value(takenAt),
+    );
+  }
+
+  factory ProgressPhoto.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProgressPhoto(
+      date: serializer.fromJson<String>(json['date']),
+      path: serializer.fromJson<String>(json['path']),
+      takenAt: serializer.fromJson<DateTime>(json['takenAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'date': serializer.toJson<String>(date),
+      'path': serializer.toJson<String>(path),
+      'takenAt': serializer.toJson<DateTime>(takenAt),
+    };
+  }
+
+  ProgressPhoto copyWith({String? date, String? path, DateTime? takenAt}) =>
+      ProgressPhoto(
+        date: date ?? this.date,
+        path: path ?? this.path,
+        takenAt: takenAt ?? this.takenAt,
+      );
+  ProgressPhoto copyWithCompanion(ProgressPhotosCompanion data) {
+    return ProgressPhoto(
+      date: data.date.present ? data.date.value : this.date,
+      path: data.path.present ? data.path.value : this.path,
+      takenAt: data.takenAt.present ? data.takenAt.value : this.takenAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProgressPhoto(')
+          ..write('date: $date, ')
+          ..write('path: $path, ')
+          ..write('takenAt: $takenAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(date, path, takenAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProgressPhoto &&
+          other.date == this.date &&
+          other.path == this.path &&
+          other.takenAt == this.takenAt);
+}
+
+class ProgressPhotosCompanion extends UpdateCompanion<ProgressPhoto> {
+  final Value<String> date;
+  final Value<String> path;
+  final Value<DateTime> takenAt;
+  final Value<int> rowid;
+  const ProgressPhotosCompanion({
+    this.date = const Value.absent(),
+    this.path = const Value.absent(),
+    this.takenAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProgressPhotosCompanion.insert({
+    required String date,
+    required String path,
+    this.takenAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : date = Value(date),
+       path = Value(path);
+  static Insertable<ProgressPhoto> custom({
+    Expression<String>? date,
+    Expression<String>? path,
+    Expression<DateTime>? takenAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (date != null) 'date': date,
+      if (path != null) 'path': path,
+      if (takenAt != null) 'taken_at': takenAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProgressPhotosCompanion copyWith({
+    Value<String>? date,
+    Value<String>? path,
+    Value<DateTime>? takenAt,
+    Value<int>? rowid,
+  }) {
+    return ProgressPhotosCompanion(
+      date: date ?? this.date,
+      path: path ?? this.path,
+      takenAt: takenAt ?? this.takenAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (date.present) {
+      map['date'] = Variable<String>(date.value);
+    }
+    if (path.present) {
+      map['path'] = Variable<String>(path.value);
+    }
+    if (takenAt.present) {
+      map['taken_at'] = Variable<DateTime>(takenAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProgressPhotosCompanion(')
+          ..write('date: $date, ')
+          ..write('path: $path, ')
+          ..write('takenAt: $takenAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -8808,6 +10190,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
   late final $ShoppingCartItemsTable shoppingCartItems =
       $ShoppingCartItemsTable(this);
+  late final $SleepLogsTable sleepLogs = $SleepLogsTable(this);
+  late final $PantryUsagesTable pantryUsages = $PantryUsagesTable(this);
+  late final $SyncDeletionsTable syncDeletions = $SyncDeletionsTable(this);
+  late final $ProgressPhotosTable progressPhotos = $ProgressPhotosTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -8827,6 +10213,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     recipes,
     inventoryItems,
     shoppingCartItems,
+    sleepLogs,
+    pantryUsages,
+    syncDeletions,
+    progressPhotos,
   ];
 }
 
@@ -12220,6 +13610,7 @@ typedef $$RecipesTableCreateCompanionBuilder = RecipesCompanion Function({
   required double fatG,
   Value<double> fiberG,
   required String ingredientsJson,
+  Value<double> servings,
   required String method,
   Value<String?> shelfLifeTip,
   Value<String?> tags,
@@ -12238,6 +13629,7 @@ typedef $$RecipesTableUpdateCompanionBuilder = RecipesCompanion Function({
   Value<double> fatG,
   Value<double> fiberG,
   Value<String> ingredientsJson,
+  Value<double> servings,
   Value<String> method,
   Value<String?> shelfLifeTip,
   Value<String?> tags,
@@ -12306,6 +13698,11 @@ class $$RecipesTableFilterComposer
 
   ColumnFilters<String> get ingredientsJson => $composableBuilder(
     column: $table.ingredientsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get servings => $composableBuilder(
+    column: $table.servings,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -12394,6 +13791,11 @@ class $$RecipesTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get servings => $composableBuilder(
+    column: $table.servings,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get method => $composableBuilder(
     column: $table.method,
     builder: (column) => ColumnOrderings(column),
@@ -12459,6 +13861,9 @@ class $$RecipesTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<double> get servings =>
+      $composableBuilder(column: $table.servings, builder: (column) => column);
+
   GeneratedColumn<String> get method =>
       $composableBuilder(column: $table.method, builder: (column) => column);
 
@@ -12513,6 +13918,7 @@ class $$RecipesTableTableManager
                 Value<double> fatG = const Value.absent(),
                 Value<double> fiberG = const Value.absent(),
                 Value<String> ingredientsJson = const Value.absent(),
+                Value<double> servings = const Value.absent(),
                 Value<String> method = const Value.absent(),
                 Value<String?> shelfLifeTip = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
@@ -12530,6 +13936,7 @@ class $$RecipesTableTableManager
                 fatG: fatG,
                 fiberG: fiberG,
                 ingredientsJson: ingredientsJson,
+                servings: servings,
                 method: method,
                 shelfLifeTip: shelfLifeTip,
                 tags: tags,
@@ -12549,6 +13956,7 @@ class $$RecipesTableTableManager
                 required double fatG,
                 Value<double> fiberG = const Value.absent(),
                 required String ingredientsJson,
+                Value<double> servings = const Value.absent(),
                 required String method,
                 Value<String?> shelfLifeTip = const Value.absent(),
                 Value<String?> tags = const Value.absent(),
@@ -12566,6 +13974,7 @@ class $$RecipesTableTableManager
                 fatG: fatG,
                 fiberG: fiberG,
                 ingredientsJson: ingredientsJson,
+                servings: servings,
                 method: method,
                 shelfLifeTip: shelfLifeTip,
                 tags: tags,
@@ -13234,6 +14643,784 @@ typedef $$ShoppingCartItemsTableProcessedTableManager =
       ShoppingCartItem,
       PrefetchHooks Function()
     >;
+typedef $$SleepLogsTableCreateCompanionBuilder = SleepLogsCompanion Function({
+  required String date,
+  required int minutes,
+  required DateTime bedtime,
+  required DateTime wakeTime,
+  Value<String> source,
+  Value<bool> isDirty,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+typedef $$SleepLogsTableUpdateCompanionBuilder = SleepLogsCompanion Function({
+  Value<String> date,
+  Value<int> minutes,
+  Value<DateTime> bedtime,
+  Value<DateTime> wakeTime,
+  Value<String> source,
+  Value<bool> isDirty,
+  Value<DateTime> updatedAt,
+  Value<int> rowid,
+});
+
+class $$SleepLogsTableFilterComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get bedtime => $composableBuilder(
+    column: $table.bedtime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get wakeTime => $composableBuilder(
+    column: $table.wakeTime,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SleepLogsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get minutes => $composableBuilder(
+    column: $table.minutes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get bedtime => $composableBuilder(
+    column: $table.bedtime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get wakeTime => $composableBuilder(
+    column: $table.wakeTime,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get source => $composableBuilder(
+    column: $table.source,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SleepLogsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SleepLogsTable> {
+  $$SleepLogsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<int> get minutes =>
+      $composableBuilder(column: $table.minutes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get bedtime =>
+      $composableBuilder(column: $table.bedtime, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get wakeTime =>
+      $composableBuilder(column: $table.wakeTime, builder: (column) => column);
+
+  GeneratedColumn<String> get source =>
+      $composableBuilder(column: $table.source, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SleepLogsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SleepLogsTable,
+          SleepLog,
+          $$SleepLogsTableFilterComposer,
+          $$SleepLogsTableOrderingComposer,
+          $$SleepLogsTableAnnotationComposer,
+          $$SleepLogsTableCreateCompanionBuilder,
+          $$SleepLogsTableUpdateCompanionBuilder,
+          (SleepLog, BaseReferences<_$AppDatabase, $SleepLogsTable, SleepLog>),
+          SleepLog,
+          PrefetchHooks Function()
+        > {
+  $$SleepLogsTableTableManager(_$AppDatabase db, $SleepLogsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SleepLogsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SleepLogsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SleepLogsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> date = const Value.absent(),
+                Value<int> minutes = const Value.absent(),
+                Value<DateTime> bedtime = const Value.absent(),
+                Value<DateTime> wakeTime = const Value.absent(),
+                Value<String> source = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SleepLogsCompanion(
+                date: date,
+                minutes: minutes,
+                bedtime: bedtime,
+                wakeTime: wakeTime,
+                source: source,
+                isDirty: isDirty,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String date,
+                required int minutes,
+                required DateTime bedtime,
+                required DateTime wakeTime,
+                Value<String> source = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SleepLogsCompanion.insert(
+                date: date,
+                minutes: minutes,
+                bedtime: bedtime,
+                wakeTime: wakeTime,
+                source: source,
+                isDirty: isDirty,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SleepLogsTable, SleepLog>(table),
+                  BaseReferences<_$AppDatabase, $SleepLogsTable, SleepLog>(
+                    db,
+                    table,
+                    e,
+                  ),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SleepLogsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SleepLogsTable,
+      SleepLog,
+      $$SleepLogsTableFilterComposer,
+      $$SleepLogsTableOrderingComposer,
+      $$SleepLogsTableAnnotationComposer,
+      $$SleepLogsTableCreateCompanionBuilder,
+      $$SleepLogsTableUpdateCompanionBuilder,
+      (SleepLog, BaseReferences<_$AppDatabase, $SleepLogsTable, SleepLog>),
+      SleepLog,
+      PrefetchHooks Function()
+    >;
+typedef $$PantryUsagesTableCreateCompanionBuilder =
+    PantryUsagesCompanion Function({
+      Value<int> id,
+      required String diaryEntryId,
+      required String inventoryItemId,
+      required String name,
+      required String canonicalName,
+      required double amount,
+      required String unit,
+    });
+typedef $$PantryUsagesTableUpdateCompanionBuilder =
+    PantryUsagesCompanion Function({
+      Value<int> id,
+      Value<String> diaryEntryId,
+      Value<String> inventoryItemId,
+      Value<String> name,
+      Value<String> canonicalName,
+      Value<double> amount,
+      Value<String> unit,
+    });
+
+class $$PantryUsagesTableFilterComposer
+    extends Composer<_$AppDatabase, $PantryUsagesTable> {
+  $$PantryUsagesTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get diaryEntryId => $composableBuilder(
+    column: $table.diaryEntryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get inventoryItemId => $composableBuilder(
+    column: $table.inventoryItemId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PantryUsagesTableOrderingComposer
+    extends Composer<_$AppDatabase, $PantryUsagesTable> {
+  $$PantryUsagesTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get diaryEntryId => $composableBuilder(
+    column: $table.diaryEntryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get inventoryItemId => $composableBuilder(
+    column: $table.inventoryItemId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get amount => $composableBuilder(
+    column: $table.amount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PantryUsagesTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PantryUsagesTable> {
+  $$PantryUsagesTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get diaryEntryId => $composableBuilder(
+    column: $table.diaryEntryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get inventoryItemId => $composableBuilder(
+    column: $table.inventoryItemId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get amount =>
+      $composableBuilder(column: $table.amount, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+}
+
+class $$PantryUsagesTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PantryUsagesTable,
+          PantryUsage,
+          $$PantryUsagesTableFilterComposer,
+          $$PantryUsagesTableOrderingComposer,
+          $$PantryUsagesTableAnnotationComposer,
+          $$PantryUsagesTableCreateCompanionBuilder,
+          $$PantryUsagesTableUpdateCompanionBuilder,
+          (
+            PantryUsage,
+            BaseReferences<_$AppDatabase, $PantryUsagesTable, PantryUsage>,
+          ),
+          PantryUsage,
+          PrefetchHooks Function()
+        > {
+  $$PantryUsagesTableTableManager(_$AppDatabase db, $PantryUsagesTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PantryUsagesTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PantryUsagesTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PantryUsagesTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> diaryEntryId = const Value.absent(),
+                Value<String> inventoryItemId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> canonicalName = const Value.absent(),
+                Value<double> amount = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+              }) => PantryUsagesCompanion(
+                id: id,
+                diaryEntryId: diaryEntryId,
+                inventoryItemId: inventoryItemId,
+                name: name,
+                canonicalName: canonicalName,
+                amount: amount,
+                unit: unit,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String diaryEntryId,
+                required String inventoryItemId,
+                required String name,
+                required String canonicalName,
+                required double amount,
+                required String unit,
+              }) => PantryUsagesCompanion.insert(
+                id: id,
+                diaryEntryId: diaryEntryId,
+                inventoryItemId: inventoryItemId,
+                name: name,
+                canonicalName: canonicalName,
+                amount: amount,
+                unit: unit,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$PantryUsagesTable, PantryUsage>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $PantryUsagesTable,
+                    PantryUsage
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PantryUsagesTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PantryUsagesTable,
+      PantryUsage,
+      $$PantryUsagesTableFilterComposer,
+      $$PantryUsagesTableOrderingComposer,
+      $$PantryUsagesTableAnnotationComposer,
+      $$PantryUsagesTableCreateCompanionBuilder,
+      $$PantryUsagesTableUpdateCompanionBuilder,
+      (
+        PantryUsage,
+        BaseReferences<_$AppDatabase, $PantryUsagesTable, PantryUsage>,
+      ),
+      PantryUsage,
+      PrefetchHooks Function()
+    >;
+typedef $$SyncDeletionsTableCreateCompanionBuilder =
+    SyncDeletionsCompanion Function({required String path, Value<int> rowid});
+typedef $$SyncDeletionsTableUpdateCompanionBuilder =
+    SyncDeletionsCompanion Function({Value<String> path, Value<int> rowid});
+
+class $$SyncDeletionsTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncDeletionsTable> {
+  $$SyncDeletionsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncDeletionsTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncDeletionsTable> {
+  $$SyncDeletionsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncDeletionsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncDeletionsTable> {
+  $$SyncDeletionsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+}
+
+class $$SyncDeletionsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncDeletionsTable,
+          SyncDeletion,
+          $$SyncDeletionsTableFilterComposer,
+          $$SyncDeletionsTableOrderingComposer,
+          $$SyncDeletionsTableAnnotationComposer,
+          $$SyncDeletionsTableCreateCompanionBuilder,
+          $$SyncDeletionsTableUpdateCompanionBuilder,
+          (
+            SyncDeletion,
+            BaseReferences<_$AppDatabase, $SyncDeletionsTable, SyncDeletion>,
+          ),
+          SyncDeletion,
+          PrefetchHooks Function()
+        > {
+  $$SyncDeletionsTableTableManager(_$AppDatabase db, $SyncDeletionsTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncDeletionsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncDeletionsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncDeletionsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> path = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) => SyncDeletionsCompanion(path: path, rowid: rowid),
+          createCompanionCallback: ({
+            required String path,
+            Value<int> rowid = const Value.absent(),
+          }) => SyncDeletionsCompanion.insert(path: path, rowid: rowid),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$SyncDeletionsTable, SyncDeletion>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $SyncDeletionsTable,
+                    SyncDeletion
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncDeletionsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncDeletionsTable,
+      SyncDeletion,
+      $$SyncDeletionsTableFilterComposer,
+      $$SyncDeletionsTableOrderingComposer,
+      $$SyncDeletionsTableAnnotationComposer,
+      $$SyncDeletionsTableCreateCompanionBuilder,
+      $$SyncDeletionsTableUpdateCompanionBuilder,
+      (
+        SyncDeletion,
+        BaseReferences<_$AppDatabase, $SyncDeletionsTable, SyncDeletion>,
+      ),
+      SyncDeletion,
+      PrefetchHooks Function()
+    >;
+typedef $$ProgressPhotosTableCreateCompanionBuilder =
+    ProgressPhotosCompanion Function({
+      required String date,
+      required String path,
+      Value<DateTime> takenAt,
+      Value<int> rowid,
+    });
+typedef $$ProgressPhotosTableUpdateCompanionBuilder =
+    ProgressPhotosCompanion Function({
+      Value<String> date,
+      Value<String> path,
+      Value<DateTime> takenAt,
+      Value<int> rowid,
+    });
+
+class $$ProgressPhotosTableFilterComposer
+    extends Composer<_$AppDatabase, $ProgressPhotosTable> {
+  $$ProgressPhotosTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProgressPhotosTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProgressPhotosTable> {
+  $$ProgressPhotosTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get path => $composableBuilder(
+    column: $table.path,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get takenAt => $composableBuilder(
+    column: $table.takenAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProgressPhotosTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProgressPhotosTable> {
+  $$ProgressPhotosTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get path =>
+      $composableBuilder(column: $table.path, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get takenAt =>
+      $composableBuilder(column: $table.takenAt, builder: (column) => column);
+}
+
+class $$ProgressPhotosTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProgressPhotosTable,
+          ProgressPhoto,
+          $$ProgressPhotosTableFilterComposer,
+          $$ProgressPhotosTableOrderingComposer,
+          $$ProgressPhotosTableAnnotationComposer,
+          $$ProgressPhotosTableCreateCompanionBuilder,
+          $$ProgressPhotosTableUpdateCompanionBuilder,
+          (
+            ProgressPhoto,
+            BaseReferences<_$AppDatabase, $ProgressPhotosTable, ProgressPhoto>,
+          ),
+          ProgressPhoto,
+          PrefetchHooks Function()
+        > {
+  $$ProgressPhotosTableTableManager(
+    _$AppDatabase db,
+    $ProgressPhotosTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProgressPhotosTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProgressPhotosTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProgressPhotosTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> date = const Value.absent(),
+                Value<String> path = const Value.absent(),
+                Value<DateTime> takenAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProgressPhotosCompanion(
+                date: date,
+                path: path,
+                takenAt: takenAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String date,
+                required String path,
+                Value<DateTime> takenAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProgressPhotosCompanion.insert(
+                date: date,
+                path: path,
+                takenAt: takenAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ProgressPhotosTable, ProgressPhoto>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ProgressPhotosTable,
+                    ProgressPhoto
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProgressPhotosTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProgressPhotosTable,
+      ProgressPhoto,
+      $$ProgressPhotosTableFilterComposer,
+      $$ProgressPhotosTableOrderingComposer,
+      $$ProgressPhotosTableAnnotationComposer,
+      $$ProgressPhotosTableCreateCompanionBuilder,
+      $$ProgressPhotosTableUpdateCompanionBuilder,
+      (
+        ProgressPhoto,
+        BaseReferences<_$AppDatabase, $ProgressPhotosTable, ProgressPhoto>,
+      ),
+      ProgressPhoto,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -13266,4 +15453,12 @@ class $AppDatabaseManager {
       $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
   $$ShoppingCartItemsTableTableManager get shoppingCartItems =>
       $$ShoppingCartItemsTableTableManager(_db, _db.shoppingCartItems);
+  $$SleepLogsTableTableManager get sleepLogs =>
+      $$SleepLogsTableTableManager(_db, _db.sleepLogs);
+  $$PantryUsagesTableTableManager get pantryUsages =>
+      $$PantryUsagesTableTableManager(_db, _db.pantryUsages);
+  $$SyncDeletionsTableTableManager get syncDeletions =>
+      $$SyncDeletionsTableTableManager(_db, _db.syncDeletions);
+  $$ProgressPhotosTableTableManager get progressPhotos =>
+      $$ProgressPhotosTableTableManager(_db, _db.progressPhotos);
 }

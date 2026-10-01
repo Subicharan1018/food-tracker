@@ -18,9 +18,22 @@ import '../../../ai_digest/weekly_digest_card.dart';
 import '../../../ai_planner/meal_plan_card.dart';
 import '../../../workouts/progression_card.dart';
 import '../../../nutrition/nutrient_pace_card.dart';
+import '../../../food_logging/repeat_meal.dart';
+import '../../../checkin/checkin_screen.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
+
+  /// Sunday without a weigh-in yet, or a week or more since the last one.
+  static bool _checkInDue(WidgetRef ref) {
+    final weighIns = ref.watch(weighInsStreamProvider).value;
+    if (weighIns == null) return false;
+    final now = DateTime.now();
+    final today = DateFormat('yyyy-MM-dd').format(now);
+    final last = weighIns.isEmpty ? null : DateTime.parse(weighIns.first.date);
+    if (last != null && weighIns.first.date == today) return false;
+    return now.weekday == DateTime.sunday || last == null || now.difference(last).inDays >= 7;
+  }
 
   void _navigateLogFood(BuildContext context, String mealSlot) {
     Navigator.push(
@@ -142,6 +155,8 @@ class HomeScreen extends ConsumerWidget {
     final targetSteps = user?.stepsTarget ?? 10000;
 
     final entries = entriesAsync.value ?? [];
+    final usual = ref.watch(usualFoodsProvider).value ?? const <String, List<String>>{};
+    final lastMeals = ref.watch(lastMealsProvider).value ?? const <String, List<DiaryEntry>>{};
     final totalConsumedKcal = entries.fold<double>(0, (sum, e) => sum + e.calories).toInt();
     final totalP = entries.fold<double>(0, (sum, e) => sum + e.proteinG);
     final totalC = entries.fold<double>(0, (sum, e) => sum + e.carbsG);
@@ -322,7 +337,39 @@ class HomeScreen extends ConsumerWidget {
 
             const SizedBox(height: 16),
 
-            NutrientPaceCard(status: paceAsync.value),
+            if (_checkInDue(ref)) ...[
+              InkWell(
+                onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckInScreen())),
+                borderRadius: AppShapes.information,
+                child: Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: AppColors.card,
+                    borderRadius: AppShapes.information,
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: const Row(
+                    children: [
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text('Check-in', style: AppTypography.titleMedium),
+                            SizedBox(height: 2),
+                            Text('Weigh in before food and water, then a progress photo.',
+                                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
+                          ],
+                        ),
+                      ),
+                      Text('Start', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandPrimary)),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            NutrientPaceCard(status: paceAsync.value, unreachable: paceAsync.hasError),
 
             const SizedBox(height: 16),
 
@@ -385,12 +432,33 @@ class HomeScreen extends ConsumerWidget {
               onAdd: (slot) => _navigateLogFood(context, slot),
               onDelete: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
               items: [
-                MealRailItem(keyName: 'breakfast', title: 'Breakfast', subtitle: '3 chapatis + egg/oat side dish (~508 kcal / 38g P)', time: '6:00 AM', icon: Icons.wb_sunny_outlined, entries: entries.where((e) => e.mealSlot == 'breakfast').toList()),
-                MealRailItem(keyName: 'lunch', title: 'Lunch', subtitle: '2 chapatis + protein dry pack (~440 kcal / 42g P)', time: '1:00 PM', icon: Icons.lunch_dining_outlined, entries: entries.where((e) => e.mealSlot == 'lunch').toList()),
-                MealRailItem(keyName: 'shake', title: 'Shake', subtitle: '1 scoop whey + 250 ml water (114 kcal / 27g P)', time: '4:30 PM', icon: Icons.local_cafe_outlined, entries: entries.where((e) => e.mealSlot == 'shake').toList()),
-                MealRailItem(keyName: 'pre_workout', title: 'Pre-workout', subtitle: '2 bananas on reaching home (214 kcal / 2.6g P)', time: '6:00 PM', icon: Icons.bolt_outlined, entries: entries.where((e) => e.mealSlot == 'pre_workout').toList()),
-                MealRailItem(keyName: 'dinner', title: 'Dinner', subtitle: '1 cup rice + 200g chicken curry (~625 kcal / 68g P)', time: '8:15 PM', icon: Icons.dinner_dining_outlined, entries: entries.where((e) => e.mealSlot == 'dinner').toList()),
-                MealRailItem(keyName: 'snack', title: 'Snack', subtitle: '1–2 high-protein picks (~150–300 kcal)', time: 'Anytime', icon: Icons.cookie_outlined, entries: entries.where((e) => e.mealSlot == 'snack').toList()),
+                for (final (key, title, time, icon) in const [
+                  ('breakfast', 'Breakfast', '6:00 AM', Icons.wb_sunny_outlined),
+                  ('lunch', 'Lunch', '1:00 PM', Icons.lunch_dining_outlined),
+                  ('shake', 'Shake', '4:30 PM', Icons.local_cafe_outlined),
+                  ('pre_workout', 'Pre-workout', '6:00 PM', Icons.bolt_outlined),
+                  ('dinner', 'Dinner', '8:15 PM', Icons.dinner_dining_outlined),
+                  ('snack', 'Snack', 'Anytime', Icons.cookie_outlined),
+                ])
+                  MealRailItem(
+                    keyName: key,
+                    title: title,
+                    subtitle: usual[key] == null ? 'Nothing logged here in the last 2 weeks' : 'Usually ${usual[key]!.join(' + ')}',
+                    time: time,
+                    icon: icon,
+                    entries: entries.where((e) => e.mealSlot == key).toList(),
+                    repeatLabel: lastMeals[key] == null ? null : repeatLabel(lastMeals[key]!),
+                    onRepeat: lastMeals[key] == null
+                        ? null
+                        : () async {
+                            final report = await repeatMeal(ref.read(databaseProvider), lastMeals[key]!, date: dateStr);
+                            if (context.mounted) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(content: Text(['Logged $title.', ?report.summary].join(' '))),
+                              );
+                            }
+                          },
+                  ),
               ],
             ),
 

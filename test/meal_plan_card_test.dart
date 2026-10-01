@@ -9,61 +9,57 @@ import 'package:food_tracker/features/ai_planner/meal_plan_card.dart';
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  late AppDatabase inMemoryDb;
+  late AppDatabase db;
 
-  setUp(() {
-    inMemoryDb = AppDatabase(NativeDatabase.memory());
-  });
+  setUp(() => db = AppDatabase(NativeDatabase.memory()));
+  tearDown(() => db.close());
 
-  tearDown(() async {
-    await inMemoryDb.close();
-  });
+  testWidgets('shows and logs the recipe box numbers, never the AI\'s', (tester) async {
+    await tester.runAsync(() async {
+      await db.into(db.recipes).insert(RecipesCompanion.insert(
+            id: 'biryani',
+            name: 'Chicken Biryani',
+            mealSlot: 'dinner',
+            calories: 612,
+            proteinG: 48,
+            carbsG: 70,
+            fatG: 15,
+            ingredientsJson: '[]',
+            method: '',
+          ));
 
-  testWidgets('MealPlanCard renders items and logs directly to Drift database', (tester) async {
-    final mockPlan = [
-      {
-        'recipe_name': 'Chicken Biryani',
-        'meal_slot': 'dinner',
-        'calories': 550,
-        'protein': 42,
-        'reasoning': 'Optimal high-protein evening dinner'
-      },
-    ];
-
-    await tester.pumpWidget(
-      ProviderScope(
-        overrides: [
-          databaseProvider.overrideWithValue(inMemoryDb),
-        ],
-        child: MaterialApp(
+      await tester.pumpWidget(ProviderScope(
+        overrides: [databaseProvider.overrideWithValue(db)],
+        child: const MaterialApp(
           home: Scaffold(
-            body: MealPlanCard(planItems: mockPlan),
+            body: MealPlanCard(planItems: [
+              // The AI's own numbers are deliberately different and must be ignored.
+              {'recipe_name': 'chicken biryani', 'meal_slot': 'dinner', 'calories': 550, 'protein': 42, 'reasoning': 'High protein'},
+              {'recipe_name': 'Grilled Salmon', 'meal_slot': 'dinner', 'calories': 400, 'protein': 35},
+            ]),
           ),
         ),
-      ),
-    );
+      ));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      await tester.pump();
 
-    // Verify UI components render
-    expect(find.text("Tonight's Plan"), findsOneWidget);
-    expect(find.text('Chicken Biryani'), findsOneWidget);
-    expect(find.text('550 kcal'), findsOneWidget);
-    expect(find.text('42 g protein'), findsOneWidget);
-    expect(find.text('Optimal high-protein evening dinner'), findsOneWidget);
+      expect(find.text('Chicken Biryani'), findsOneWidget);
+      expect(find.text('612 kcal · 48 g protein'), findsOneWidget);
+      expect(find.textContaining('550'), findsNothing);
+      expect(find.textContaining('Not in your recipe box'), findsOneWidget);
+      expect(find.text('Log meal'), findsOneWidget, reason: 'only the matched recipe can be logged');
 
-    // Tap "Log meal" button
-    final logButton = find.text('Log meal');
-    expect(logButton, findsOneWidget);
-    await tester.tap(logButton);
-    await tester.pumpAndSettle();
+      await tester.tap(find.text('Log meal'));
+      await Future<void>.delayed(const Duration(milliseconds: 30));
+      await tester.pump();
 
-    // Verify written to database
-    final entries = await inMemoryDb.select(inMemoryDb.diaryEntries).get();
-    expect(entries.length, 1);
-    expect(entries.first.foodName, 'Chicken Biryani');
-    expect(entries.first.calories, 550.0);
-    expect(entries.first.proteinG, 42.0);
-
-    // Verify button state updated to Logged
-    expect(find.text('Logged'), findsOneWidget);
+      final entry = (await db.select(db.diaryEntries).get()).single;
+      expect(entry.foodName, 'Chicken Biryani');
+      expect(entry.calories, 612);
+      expect(entry.proteinG, 48);
+      expect(find.text('Logged'), findsOneWidget);
+    });
+    await tester.pumpWidget(const SizedBox());
+    await tester.pump(Duration.zero);
   });
 }

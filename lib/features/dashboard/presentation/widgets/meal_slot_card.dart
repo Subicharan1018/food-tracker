@@ -10,6 +10,8 @@ class MealSlotCard extends StatelessWidget {
   final List<DiaryEntry> entries;
   final VoidCallback onAddTap;
   final Function(String entryId) onDeleteEntry;
+  final String? repeatLabel;
+  final VoidCallback? onRepeat;
 
   const MealSlotCard({
     super.key,
@@ -20,6 +22,8 @@ class MealSlotCard extends StatelessWidget {
     required this.entries,
     required this.onAddTap,
     required this.onDeleteEntry,
+    this.repeatLabel,
+    this.onRepeat,
   });
 
   @override
@@ -162,6 +166,31 @@ class MealSlotCard extends StatelessWidget {
                   ),
                 );
               },
+            ),
+
+          if (entries.isEmpty && repeatLabel != null && onRepeat != null)
+            InkWell(
+              onTap: onRepeat,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        repeatLabel!,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(fontSize: 13, height: 1.35, color: AppColors.textSecondary),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'Log again',
+                      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandPrimary),
+                    ),
+                  ],
+                ),
+              ),
             ),
 
           // Add button

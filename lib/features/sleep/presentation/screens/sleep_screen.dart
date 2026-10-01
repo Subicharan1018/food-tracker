@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../../core/di/providers.dart';
+import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/ledger.dart';
 
 class SleepEngine {
   /// Computes duration in minutes between bedtime and wake-up time,
@@ -38,28 +41,40 @@ class SleepScreen extends ConsumerStatefulWidget {
 }
 
 class _SleepScreenState extends ConsumerState<SleepScreen> {
-  TimeOfDay _sleepTime = const TimeOfDay(hour: 23, minute: 30); // 11:30 PM
-  TimeOfDay _wakeTime = const TimeOfDay(hour: 7, minute: 30);  // 07:30 AM
-  bool _isLoading = true;
+  TimeOfDay _sleepTime = const TimeOfDay(hour: 23, minute: 30);
+  TimeOfDay _wakeTime = const TimeOfDay(hour: 7, minute: 30);
+  bool _connected = true;
+  bool _importing = false;
 
   @override
   void initState() {
     super.initState();
     _loadSavedTimes();
+    _refresh();
   }
 
   Future<void> _loadSavedTimes() async {
     final prefs = await SharedPreferences.getInstance();
-    final sleepHour = prefs.getInt('sleep_time_hour') ?? 23;
-    final sleepMin = prefs.getInt('sleep_time_minute') ?? 30;
-    final wakeHour = prefs.getInt('wake_time_hour') ?? 7;
-    final wakeMin = prefs.getInt('wake_time_minute') ?? 30;
+    if (!mounted) return;
+    setState(() {
+      _sleepTime = TimeOfDay(hour: prefs.getInt('sleep_time_hour') ?? 23, minute: prefs.getInt('sleep_time_minute') ?? 30);
+      _wakeTime = TimeOfDay(hour: prefs.getInt('wake_time_hour') ?? 7, minute: prefs.getInt('wake_time_minute') ?? 30);
+    });
+  }
 
+  Future<void> _refresh({bool askPermission = false}) async {
+    setState(() => _importing = true);
+    final health = ref.read(healthSyncServiceProvider);
+    var connected = await health.checkConnectionStatus();
+    if (!connected && askPermission) connected = await health.requestPermissions();
+    if (connected) {
+      final changed = await health.importSleep(ref.read(databaseProvider));
+      if (changed > 0) ref.read(syncSchedulerProvider).scheduleSync();
+    }
     if (mounted) {
       setState(() {
-        _sleepTime = TimeOfDay(hour: sleepHour, minute: sleepMin);
-        _wakeTime = TimeOfDay(hour: wakeHour, minute: wakeMin);
-        _isLoading = false;
+        _connected = connected;
+        _importing = false;
       });
     }
   }
@@ -70,217 +85,160 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
     await prefs.setInt('sleep_time_minute', _sleepTime.minute);
     await prefs.setInt('wake_time_hour', _wakeTime.hour);
     await prefs.setInt('wake_time_minute', _wakeTime.minute);
-
-    final duration = SleepEngine.computeSleepDurationMinutes(
-      sleepHour: _sleepTime.hour,
-      sleepMinute: _sleepTime.minute,
-      wakeHour: _wakeTime.hour,
-      wakeMinute: _wakeTime.minute,
-    );
-    await prefs.setInt('sleep_target_minutes', duration);
-
-    if (mounted) {
-      Navigator.pop(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Sleep schedule saved: ${SleepEngine.formatDuration(duration)} daily goal!')),
-      );
-    }
+    await prefs.setInt('sleep_target_minutes', _goalMinutes);
   }
 
-  String _formatTimeOfDay(TimeOfDay tod) {
-    final hour = tod.hourOfPeriod == 0 ? 12 : tod.hourOfPeriod;
-    final min = tod.minute.toString().padLeft(2, '0');
-    final period = tod.period == DayPeriod.am ? 'AM' : 'PM';
-    final hourStr = hour.toString().padLeft(2, '0');
-    return '$hourStr:$min $period';
+  int get _goalMinutes => SleepEngine.computeSleepDurationMinutes(
+        sleepHour: _sleepTime.hour,
+        sleepMinute: _sleepTime.minute,
+        wakeHour: _wakeTime.hour,
+        wakeMinute: _wakeTime.minute,
+      );
+
+  Future<void> _pick(bool bedtime) async {
+    final picked = await showTimePicker(context: context, initialTime: bedtime ? _sleepTime : _wakeTime);
+    if (picked == null) return;
+    setState(() => bedtime ? _sleepTime = picked : _wakeTime = picked);
+    await _saveTimes();
   }
 
   @override
   Widget build(BuildContext context) {
-    final totalMinutes = SleepEngine.computeSleepDurationMinutes(
-      sleepHour: _sleepTime.hour,
-      sleepMinute: _sleepTime.minute,
-      wakeHour: _wakeTime.hour,
-      wakeMinute: _wakeTime.minute,
-    );
-    final durationStr = SleepEngine.formatDuration(totalMinutes);
+    final nights = ref.watch(recentSleepProvider).value ?? const <SleepLog>[];
+    final week = nights.take(7).toList();
+    final average = week.isEmpty ? null : week.fold<int>(0, (sum, n) => sum + n.minutes) ~/ week.length;
+    final goal = _goalMinutes;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'Setup your Sleep Tracker',
-          style: TextStyle(fontSize: 18, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-        ),
-      ),
-      body: _isLoading
-          ? const Center(child: CircularProgressIndicator())
-          : Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+      appBar: AppBar(title: const Text('Sleep')),
+      body: RefreshIndicator(
+        onRefresh: _refresh,
+        child: ListView(
+          padding: const EdgeInsets.only(bottom: 48),
+          children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const SizedBox(height: 30),
-
-                  // Hero Duration (Screenshot 4)
                   Text(
-                    durationStr,
+                    nights.isEmpty ? '–' : SleepEngine.formatDuration(nights.first.minutes),
                     style: const TextStyle(
-                      fontSize: 48,
-                      fontWeight: FontWeight.w800,
+                      fontSize: 40,
+                      height: 1,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: -1.2,
                       color: AppColors.textPrimary,
-                      letterSpacing: -0.5,
+                      fontFeatures: tabularFigures,
                     ),
                   ),
-                  const SizedBox(height: 10),
-                  const Text(
-                    'Sleep Goal - Recommended',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.positive,
+                  const SizedBox(height: 6),
+                  Text(
+                    nights.isEmpty
+                        ? (_connected ? 'No sleep recorded in Health Connect yet.' : 'Health Connect sleep access is off.')
+                        : 'Last night · 7-night average ${SleepEngine.formatDuration(average!)} · goal ${SleepEngine.formatDuration(goal)}',
+                    style: const TextStyle(fontSize: 14, color: AppColors.textSecondary, fontFeatures: tabularFigures),
+                  ),
+                  if (!_connected) ...[
+                    const SizedBox(height: 12),
+                    ElevatedButton(
+                      onPressed: _importing ? null : () => _refresh(askPermission: true),
+                      child: const Text('Allow sleep access'),
                     ),
-                  ),
-                  const SizedBox(height: 14),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      '7–9 hours is the recommended amount of sleep for all adults from age 18–64, according to the sleepfoundation.org',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 13,
-                        color: AppColors.textMuted,
-                        height: 1.45,
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 50),
-
-                  // Schedule Pickers (Screenshot 4)
-                  Row(
-                    children: [
-                      // Regular Sleep Time Card
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Text('🌙', style: TextStyle(fontSize: 28)),
-                            const SizedBox(height: 16),
-                            Text(
-                              _formatTimeOfDay(_sleepTime),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Regular Sleep Time',
-                              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                            ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: () async {
-                                final picked = await showTimePicker(
-                                  context: context,
-                                  initialTime: _sleepTime,
-                                );
-                                if (picked != null) {
-                                  setState(() => _sleepTime = picked);
-                                }
-                              },
-                              child: const Text(
-                                'EDIT',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      // Divider Line
-                      Container(
-                        height: 90,
-                        width: 1,
-                        color: AppColors.border,
-                      ),
-
-                      // Regular Wake Time Card
-                      Expanded(
-                        child: Column(
-                          children: [
-                            const Text('⛅', style: TextStyle(fontSize: 28)),
-                            const SizedBox(height: 16),
-                            Text(
-                              _formatTimeOfDay(_wakeTime),
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.w800,
-                                color: AppColors.textPrimary,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            const Text(
-                              'Regular Wake Time',
-                              style: TextStyle(fontSize: 12, color: AppColors.textMuted),
-                            ),
-                            const SizedBox(height: 12),
-                            TextButton(
-                              onPressed: () async {
-                                final picked = await showTimePicker(
-                                  context: context,
-                                  initialTime: _wakeTime,
-                                );
-                                if (picked != null) {
-                                  setState(() => _wakeTime = picked);
-                                }
-                              },
-                              child: const Text(
-                                'EDIT',
-                                style: TextStyle(
-                                  fontSize: 13,
-                                  fontWeight: FontWeight.w700,
-                                  color: AppColors.textPrimary,
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const Spacer(),
-
-                  // DONE Button (Screenshot 4)
-                  SizedBox(
-                    width: double.infinity,
-                    height: 52,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.brandPrimary,
-                        foregroundColor: AppColors.textInverse,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                      ),
-                      onPressed: _saveTimes,
-                      child: const Text(
-                        'DONE',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 0.5),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 16),
+                  ],
                 ],
               ),
             ),
+            if (nights.isNotEmpty) ...[
+              SectionHeader(title: 'Recent nights', detail: _importing ? 'updating…' : null),
+              for (final night in nights) ...[
+                _NightRow(night: night, goalMinutes: goal),
+                const Hairline(),
+              ],
+            ],
+            const SectionHeader(title: 'Your schedule'),
+            _TimeRow(label: 'Bedtime', time: _sleepTime, onTap: () => _pick(true)),
+            const Hairline(),
+            _TimeRow(label: 'Wake up', time: _wakeTime, onTap: () => _pick(false)),
+            const Padding(
+              padding: EdgeInsets.fromLTRB(20, 12, 20, 0),
+              child: Text(
+                'Adults 18–64 are recommended 7–9 hours (sleepfoundation.org). Nights come from Health Connect, '
+                'so a watch or sleep app needs to be writing there. Pull down to refresh.',
+                style: TextStyle(fontSize: 12, height: 1.45, color: AppColors.textMuted),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _NightRow extends StatelessWidget {
+  final SleepLog night;
+  final int goalMinutes;
+  const _NightRow({required this.night, required this.goalMinutes});
+
+  @override
+  Widget build(BuildContext context) {
+    final date = DateTime.parse(night.date);
+    const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final short = night.minutes < goalMinutes - 30;
+    String hm(DateTime t) => '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}';
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              SizedBox(
+                width: 64,
+                child: Text('${days[date.weekday - 1]} ${date.day}',
+                    style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
+              ),
+              Expanded(
+                child: Text('${hm(night.bedtime)} – ${hm(night.wakeTime)}',
+                    style: const TextStyle(fontSize: 13, color: AppColors.textMuted, fontFeatures: tabularFigures)),
+              ),
+              Text(
+                SleepEngine.formatDuration(night.minutes),
+                style: TextStyle(
+                  fontSize: 14,
+                  color: short ? AppColors.attention : AppColors.textPrimary,
+                  fontFeatures: tabularFigures,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Meter(fraction: goalMinutes == 0 ? 0 : night.minutes / goalMinutes, color: short ? AppColors.attention : AppColors.textSecondary),
+        ],
+      ),
+    );
+  }
+}
+
+class _TimeRow extends StatelessWidget {
+  final String label;
+  final TimeOfDay time;
+  final VoidCallback onTap;
+  const _TimeRow({required this.label, required this.time, required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 15, color: AppColors.textPrimary))),
+            Text(time.format(context), style: const TextStyle(fontSize: 15, color: AppColors.textSecondary, fontFeatures: tabularFigures)),
+          ],
+        ),
+      ),
     );
   }
 }

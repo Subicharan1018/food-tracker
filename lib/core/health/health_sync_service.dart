@@ -1,5 +1,7 @@
 import 'package:flutter/foundation.dart';
 import 'package:health/health.dart';
+import 'package:intl/intl.dart';
+import '../local_db/app_database.dart';
 
 class HealthActivitySummary {
   final int steps;
@@ -132,6 +134,29 @@ class HealthSyncService {
     return trend;
   }
 
+  /// Copies the last [days] nights of Health Connect sleep into [db].
+  /// Returns how many nights were new or changed (and will be synced).
+  Future<int> importSleep(AppDatabase db, {int days = 14}) async {
+    if (!_isConfigured) await initialize();
+    final now = DateTime.now();
+    final List<HealthDataPoint> points;
+    try {
+      points = await _health.getHealthDataFromTypes(
+        types: [HealthDataType.SLEEP_SESSION],
+        startTime: now.subtract(Duration(days: days)),
+        endTime: now,
+      );
+    } catch (e) {
+      debugPrint('Sleep import skipped: $e');
+      return 0;
+    }
+    var changed = 0;
+    for (final night in groupSleepNights([for (final p in points) (p.dateFrom, p.dateTo)])) {
+      if (await db.upsertSleepNight(night.date, night.minutes, night.bedtime, night.wakeTime)) changed++;
+    }
+    return changed;
+  }
+
   /// Fetch active workouts recorded by wearable/phone
   Future<List<String>> fetchTodayWorkouts() async {
     final now = DateTime.now();
@@ -150,6 +175,46 @@ class HealthSyncService {
     }
     return [];
   }
+}
+
+class SleepNight {
+  final String date; // local date of wake-up
+  final int minutes;
+  final DateTime bedtime;
+  final DateTime wakeTime;
+  const SleepNight(this.date, this.minutes, this.bedtime, this.wakeTime);
+}
+
+/// Groups raw sleep sessions into nights keyed by the local date you woke up.
+/// A night split by a wake-up (two sessions) is summed; bedtime is the
+/// earliest start and wake time the latest end.  Overlapping sessions from
+/// two apps are merged so the same minutes aren't counted twice.
+List<SleepNight> groupSleepNights(List<(DateTime, DateTime)> sessions) {
+  final byDate = <String, List<(DateTime, DateTime)>>{};
+  for (final (start, end) in sessions) {
+    if (!end.isAfter(start)) continue;
+    final key = DateFormat('yyyy-MM-dd').format(end.toLocal());
+    byDate.putIfAbsent(key, () => []).add((start.toLocal(), end.toLocal()));
+  }
+  final nights = <SleepNight>[];
+  byDate.forEach((date, list) {
+    list.sort((a, b) => a.$1.compareTo(b.$1));
+    var minutes = 0;
+    var (curStart, curEnd) = list.first;
+    for (final (start, end) in list.skip(1)) {
+      if (start.isAfter(curEnd)) {
+        minutes += curEnd.difference(curStart).inMinutes;
+        (curStart, curEnd) = (start, end);
+      } else if (end.isAfter(curEnd)) {
+        curEnd = end;
+      }
+    }
+    minutes += curEnd.difference(curStart).inMinutes;
+    final wake = list.map((s) => s.$2).reduce((a, b) => a.isAfter(b) ? a : b);
+    nights.add(SleepNight(date, minutes, list.first.$1, wake));
+  });
+  nights.sort((a, b) => b.date.compareTo(a.date));
+  return nights;
 }
 
 class DailyStepRecord {

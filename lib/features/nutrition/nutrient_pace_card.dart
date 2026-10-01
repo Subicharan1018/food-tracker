@@ -17,7 +17,10 @@ import 'nutrient_labels.dart';
 class NutrientPaceCard extends ConsumerWidget {
   final Map<String, dynamic>? status;
 
-  const NutrientPaceCard({super.key, required this.status});
+  /// The last fetch failed; [status] (if any) is from an earlier fetch.
+  final bool unreachable;
+
+  const NutrientPaceCard({super.key, required this.status, this.unreachable = false});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -30,6 +33,9 @@ class NutrientPaceCard extends ConsumerWidget {
     final updatedAt = data['updated_at']?.toString();
     final message = data['message']?.toString();
     final candidate = data['candidate_recipe'] is Map ? Map<String, dynamic>.from(data['candidate_recipe']) : null;
+    final uncounted = data['uncounted_foods'] is List
+        ? (data['uncounted_foods'] as List).map((e) => '$e').toList()
+        : const <String>[];
 
     final cart = ref.watch(cartItemsProvider).value ?? const [];
     final inCart = {for (final c in cart) c.canonicalName};
@@ -66,7 +72,16 @@ class NutrientPaceCard extends ConsumerWidget {
               ],
             ),
           ),
-          if (issues.isEmpty) ...[
+          if (unreachable) ...[
+            const SizedBox(height: 8),
+            Text(
+              status == null
+                  ? "Can't reach the Kinetik server, so pace can't be checked right now."
+                  : "Can't reach the Kinetik server — showing the last check.",
+              style: const TextStyle(fontSize: 13, height: 1.45, color: AppColors.attention),
+            ),
+          ],
+          if (issues.isEmpty && !(unreachable && status == null)) ...[
             const SizedBox(height: 8),
             Text(
               updatedAt == null
@@ -114,6 +129,16 @@ class NutrientPaceCard extends ConsumerWidget {
               onOpenCart: () => Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const ShoppingCartScreen()),
+              ),
+            ),
+          ],
+          if (uncounted.isNotEmpty) ...[
+            const SizedBox(height: 12),
+            Padding(
+              padding: const EdgeInsets.only(right: 8),
+              child: Text(
+                'Not counted (no cited data or no weight): ${uncounted.join(', ')}.',
+                style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textMuted),
               ),
             ),
           ],

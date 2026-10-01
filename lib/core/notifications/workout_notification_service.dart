@@ -15,8 +15,8 @@ const _workoutAlarms = [
    body: "Goblet Squats → Sumo DL → 6–8 sprint rounds.", day: "lower_b_hiit"),
   (id: 205, weekday: 6, hour: 8, minute: 0, title: "Active Recovery",
    body: "20–30 min walk + weekly grocery run.", day: "recovery"),
-  (id: 206, weekday: 7, hour: 7, minute: 30, title: "Weigh-in Sunday",
-   body: "Fasted, before water. Then batch meal prep.", day: "rest"),
+  (id: 206, weekday: 7, hour: 7, minute: 30, title: "Sunday check-in",
+   body: "Weigh in fasted, before water. Progress photo, same spot. Tape every 4th week.", day: "rest"),
 ];
 
 class WorkoutNotificationService {
@@ -35,6 +35,7 @@ class WorkoutNotificationService {
         exact: true,
         wakeup: true,
         alarmClock: true,
+        params: {'title': alarm.title, 'body': alarm.body},
       );
     }
   }
@@ -48,12 +49,12 @@ class WorkoutNotificationService {
 }
 
 @pragma('vm:entry-point')
-Future<void> _fireWorkoutNotification() async {
+Future<void> _fireWorkoutNotification(int id, Map<String, dynamic> params) async {
   final plugin = FlutterLocalNotificationsPlugin();
   await plugin.show(
-    200,
-    'Workout Time',
-    'Time for your scheduled workout session!',
+    id,
+    params['title'] as String? ?? 'Workout time',
+    params['body'] as String? ?? 'Time for your scheduled session.',
     const NotificationDetails(
       android: AndroidNotificationDetails(
         'workout_start', 'Workout Start',

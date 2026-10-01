@@ -10,6 +10,7 @@ import '../../data/workout_routines_provider.dart';
 import '../../hiit/hiit_timer_screen.dart';
 import '../../set_timer/set_rest_timer_service.dart';
 import '../../set_timer/set_rest_timer_widget.dart';
+import '../../progression_engine.dart';
 
 String _categoryFor(String exerciseName) {
   const compound = [
@@ -848,6 +849,34 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                       ),
                       const SizedBox(height: 4),
                       Text(ex.setsReps, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brandPrimary)),
+                      Builder(builder: (_) {
+                        final sleep = ref.watch(recentSleepProvider).value ?? const [];
+                        final week = sleep.take(7).toList();
+                        final next = recommendProgression(
+                          exercise: ex.name,
+                          setsReps: ex.setsReps,
+                          history: ref.watch(recentSetLogsProvider).value ?? const [],
+                          usesBar: RegExp(r'barbell|\bbar\b|ez bar', caseSensitive: false).hasMatch('${ex.name} ${ex.setup}'),
+                          averageSleepHours: week.isEmpty ? null : week.fold<int>(0, (a, n) => a + n.minutes) / week.length / 60,
+                        );
+                        if (next == null) return const SizedBox.shrink();
+                        return Padding(
+                          padding: const EdgeInsets.only(top: 4),
+                          child: Text.rich(
+                            TextSpan(children: [
+                              TextSpan(
+                                text: 'Next: ${next.headline}. ',
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: next.isStall ? AppColors.attention : AppColors.textPrimary,
+                                ),
+                              ),
+                              TextSpan(text: next.detail),
+                            ]),
+                            style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textSecondary),
+                          ),
+                        );
+                      }),
                       const SizedBox(height: 2),
                       Text(ex.setup, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
                       if (ex.cue.isNotEmpty) ...[
@@ -993,6 +1022,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                       onPressed: () async {
                         final db = ref.read(databaseProvider);
                         final dateStr = ref.read(formattedSelectedDateProvider);
+                        final setIndex = await db.countSetsFor(dateStr, ex.name) + 1;
 
                         await db.addWorkoutSetLogs([
                           WorkoutSetLogsCompanion.insert(
@@ -1000,7 +1030,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                             sessionId: 'recomp_$day',
                             date: dateStr,
                             exerciseName: ex.name,
-                            setIndex: 1,
+                            setIndex: setIndex,
                             weightKg: weight,
                             reps: reps,
                             targetReps: Value(ex.setsReps),

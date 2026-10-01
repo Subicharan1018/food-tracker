@@ -45,8 +45,16 @@ class NemotronService:
         system: str,
         user: str,
         max_tokens: int = 2000,
+        reasoning: bool = True,
     ) -> str:
-        """Single-turn completion. No tool use."""
+        """Single-turn completion. No tool use.
+
+        ``reasoning=False`` is for short prose: the model is a reasoning
+        model, and with a small token budget its thinking used up the budget
+        and leaked into the reply ("The user wants a specific action…").
+        Such calls also drop a reply that hit the token limit, so callers fall
+        back to their deterministic text instead of sending half a sentence.
+        """
         async def _call():
             response = await self._client.chat.completions.create(
                 model=settings.nemotron_model,
@@ -55,11 +63,15 @@ class NemotronService:
                     {"role": "user",   "content": user},
                 ],
                 max_tokens=max_tokens,
+                **({} if reasoning else {"extra_body": {"reasoning": {"enabled": False}}}),
             )
             if not response or not getattr(response, "choices", None):
                 return ""
             choice = response.choices[0]
             if not choice or not getattr(choice, "message", None):
+                return ""
+            if not reasoning and getattr(choice, "finish_reason", None) == "length":
+                logger.warning("AI reply hit the %d-token limit; discarding it", max_tokens)
                 return ""
             return choice.message.content or ""
 

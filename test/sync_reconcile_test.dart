@@ -75,6 +75,12 @@ void main() {
         unit TEXT NOT NULL DEFAULT 'pieces', added_from TEXT NOT NULL, reason TEXT NULL,
         checked INTEGER NOT NULL DEFAULT 0, added_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)),
         is_dirty INTEGER NOT NULL DEFAULT 1)''');
+      raw.execute('''CREATE TABLE recipes (id TEXT NOT NULL PRIMARY KEY, name TEXT NOT NULL, tamil_name TEXT NULL,
+        meal_slot TEXT NOT NULL, day_of_week TEXT NULL, calories REAL NOT NULL, protein_g REAL NOT NULL,
+        carbs_g REAL NOT NULL, fat_g REAL NOT NULL, fiber_g REAL NOT NULL DEFAULT 0.0, ingredients_json TEXT NOT NULL,
+        method TEXT NOT NULL, shelf_life_tip TEXT NULL, tags TEXT NULL,
+        updated_at INTEGER NOT NULL DEFAULT (CAST(strftime('%s', CURRENT_TIMESTAMP) AS INTEGER)))''');
+      raw.execute("INSERT INTO recipes (id, name, meal_slot, calories, protein_g, carbs_g, fat_g, ingredients_json, method) VALUES ('r1', 'Rajma', 'lunch', 400, 20, 50, 8, '[]', '')");
       raw.execute("INSERT INTO inventory_items (name, canonical_name, quantity, unit) VALUES ('Oats', 'oats', 500, 'g')");
       raw.execute("INSERT INTO shopping_cart_items (name, canonical_name, added_from, reason) VALUES ('Rajma', 'kidney beans', 'nutrient_gap', 'Unlocks Rajma Masala')");
       raw.execute('PRAGMA user_version = 2');
@@ -87,5 +93,8 @@ void main() {
     expect(pantry.single.pendingDelete, isFalse);
     expect(cart.single.reason, 'Unlocks Rajma Masala');
     expect(cart.single.id, '1');
+    // v5: existing recipes get servings = 1; later tables exist.
+    expect((await db.getAllRecipes()).single.servings, 1.0);
+    expect(await db.getPendingDeletions(), isEmpty);
   });
 }

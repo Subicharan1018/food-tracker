@@ -209,6 +209,8 @@ class Recipes extends Table {
   RealColumn get fatG => real()();
   RealColumn get fiberG => real().withDefault(const Constant(0.0))();
   TextColumn get ingredientsJson => text()();
+  // How many servings the ingredient amounts make; one logged portion uses 1/servings.
+  RealColumn get servings => real().withDefault(const Constant(1.0))();
   TextColumn get method => text()();
   TextColumn get shelfLifeTip => text().nullable()();
   TextColumn get tags => text().nullable()();
@@ -256,6 +258,52 @@ class ShoppingCartItems extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// 15. Sleep Logs — one row per night, keyed by the local date you woke up.
+// Imported from Health Connect; synced to users/{uid}/sleep_logs for the digest.
+class SleepLogs extends Table {
+  TextColumn get date => text()(); // YYYY-MM-DD of wake-up
+  IntColumn get minutes => integer()();
+  DateTimeColumn get bedtime => dateTime()();
+  DateTimeColumn get wakeTime => dateTime()();
+  TextColumn get source => text().withDefault(const Constant('health_connect'))();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(true))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {date};
+}
+
+// 16. Pantry usage — what logging a recipe took out of the pantry, so deleting
+// that diary entry can put it back.  Amounts are in the pantry row's unit.
+class PantryUsages extends Table {
+  IntColumn get id => integer().autoIncrement()();
+  TextColumn get diaryEntryId => text()();
+  TextColumn get inventoryItemId => text()();
+  TextColumn get name => text()();
+  TextColumn get canonicalName => text()();
+  RealColumn get amount => real()();
+  TextColumn get unit => text()();
+}
+
+// 17. Remote deletes waiting to be pushed ("diary_entries/<id>").  Without
+// this, a deleted row is pulled straight back on the next sync.
+class SyncDeletions extends Table {
+  TextColumn get path => text()();
+
+  @override
+  Set<Column> get primaryKey => {path};
+}
+
+// 18. Progress photos — files stay on the phone (private, large); never synced.
+class ProgressPhotos extends Table {
+  TextColumn get date => text()(); // YYYY-MM-DD
+  TextColumn get path => text()();
+  DateTimeColumn get takenAt => dateTime().withDefault(currentDateAndTime)();
+
+  @override
+  Set<Column> get primaryKey => {date};
+}
+
 @DriftDatabase(tables: [
   Users,
   FoodItems,
@@ -271,6 +319,10 @@ class ShoppingCartItems extends Table {
   Recipes,
   InventoryItems,
   ShoppingCartItems,
+  SleepLogs,
+  PantryUsages,
+  SyncDeletions,
+  ProgressPhotos,
 ])
 class AppDatabase extends _$AppDatabase {
   SyncScheduler? syncScheduler;
@@ -282,7 +334,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -293,9 +345,7 @@ class AppDatabase extends _$AppDatabase {
       if (from < 2) {
         await m.createTable(inventoryItems);
         await m.createTable(shoppingCartItems);
-        return;
-      }
-      if (from < 3) {
+      } else if (from < 3) {
         // v2 used local autoincrement ids, which collide as Firestore doc ids
         // across devices.  Rebuild both tables with text ids, keeping rows.
         await m.alterTable(TableMigration(
@@ -308,6 +358,17 @@ class AppDatabase extends _$AppDatabase {
           columnTransformer: {shoppingCartItems.id: shoppingCartItems.id.cast<String>()},
           newColumns: [shoppingCartItems.updatedAt, shoppingCartItems.pendingDelete],
         ));
+      }
+      if (from < 4) {
+        await m.createTable(sleepLogs);
+      }
+      if (from < 5) {
+        await m.addColumn(recipes, recipes.servings);
+        await m.createTable(pantryUsages);
+        await m.createTable(syncDeletions);
+      }
+      if (from < 6) {
+        await m.createTable(progressPhotos);
       }
     },
   );
@@ -367,13 +428,43 @@ class AppDatabase extends _$AppDatabase {
     return res;
   }
 
+  /// Deletes a meal everywhere: queues the remote delete and puts back any
+  /// pantry stock that logging it had used.
   Future<bool> deleteDiaryEntry(String id) async {
-    final count = await (delete(diaryEntries)..where((e) => e.id.equals(id))).go();
-    if (count > 0) {
-      syncScheduler?.scheduleSync();
-    }
-    return count > 0;
+    final deleted = await transaction(() async {
+      final count = await (delete(diaryEntries)..where((e) => e.id.equals(id))).go();
+      if (count == 0) return false;
+      await into(syncDeletions).insertOnConflictUpdate(SyncDeletionsCompanion.insert(path: 'diary_entries/$id'));
+      await _restorePantryUsage(id);
+      return true;
+    });
+    if (deleted) syncScheduler?.scheduleSync();
+    return deleted;
   }
+
+  Future<void> _restorePantryUsage(String diaryEntryId) async {
+    final usages = await (select(pantryUsages)..where((u) => u.diaryEntryId.equals(diaryEntryId))).get();
+    for (final u in usages) {
+      final row = await (select(inventoryItems)..where((i) => i.id.equals(u.inventoryItemId))).getSingleOrNull();
+      if (row != null && !row.pendingDelete) {
+        await incrementInventoryQuantity(row.id, u.amount);
+      } else {
+        await createInventoryItem(InventoryItemsCompanion.insert(
+          name: u.name,
+          canonicalName: u.canonicalName,
+          quantity: Value(u.amount),
+          unit: Value(u.unit),
+        ));
+      }
+    }
+    await (delete(pantryUsages)..where((u) => u.diaryEntryId.equals(diaryEntryId))).go();
+  }
+
+  Future<List<String>> getPendingDeletions() async =>
+      (await select(syncDeletions).get()).map((d) => d.path).toList();
+
+  Future<void> clearPendingDeletions(List<String> paths) =>
+      (delete(syncDeletions)..where((d) => d.path.isIn(paths))).go();
 
   // Frequent & Recent foods
   Future<List<String>> getRecentFoodNames(int limit) async {
@@ -707,6 +798,124 @@ class AppDatabase extends _$AppDatabase {
 
   Future<void> reconcileCartItems(List<ShoppingCartItemsCompanion> remote) =>
       _reconcile(shoppingCartItems, remote, (c) => c.id.value);
+
+  /// Most-logged food names per meal slot since [fromDate] (YYYY-MM-DD),
+  /// most frequent first.  Drives the "usually" line on the home meal rail.
+  Future<Map<String, List<String>>> usualFoodsBySlot(String fromDate, {int perSlot = 2}) async {
+    final count = diaryEntries.id.count();
+    final rows = await (selectOnly(diaryEntries)
+          ..addColumns([diaryEntries.mealSlot, diaryEntries.foodName, count])
+          ..where(diaryEntries.date.isBiggerOrEqualValue(fromDate))
+          ..groupBy([diaryEntries.mealSlot, diaryEntries.foodName])
+          ..orderBy([OrderingTerm.desc(count), OrderingTerm.asc(diaryEntries.foodName)]))
+        .get();
+    final result = <String, List<String>>{};
+    for (final row in rows) {
+      final list = result.putIfAbsent(row.read(diaryEntries.mealSlot)!, () => []);
+      if (list.length < perSlot) list.add(row.read(diaryEntries.foodName)!);
+    }
+    return result;
+  }
+
+  /// For each meal slot, the entries from the most recent day before
+  /// [beforeDate] (within [fromDate]) that slot was logged.
+  Future<Map<String, List<DiaryEntry>>> lastMealsBySlot(String fromDate, String beforeDate) async {
+    final rows = await (select(diaryEntries)
+          ..where((e) => e.date.isBiggerOrEqualValue(fromDate) & e.date.isSmallerThanValue(beforeDate))
+          ..orderBy([(e) => OrderingTerm.desc(e.date), (e) => OrderingTerm.asc(e.loggedAt)]))
+        .get();
+    final latestDate = <String, String>{};
+    final result = <String, List<DiaryEntry>>{};
+    for (final row in rows) {
+      final date = latestDate.putIfAbsent(row.mealSlot, () => row.date);
+      if (row.date == date) result.putIfAbsent(row.mealSlot, () => []).add(row);
+    }
+    return result;
+  }
+
+  Stream<List<WorkoutSetLog>> watchSetLogsSince(String fromDate) =>
+      (select(workoutSetLogs)..where((l) => l.date.isBiggerOrEqualValue(fromDate))).watch();
+
+  Future<int> countSetsFor(String date, String exerciseName) async {
+    final rows = await (select(workoutSetLogs)
+          ..where((l) => l.date.equals(date) & l.exerciseName.equals(exerciseName)))
+        .get();
+    return rows.length;
+  }
+
+  /// Saves a weigh-in for [date] (replacing that day's) with a real rolling
+  /// average: the mean of every weigh-in in the 7 days up to and including it.
+  Future<void> saveWeighIn(String date, double weightKg) async {
+    final day = DateTime.parse(date);
+    final from = day.subtract(const Duration(days: 6)).toIso8601String().substring(0, 10);
+    final window = await (select(weighIns)
+          ..where((w) => w.date.isBiggerOrEqualValue(from) & w.date.isSmallerThanValue(date)))
+        .get();
+    final values = [...window.map((w) => w.weightKg), weightKg];
+    final avg = values.reduce((a, b) => a + b) / values.length;
+    final existing = await (select(weighIns)..where((w) => w.date.equals(date))).getSingleOrNull();
+    await addWeighIn(WeighInsCompanion.insert(
+      id: existing?.id ?? const Uuid().v4(),
+      date: date,
+      weightKg: weightKg,
+      rollingAvgKg: Value(double.parse(avg.toStringAsFixed(2))),
+      loggedAt: Value(DateTime.now()),
+      isDirty: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
+
+  // ── Check-in Helpers ──────────────────────────────────────────────
+
+  Stream<List<ProgressPhoto>> watchProgressPhotos() =>
+      (select(progressPhotos)..orderBy([(p) => OrderingTerm.asc(p.date)])).watch();
+
+  Future<void> saveProgressPhoto(String date, String path) =>
+      into(progressPhotos).insertOnConflictUpdate(ProgressPhotosCompanion.insert(date: date, path: path));
+
+  Future<WeighIn?> latestWeighIn() =>
+      (select(weighIns)..orderBy([(w) => OrderingTerm.desc(w.date)])..limit(1)).getSingleOrNull();
+
+  Future<String?> latestMeasurementDate() async {
+    final row = await (select(measurements)..orderBy([(m) => OrderingTerm.desc(m.date)])..limit(1)).getSingleOrNull();
+    return row?.date;
+  }
+
+  // ── Sleep Helpers ─────────────────────────────────────────────────
+
+  Stream<List<SleepLog>> watchRecentSleep(int nights) =>
+      (select(sleepLogs)
+            ..orderBy([(s) => OrderingTerm.desc(s.date)])
+            ..limit(nights))
+          .watch();
+
+  /// Insert or update a night; only marks dirty when something changed, so
+  /// re-importing the same Health Connect data doesn't re-push it.
+  Future<bool> upsertSleepNight(String date, int minutes, DateTime bedtime, DateTime wakeTime) async {
+    final existing = await (select(sleepLogs)..where((s) => s.date.equals(date))).getSingleOrNull();
+    if (existing != null &&
+        existing.minutes == minutes &&
+        existing.bedtime == bedtime &&
+        existing.wakeTime == wakeTime) {
+      return false;
+    }
+    await into(sleepLogs).insertOnConflictUpdate(SleepLogsCompanion.insert(
+      date: date,
+      minutes: minutes,
+      bedtime: bedtime,
+      wakeTime: wakeTime,
+      isDirty: const Value(true),
+      updatedAt: Value(DateTime.now()),
+    ));
+    return true;
+  }
+
+  Future<List<SleepLog>> getDirtySleepLogs() =>
+      (select(sleepLogs)..where((s) => s.isDirty.equals(true))).get();
+
+  Future<void> markSleepLogsClean(List<String> dates) =>
+      (update(sleepLogs)..where((s) => s.date.isIn(dates)))
+          .write(const SleepLogsCompanion(isDirty: Value(false)));
 
   Future<void> _reconcile<T extends Table, D>(
     TableInfo<T, D> table,

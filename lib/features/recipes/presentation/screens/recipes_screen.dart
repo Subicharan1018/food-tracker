@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 import '../../../../core/di/providers.dart';
+import '../../../pantry/pantry_service.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../streaks/services/streak_service.dart';
@@ -164,22 +165,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                       final db = ref.read(databaseProvider);
                       final dateStr = ref.read(formattedSelectedDateProvider);
 
-                      await db.addDiaryEntry(
-                        DiaryEntriesCompanion.insert(
-                          id: const Uuid().v4(),
-                          date: dateStr,
-                          mealSlot: recipe.mealSlot,
-                          foodName: recipe.name,
-                          portionQty: 1.0,
-                          portionUnit: 'recipe meal',
-                          calories: recipe.calories,
-                          proteinG: recipe.proteinG,
-                          carbsG: recipe.carbsG,
-                          fatG: recipe.fatG,
-                          fiberG: Value(recipe.fiberG),
-                          loggedAt: Value(DateTime.now()),
-                        ),
-                      );
+                      final pantry = await logRecipe(db, recipe, date: dateStr, mealSlot: recipe.mealSlot);
 
                       // Update logging streak
                       final currentStreak = await db.getStreak('logging');
@@ -204,7 +190,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
                       }
                       if (mounted) {
                         ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Logged ${recipe.name} to ${recipe.mealSlot.toUpperCase()}!')),
+                          SnackBar(content: Text(['Logged ${recipe.name}.', ?pantry.summary].join(' '))),
                         );
                       }
                     },
@@ -232,7 +218,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
 
     setState(() => _isCreating = true);
     try {
-      final userId = ref.read(userProfileProvider).value?.id ?? 'default_user';
+      final userId = await ref.read(firestoreUserIdProvider.future);
       final response = await ref.read(aiApiClientProvider).createRecipe(
             userId: userId,
             recipeText: draft.text,
@@ -253,6 +239,7 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
           fatG: _asDouble(response['fat_g']),
           fiberG: Value(_asDouble(response['fiber_g'])),
           ingredientsJson: jsonEncode(ingredients),
+          servings: Value(_asDouble(response['servings']) > 0 ? _asDouble(response['servings']) : draft.servings),
           method: response['method']?.toString() ?? '',
           updatedAt: Value(DateTime.now()),
         ),

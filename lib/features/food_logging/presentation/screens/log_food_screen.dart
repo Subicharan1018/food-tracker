@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:uuid/uuid.dart';
 import '../../../../core/di/providers.dart';
+import '../../../../core/ingredients/ingredient_identity.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../streaks/services/streak_service.dart';
@@ -71,6 +72,24 @@ double _convertMass(double amount, String? from, String to) {
   return amount;
 }
 
+/// The food [query] unambiguously refers to, or `null`.
+///
+/// Search is a substring match, so its first row can be the wrong food
+/// ("egg" → an eggplant dish, or egg noodles).  Accept a result only when its
+/// canonical name equals the query's, or when exactly one result is an IFCT
+/// style variant of it ("Spinach, boiled" for "spinach").
+FoodItem? confidentFoodMatch(List<FoodItem> results, String query) {
+  final wanted = canonicalizeIngredient(query);
+  if (wanted.isEmpty) return null;
+  final exact = results.where((f) => canonicalizeIngredient(f.name) == wanted).toList();
+  if (exact.length == 1) return exact.single;
+  final heads = results.where((f) {
+    final name = canonicalizeIngredient(f.name);
+    return name.startsWith('$wanted,');
+  }).toList();
+  return heads.length == 1 ? heads.single : null;
+}
+
 class LogFoodScreen extends ConsumerStatefulWidget {
   final String initialMealSlot;
 
@@ -93,58 +112,61 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
   Future<void> _handleNlpParsedItems(List<Map<String, dynamic>> items) async {
     final db = ref.read(databaseProvider);
     final dateStr = ref.read(formattedSelectedDateProvider);
+    final unmatched = <String>[];
+    var logged = 0;
 
     for (final item in items) {
       final name = item['food_name']?.toString() ?? 'Item';
       final requested = (item['portion_qty'] as num?)?.toDouble() ?? 1.0;
       final slot = item['meal_slot']?.toString().toLowerCase() ?? _selectedSlot;
 
-      final match = await db.searchFoodItems(name);
-      final food = match.isNotEmpty ? match.first : null;
+      // Only log against a food we're sure of; numbers are never invented.
+      final food = confidentFoodMatch(await db.searchFoodItems(name), name);
+      if (food == null) {
+        unmatched.add(name);
+        continue;
+      }
 
-      final spec = food == null ? null : _portionSpec(food);
+      final spec = _portionSpec(food);
       // A bare NLP quantity means servings for count-based foods, but the
       // standard serving size for gram/ml foods. Explicit 200g/250ml values
       // remain literal amounts from the parser.
       final parsedUnit = item['portion_unit']?.toString();
-      final portion = food == null
-          ? requested
-          : (spec!.isMass && parsedUnit == null && requested == 1.0
-              ? spec.servingSize
-              : (spec.isMass ? _convertMass(requested, parsedUnit, spec.unit) : requested));
-      final factor = food == null ? portion : _portionFactor(spec!, portion);
-      final cal = food != null ? food.calories * factor : 150.0 * portion;
-      final p = food != null ? food.proteinG * factor : 10.0 * portion;
-      final c = food != null ? food.carbsG * factor : 15.0 * portion;
-      final f = food != null ? food.fatG * factor : 4.0 * portion;
+      final portion = spec.isMass && parsedUnit == null && requested == 1.0
+          ? spec.servingSize
+          : (spec.isMass ? _convertMass(requested, parsedUnit, spec.unit) : requested);
+      final factor = _portionFactor(spec, portion);
 
       await db.addDiaryEntry(
         DiaryEntriesCompanion.insert(
           id: const Uuid().v4(),
           date: dateStr,
           mealSlot: slot,
-          foodItemId: Value(food?.id),
-          foodName: food?.name ?? name,
+          foodItemId: Value(food.id),
+          foodName: food.name,
           portionQty: portion,
-          portionUnit: food?.servingUnit ?? item['portion_unit']?.toString() ?? 'serving',
-          calories: cal,
-          proteinG: p,
-          carbsG: c,
-          fatG: f,
-          fiberG: Value(food != null ? food.fiberG * factor : 2.0 * portion),
+          portionUnit: food.servingUnit,
+          calories: food.calories * factor,
+          proteinG: food.proteinG * factor,
+          carbsG: food.carbsG * factor,
+          fatG: food.fatG * factor,
+          fiberG: Value(food.fiberG * factor),
           loggedAt: Value(DateTime.now()),
         ),
       );
+      logged++;
     }
 
-    if (mounted) {
-      setState(() => _nlpMode = false);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Logged ${items.length} item(s) from natural language! ✨'),
-          backgroundColor: AppColors.positive,
-        ),
-      );
+    if (!mounted) return;
+    setState(() => _nlpMode = false);
+    final parts = [
+      if (logged > 0) 'Logged $logged ${logged == 1 ? 'item' : 'items'}.',
+      if (unmatched.isNotEmpty) "Couldn't match ${unmatched.join(', ')} — pick it from search.",
+    ];
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(parts.join(' '))));
+    if (unmatched.isNotEmpty) {
+      _searchController.text = unmatched.first;
+      _performSearch(unmatched.first);
     }
   }
 
@@ -589,7 +611,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: _nlpMode
                 ? NlpInputWidget(
-                    userId: ref.watch(userProfileProvider).value?.id,
+                    userId: ref.watch(firestoreUserIdProvider).value,
                     initialText: _searchController.text,
                     onParsed: _handleNlpParsedItems,
                     onFallbackSearch: (fallback) {

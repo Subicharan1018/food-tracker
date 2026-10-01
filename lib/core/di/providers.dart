@@ -201,8 +201,11 @@ final todayWaterLogsProvider = FutureProvider<List<WaterLog>>((ref) async {
 
 final userProfileStreamProvider = userProfileProvider;
 
+// The family key is kept for cache identity only; backend calls always use
+// the Firestore user id, since that's where the server reads synced data.
 final mealPlanProvider = FutureProvider.family<Map<String, dynamic>, String>(
-  (ref, userId) async {
+  (ref, _) async {
+    final userId = await ref.read(firestoreUserIdProvider.future);
     final client = ref.read(aiApiClientProvider);
     final diary = await ref.read(todayDiaryEntriesProvider.future);
     final waterLogs = await ref.read(todayWaterLogsProvider.future);
@@ -216,7 +219,8 @@ final mealPlanProvider = FutureProvider.family<Map<String, dynamic>, String>(
 );
 
 final workoutProgressionProvider = FutureProvider.family<Map<String, dynamic>, String>(
-  (ref, userId) async {
+  (ref, _) async {
+    final userId = await ref.read(firestoreUserIdProvider.future);
     final client = ref.read(aiApiClientProvider);
     return client.requestWorkoutProgression(userId: userId);
   },
@@ -225,8 +229,8 @@ final workoutProgressionProvider = FutureProvider.family<Map<String, dynamic>, S
 final weeklyDigestProvider = FutureProvider.family<Map<String, dynamic>?, String>(
   (ref, week) async {
     final client = ref.read(aiApiClientProvider);
-    final profile = await ref.read(userProfileProvider.future);
-    return client.fetchDigest(userId: profile?.id ?? 'default_user', week: week);
+    final userId = await ref.read(firestoreUserIdProvider.future);
+    return client.fetchDigest(userId: userId, week: week);
   },
 );
 
@@ -248,6 +252,36 @@ final dailyPaceProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
 final weeklyShoppingListProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final userId = await ref.watch(firestoreUserIdProvider.future);
   return ref.read(aiApiClientProvider).fetchShoppingList(userId: userId);
+});
+
+/// What you actually eat in each meal slot, from the last 14 days of logs.
+final usualFoodsProvider = FutureProvider<Map<String, List<String>>>((ref) {
+  ref.watch(diaryEntriesProvider); // refresh when today's log changes
+  final from = DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 14)));
+  return ref.watch(databaseProvider).usualFoodsBySlot(from);
+});
+
+/// Per meal slot, the most recent earlier day's entries — offered as a
+/// one-tap "same as last time" on the home meal rail.
+final lastMealsProvider = FutureProvider<Map<String, List<DiaryEntry>>>((ref) {
+  ref.watch(diaryEntriesProvider);
+  final date = ref.watch(selectedDateProvider);
+  final fmt = DateFormat('yyyy-MM-dd');
+  return ref.watch(databaseProvider).lastMealsBySlot(
+        fmt.format(date.subtract(const Duration(days: 14))),
+        fmt.format(date),
+      );
+});
+
+/// Eight weeks of logged sets — enough history for the progression rules.
+final recentSetLogsProvider = StreamProvider<List<WorkoutSetLog>>((ref) {
+  final from = DateFormat('yyyy-MM-dd').format(DateTime.now().subtract(const Duration(days: 56)));
+  return ref.watch(databaseProvider).watchSetLogsSince(from);
+});
+
+/// Last 14 nights of sleep imported from Health Connect, newest first.
+final recentSleepProvider = StreamProvider<List<SleepLog>>((ref) {
+  return ref.watch(databaseProvider).watchRecentSleep(14);
 });
 
 /// The pantry: what the weekly ceiling is computed from.

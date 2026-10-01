@@ -14,7 +14,7 @@ from app.services.food_db_service import food_db_service
 from app.services.nemotron_service import NemotronService
 from app.services.nutrient_calculator import load_nutrient_profiles
 from app.services.nutrient_coverage_service import find_candidate_recipe
-from app.services.pacing_service import detect_gaps, gap_priority
+from app.services.pacing_service import detect_gaps, diary_micronutrients, gap_priority
 from app.services.shopping_list_service import prose_is_number_free
 
 router = APIRouter()
@@ -38,8 +38,15 @@ async def check_and_alert(
     diary = [entry for entry in diary if entry.get("date") == today]
     recipes = firestore.get_recipes(user_id)
     profile = firestore.get_user_profile(user_id)
-    issues = detect_gaps(diary, recipes, hour, float(profile.get("proteinTargetG") or 155.0))
-    status: dict = {"issues": issues, "checkpoint_hour": hour, "candidate_recipe": None}
+    issues = detect_gaps(diary, recipes, hour, float(profile.get("proteinTargetG") or 155.0), food_db)
+    micros = diary_micronutrients(diary, recipes, food_db)
+    status: dict = {
+        "issues": issues,
+        "checkpoint_hour": hour,
+        "candidate_recipe": None,
+        # Logged foods with no cited source or no known weight: shown, not zeroed.
+        "uncounted_foods": sorted(set(micros["uncounted"])),
+    }
     if not issues:
         firestore.save_daily_pace_status(user_id, status)
         return status
@@ -92,7 +99,7 @@ async def _coach_message(nemotron: NemotronService, issues: dict, candidate: dic
     )
     prompt = f"Facts: {facts}\nWrite one specific action in fewer than 30 words."
     try:
-        text = (await nemotron.complete(system, prompt, max_tokens=80)).strip()
+        text = (await nemotron.complete(system, prompt, max_tokens=120, reasoning=False)).strip()
     except Exception:
         return fallback
     return text if prose_is_number_free(text) else fallback

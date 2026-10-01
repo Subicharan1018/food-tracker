@@ -77,7 +77,7 @@ async def _summarise(nemotron, gaps_detail: list[dict[str, Any]]) -> str | None:
     )
     prompt = f"Facts: {facts}\nWrite at most two sentences."
     try:
-        text = (await nemotron.complete(system, prompt, max_tokens=90)).strip()
+        text = (await nemotron.complete(system, prompt, max_tokens=150, reasoning=False)).strip()
     except Exception as exc:  # AI prose is optional; the list stands without it.
         logger.warning("Shopping list summary skipped: %s", exc)
         return None

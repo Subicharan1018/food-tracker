@@ -144,6 +144,8 @@ class GoogleFirestoreSyncService {
           "date": {"stringValue": entry.date},
           "mealSlot": {"stringValue": entry.mealSlot},
           "foodName": {"stringValue": entry.foodName},
+          // Lets the server look up the cited IFCT row for micronutrients.
+          "foodItemId": entry.foodItemId == null ? {"nullValue": null} : {"stringValue": entry.foodItemId},
           "portionQty": {"doubleValue": entry.portionQty},
           "portionUnit": {"stringValue": entry.portionUnit},
           "calories": {"doubleValue": entry.calories},
@@ -349,6 +351,7 @@ class GoogleFirestoreSyncService {
           "carbsG": {"doubleValue": r.carbsG},
           "fatG": {"doubleValue": r.fatG},
           "ingredientsJson": {"stringValue": r.ingredientsJson},
+          "servings": {"doubleValue": r.servings},
           "method": {"stringValue": r.method},
           "updatedAt": {"stringValue": r.updatedAt.toIso8601String()},
         }
@@ -357,9 +360,13 @@ class GoogleFirestoreSyncService {
       if (ok) count++;
     }
 
+    // Queued deletes first, so a deleted meal can't be pulled back below.
+    count += await _pushDeletions(db, headers);
+
     // 10–11. Shopping cart + pantry (tombstoned rows become remote deletes)
     count += await _pushCartItems(db, headers);
     count += await _pushInventoryItems(db, headers);
+    count += await _pushSleepLogs(db, headers);
 
     return count;
   }
@@ -410,16 +417,19 @@ class GoogleFirestoreSyncService {
 
     // 2. Pull Diary Entries
     final remoteDiaryDocs = await _queryCollection('diary_entries', isFreshInstall ? null : lastSync, headers);
+    final pendingDeletes = (await db.getPendingDeletions()).toSet();
     final diaryCompanions = <DiaryEntriesCompanion>[];
     for (final doc in remoteDiaryDocs) {
       final fields = doc['fields'] as Map<String, dynamic>?;
       if (fields == null) continue;
+      if (pendingDeletes.contains('diary_entries/${fields['id']?['stringValue']}')) continue;
       diaryCompanions.add(
         DiaryEntriesCompanion(
           id: Value(fields['id']?['stringValue'] ?? ''),
           date: Value(fields['date']?['stringValue'] ?? ''),
           mealSlot: Value(fields['mealSlot']?['stringValue'] ?? 'snack'),
           foodName: Value(fields['foodName']?['stringValue'] ?? ''),
+          foodItemId: Value(fields['foodItemId']?['stringValue'] as String?),
           portionQty: Value(_parseDouble(fields['portionQty']) ?? 1.0),
           portionUnit: Value(fields['portionUnit']?['stringValue'] ?? 'g'),
           calories: Value(_parseDouble(fields['calories']) ?? 0.0),
@@ -601,6 +611,7 @@ class GoogleFirestoreSyncService {
           carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
           fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
           ingredientsJson: Value(fields['ingredientsJson']?['stringValue'] ?? '[]'),
+          servings: Value(_parseDouble(fields['servings']) ?? 1.0),
           method: Value(fields['method']?['stringValue'] ?? ''),
           updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
         ),
@@ -709,6 +720,36 @@ class GoogleFirestoreSyncService {
     if (synced.isNotEmpty) await db.markInventoryItemsClean(synced);
     if (purged.isNotEmpty) await db.purgeInventoryItems(purged);
     return synced.length + purged.length;
+  }
+
+  Future<int> _pushDeletions(AppDatabase db, Map<String, String> headers) async {
+    final done = <String>[];
+    for (final path in await db.getPendingDeletions()) {
+      if (await _deleteDoc('$_baseUrl/users/$userId/$path', headers)) done.add(path);
+    }
+    if (done.isNotEmpty) await db.clearPendingDeletions(done);
+    return done.length;
+  }
+
+  /// Phone → server only: Health Connect on the phone is the source of truth.
+  Future<int> _pushSleepLogs(AppDatabase db, Map<String, String> headers) async {
+    final synced = <String>[];
+    for (final s in await db.getDirtySleepLogs()) {
+      final ok = await _patchDocument('$_baseUrl/users/$userId/sleep_logs/${s.date}', {
+        "fields": {
+          "date": {"stringValue": s.date},
+          "durationMin": {"integerValue": s.minutes.toString()},
+          "durationHours": {"doubleValue": double.parse((s.minutes / 60).toStringAsFixed(2))},
+          "bedtime": {"stringValue": s.bedtime.toUtc().toIso8601String()},
+          "wakeTime": {"stringValue": s.wakeTime.toUtc().toIso8601String()},
+          "source": {"stringValue": s.source},
+          "updatedAt": {"stringValue": s.updatedAt.toUtc().toIso8601String()},
+        }
+      }, headers);
+      if (ok) synced.add(s.date);
+    }
+    if (synced.isNotEmpty) await db.markSleepLogsClean(synced);
+    return synced.length;
   }
 
   Future<int> _pullCartItems(AppDatabase db, Map<String, String> headers) async {
@@ -886,6 +927,7 @@ class GoogleFirestoreSyncService {
           date: Value(fields['date']?['stringValue'] ?? ''),
           mealSlot: Value(fields['mealSlot']?['stringValue'] ?? 'snack'),
           foodName: Value(fields['foodName']?['stringValue'] ?? ''),
+          foodItemId: Value(fields['foodItemId']?['stringValue'] as String?),
           portionQty: Value(_parseDouble(fields['portionQty']) ?? 1.0),
           portionUnit: Value(fields['portionUnit']?['stringValue'] ?? 'g'),
           calories: Value(_parseDouble(fields['calories']) ?? 0.0),
@@ -1040,6 +1082,7 @@ class GoogleFirestoreSyncService {
           carbsG: Value(_parseDouble(fields['carbsG']) ?? 0.0),
           fatG: Value(_parseDouble(fields['fatG']) ?? 0.0),
           ingredientsJson: Value(fields['ingredientsJson']?['stringValue'] ?? '[]'),
+          servings: Value(_parseDouble(fields['servings']) ?? 1.0),
           method: Value(fields['method']?['stringValue'] ?? ''),
           updatedAt: Value(DateTime.tryParse(fields['updatedAt']?['stringValue'] ?? '') ?? DateTime.now()),
         ),

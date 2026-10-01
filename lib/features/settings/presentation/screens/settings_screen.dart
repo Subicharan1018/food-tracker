@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../../data_export.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:drift/drift.dart' hide Column;
 import 'package:intl/intl.dart';
@@ -502,6 +503,47 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                 ),
               );
             },
+          ),
+          const SizedBox(height: 16),
+          // Export everything — insurance for a one-person app.
+          Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: AppColors.card,
+              borderRadius: AppShapes.information,
+              border: Border.all(color: AppColors.border),
+            ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('Export my data', style: AppTypography.titleMedium),
+                      SizedBox(height: 2),
+                      Text(
+                        'Everything on this phone as JSON, plus meals and weight as CSV.',
+                        style: TextStyle(fontSize: 12, height: 1.4, color: AppColors.textSecondary),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 12),
+                TextButton(
+                  onPressed: () async {
+                    try {
+                      await shareExport(ref.read(databaseProvider));
+                    } catch (e) {
+                      if (context.mounted) {
+                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Export failed: $e')));
+                      }
+                    }
+                  },
+                  style: TextButton.styleFrom(foregroundColor: AppColors.brandPrimary),
+                  child: const Text('Export'),
+                ),
+              ],
+            ),
           ),
         ],
       ),

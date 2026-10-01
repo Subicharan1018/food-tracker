@@ -7,7 +7,7 @@ import '../../core/local_db/app_database.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/ledger.dart';
 import '../shopping_cart/quick_add_parser.dart';
-import '../shopping_cart/shopping_cart_service.dart' show convertQuantity;
+import '../shopping_cart/shopping_cart_service.dart' show CartSource, convertQuantity;
 
 /// What's in the kitchen.  The server computes the weekly nutrient ceiling
 /// and the shopping list from exactly these rows (synced to Firestore).
@@ -98,7 +98,9 @@ class PantryScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final items = ref.watch(inventoryItemsProvider).value ?? const <InventoryItem>[];
-    final uncounted = items.where((i) => i.unit == 'pieces').length;
+    final inStock = items.where((i) => i.quantity > 0).toList();
+    final usedUp = items.where((i) => i.quantity <= 0).toList();
+    final uncounted = inStock.where((i) => i.unit == 'pieces').length;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Pantry')),
@@ -125,19 +127,19 @@ class PantryScreen extends ConsumerWidget {
               ),
             ),
           const SizedBox(height: 8),
-          for (var i = 0; i < items.length; i++) ...[
+          for (var i = 0; i < inStock.length; i++) ...[
             InkWell(
-              onTap: () => _edit(context, ref, items[i]),
+              onTap: () => _edit(context, ref, inStock[i]),
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 14, 20, 14),
                 child: Row(
                   children: [
                     Expanded(
-                      child: Text(items[i].name,
+                      child: Text(inStock[i].name,
                           style: const TextStyle(fontSize: 15, color: AppColors.textPrimary)),
                     ),
                     Text(
-                      '${formatQty(items[i].quantity)} ${items[i].unit}',
+                      '${formatQty(inStock[i].quantity)} ${inStock[i].unit}',
                       style: const TextStyle(
                         fontSize: 14,
                         color: AppColors.textSecondary,
@@ -148,7 +150,34 @@ class PantryScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            if (i < items.length - 1) const Hairline(),
+            if (i < inStock.length - 1) const Hairline(),
+          ],
+          if (usedUp.isNotEmpty) ...[
+            SectionHeader(title: 'Used up', detail: '${usedUp.length}'),
+            for (final item in usedUp)
+              InkWell(
+                onTap: () => _edit(context, ref, item),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(item.name, style: const TextStyle(fontSize: 15, color: AppColors.textMuted)),
+                      ),
+                      TextButton(
+                        onPressed: () => ref.read(shoppingCartServiceProvider).addToCart(
+                              name: item.name,
+                              canonicalName: item.canonicalName,
+                              unit: item.unit,
+                              addedFrom: CartSource.manual,
+                            ),
+                        style: TextButton.styleFrom(foregroundColor: AppColors.brandPrimary),
+                        child: const Text('+ Cart'),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
           ],
         ],
       ),

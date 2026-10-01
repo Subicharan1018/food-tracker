@@ -172,3 +172,25 @@ async def test_nemotron_timeout_enforcement():
         with pytest.raises(RuntimeError, match="Nemotron complete failed: AI call timed out after"):
             await svc.complete("system", "user")
 
+
+
+@pytest.mark.asyncio
+async def test_short_prose_disables_reasoning_and_drops_truncated_replies():
+    from types import SimpleNamespace
+    from unittest.mock import AsyncMock, MagicMock
+
+    client = MagicMock()
+    truncated = SimpleNamespace(choices=[SimpleNamespace(
+        finish_reason="length",
+        message=SimpleNamespace(content="The user wants a specific action based on"),
+    )])
+    client.chat.completions.create = AsyncMock(return_value=truncated)
+    svc = NemotronService(client=client)
+
+    assert await svc.complete("sys", "user", max_tokens=80, reasoning=False) == ""
+    kwargs = client.chat.completions.create.call_args.kwargs
+    assert kwargs["extra_body"] == {"reasoning": {"enabled": False}}
+
+    # Long-form calls keep reasoning and are passed through as before.
+    assert await svc.complete("sys", "user") == "The user wants a specific action based on"
+    assert "extra_body" not in client.chat.completions.create.call_args.kwargs

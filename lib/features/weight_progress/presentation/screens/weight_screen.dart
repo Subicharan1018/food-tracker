@@ -136,15 +136,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                         final db = ref.read(databaseProvider);
                         final dateStr = ref.read(formattedSelectedDateProvider);
 
-                        await db.addWeighIn(
-                          WeighInsCompanion.insert(
-                            id: const Uuid().v4(),
-                            date: dateStr,
-                            weightKg: weight,
-                            rollingAvgKg: Value(weight),
-                            loggedAt: Value(DateTime.now()),
-                          ),
-                        );
+                        await db.saveWeighIn(dateStr, weight);
 
                         if (context.mounted) {
                           Navigator.pop(ctx);
