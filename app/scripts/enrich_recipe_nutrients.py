@@ -4,9 +4,10 @@ One-time enrichment script — resolves missing ingredients via two-tier sourcin
 assets/nutrient_profiles.json.
 
 Usage:
-    python -m app.scripts.enrich_recipe_nutrients
+    python -m app.scripts.enrich_recipe_nutrients --user-id <uid>   # Stage-0 sweep over real recipes
 
 Flags:
+    --user-id UID        Sweep that user's Firestore recipes for unresolved ingredients.
     --ingredient NAME    Resolve a single ingredient by name (skip Stage-0 sweep).
     --dry-run            Print proposed changes without writing to disk.
 
@@ -26,9 +27,11 @@ from datetime import date
 from pathlib import Path
 
 from app.services.food_db_service import food_db_service
+from app.services.ingredient_identity import canonicalize
+from app.services.nutrient_calculator import compute_recipe_nutrients
 from app.services.usda_fdc_client import get_food_nutrients, search_food
 
-NUTRIENT_PROFILES_PATH = Path(__file__).resolve().parents[3] / "assets" / "nutrient_profiles.json"
+NUTRIENT_PROFILES_PATH = Path(__file__).resolve().parents[2] / "assets" / "nutrient_profiles.json"
 
 
 def _load_profiles() -> dict:
@@ -43,7 +46,21 @@ def _save_profiles(profiles: dict) -> None:
 
 
 def _normalise(name: str) -> str:
-    return " ".join(name.lower().replace("_", " ").split())
+    return canonicalize(name)
+
+
+def stage0_unresolved(user_id: str, profiles: dict) -> dict[str, list[str]]:
+    """Map each unresolved canonical ingredient to the recipes that need it."""
+    from app.services.firestore_service import firestore_service
+
+    unresolved: dict[str, list[str]] = {}
+    for recipe in firestore_service.get_recipes(user_id):
+        result = compute_recipe_nutrients(recipe, profiles, food_db_service)
+        for entry in result.get("missing_data", []):
+            if "(unknown portion)" in entry or entry.startswith("structured"):
+                continue
+            unresolved.setdefault(canonicalize(entry), []).append(recipe.get("name", "?"))
+    return unresolved
 
 
 async def resolve_via_ifct(name: str) -> dict | None:
@@ -162,12 +179,21 @@ async def resolve_ingredient(name: str, profiles: dict, dry_run: bool) -> bool:
     return True
 
 
-async def main(ingredient: str | None = None, dry_run: bool = False) -> None:
+async def main(ingredient: str | None = None, dry_run: bool = False, user_id: str | None = None) -> None:
     profiles = _load_profiles()
 
     if ingredient:
         # Single-ingredient mode
         await resolve_ingredient(ingredient, profiles, dry_run)
+        return
+
+    if user_id:
+        unresolved = stage0_unresolved(user_id, profiles)
+        print(f"{len(unresolved)} unresolved ingredients across recipes:")
+        for name, recipes in sorted(unresolved.items()):
+            print(f"  • {name}  ← {', '.join(sorted(set(recipes)))}")
+        for name in sorted(unresolved):
+            await resolve_ingredient(name, profiles, dry_run)
         return
 
     # Stage-0 sweep mode: report all ingredients missing from profiles
@@ -194,7 +220,9 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Two-tier nutrient enrichment: IFCT → USDA FDC")
     parser.add_argument("--ingredient", type=str, default=None,
                         help="Resolve a single ingredient name (skip the sweep)")
+    parser.add_argument("--user-id", type=str, default=None,
+                        help="Stage-0 sweep: scan this user's recipes for unresolved ingredients")
     parser.add_argument("--dry-run", action="store_true",
                         help="Print proposed changes without writing to disk")
     args = parser.parse_args()
-    asyncio.run(main(ingredient=args.ingredient, dry_run=args.dry_run))
+    asyncio.run(main(ingredient=args.ingredient, dry_run=args.dry_run, user_id=args.user_id))

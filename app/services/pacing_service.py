@@ -54,3 +54,11 @@ def detect_gaps(today_diary: list[dict[str, Any]], recipes: list[dict[str, Any]]
     if gaps:
         issues["nutrient_gaps"] = gaps
     return issues
+
+
+def gap_priority(nutrient_gaps: dict[str, dict[str, float]]) -> list[str]:
+    """Nutrients ordered by how far behind pace they are (largest shortfall ratio first)."""
+    def shortfall(item: tuple[str, dict[str, float]]) -> float:
+        expected = float(item[1].get("expected") or 0.0)
+        return 0.0 if expected <= 0 else 1.0 - float(item[1].get("consumed") or 0.0) / expected
+    return [key for key, _ in sorted(nutrient_gaps.items(), key=shortfall, reverse=True)]

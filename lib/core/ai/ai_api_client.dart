@@ -133,6 +133,25 @@ class AiApiClient {
     return null;
   }
 
+  /// This week's server-computed shopping list, or `null` if none exists yet.
+  Future<Map<String, dynamic>?> fetchShoppingList({required String userId}) async {
+    final response = await _client
+        .get(Uri.parse('$_base/api/shopping-list/$userId'))
+        .timeout(_timeout);
+    if (response.statusCode != 200) {
+      throw Exception('Server error ${response.statusCode}');
+    }
+    final decoded = jsonDecode(response.body);
+    if (decoded is! Map<String, dynamic> || decoded['shopping_list'] == null) {
+      return null;
+    }
+    return decoded;
+  }
+
+  /// Recompute the ceiling + gaps now against the synced pantry.
+  Future<Map<String, dynamic>> generateShoppingList({required String userId}) =>
+      _post('/api/shopping-list/generate', {'user_id': userId});
+
   Future<bool> isServerReachable() async {
     try {
       final res = await _client

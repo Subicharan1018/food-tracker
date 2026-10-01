@@ -7573,6 +7573,1221 @@ class RecipesCompanion extends UpdateCompanion<Recipe> {
   }
 }
 
+class $InventoryItemsTable extends InventoryItems
+    with TableInfo<$InventoryItemsTable, InventoryItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $InventoryItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => const Uuid().v4(),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _canonicalNameMeta = const VerificationMeta(
+    'canonicalName',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalName = GeneratedColumn<String>(
+    'canonical_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pieces'),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _pendingDeleteMeta = const VerificationMeta(
+    'pendingDelete',
+  );
+  @override
+  late final GeneratedColumn<bool> pendingDelete = GeneratedColumn<bool>(
+    'pending_delete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pending_delete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    canonicalName,
+    quantity,
+    unit,
+    updatedAt,
+    isDirty,
+    pendingDelete,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'inventory_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<InventoryItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('canonical_name')) {
+      context.handle(
+        _canonicalNameMeta,
+        canonicalName.isAcceptableOrUnknown(
+          data['canonical_name']!,
+          _canonicalNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalNameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('pending_delete')) {
+      context.handle(
+        _pendingDeleteMeta,
+        pendingDelete.isAcceptableOrUnknown(
+          data['pending_delete']!,
+          _pendingDeleteMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  InventoryItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return InventoryItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      canonicalName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_name'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      pendingDelete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pending_delete'],
+      )!,
+    );
+  }
+
+  @override
+  $InventoryItemsTable createAlias(String alias) {
+    return $InventoryItemsTable(attachedDatabase, alias);
+  }
+}
+
+class InventoryItem extends DataClass implements Insertable<InventoryItem> {
+  final String id;
+  final String name;
+  final String canonicalName;
+  final double quantity;
+  final String unit;
+  final DateTime updatedAt;
+  final bool isDirty;
+  final bool pendingDelete;
+  const InventoryItem({
+    required this.id,
+    required this.name,
+    required this.canonicalName,
+    required this.quantity,
+    required this.unit,
+    required this.updatedAt,
+    required this.isDirty,
+    required this.pendingDelete,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['canonical_name'] = Variable<String>(canonicalName);
+    map['quantity'] = Variable<double>(quantity);
+    map['unit'] = Variable<String>(unit);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['pending_delete'] = Variable<bool>(pendingDelete);
+    return map;
+  }
+
+  InventoryItemsCompanion toCompanion(bool nullToAbsent) {
+    return InventoryItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      canonicalName: Value(canonicalName),
+      quantity: Value(quantity),
+      unit: Value(unit),
+      updatedAt: Value(updatedAt),
+      isDirty: Value(isDirty),
+      pendingDelete: Value(pendingDelete),
+    );
+  }
+
+  factory InventoryItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return InventoryItem(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      canonicalName: serializer.fromJson<String>(json['canonicalName']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      unit: serializer.fromJson<String>(json['unit']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      pendingDelete: serializer.fromJson<bool>(json['pendingDelete']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'canonicalName': serializer.toJson<String>(canonicalName),
+      'quantity': serializer.toJson<double>(quantity),
+      'unit': serializer.toJson<String>(unit),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'pendingDelete': serializer.toJson<bool>(pendingDelete),
+    };
+  }
+
+  InventoryItem copyWith({
+    String? id,
+    String? name,
+    String? canonicalName,
+    double? quantity,
+    String? unit,
+    DateTime? updatedAt,
+    bool? isDirty,
+    bool? pendingDelete,
+  }) => InventoryItem(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    canonicalName: canonicalName ?? this.canonicalName,
+    quantity: quantity ?? this.quantity,
+    unit: unit ?? this.unit,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDirty: isDirty ?? this.isDirty,
+    pendingDelete: pendingDelete ?? this.pendingDelete,
+  );
+  InventoryItem copyWithCompanion(InventoryItemsCompanion data) {
+    return InventoryItem(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      canonicalName: data.canonicalName.present
+          ? data.canonicalName.value
+          : this.canonicalName,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      pendingDelete: data.pendingDelete.present
+          ? data.pendingDelete.value
+          : this.pendingDelete,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItem(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('pendingDelete: $pendingDelete')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    canonicalName,
+    quantity,
+    unit,
+    updatedAt,
+    isDirty,
+    pendingDelete,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is InventoryItem &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.canonicalName == this.canonicalName &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.updatedAt == this.updatedAt &&
+          other.isDirty == this.isDirty &&
+          other.pendingDelete == this.pendingDelete);
+}
+
+class InventoryItemsCompanion extends UpdateCompanion<InventoryItem> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> canonicalName;
+  final Value<double> quantity;
+  final Value<String> unit;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDirty;
+  final Value<bool> pendingDelete;
+  final Value<int> rowid;
+  const InventoryItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.canonicalName = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.pendingDelete = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  InventoryItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String canonicalName,
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.pendingDelete = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name),
+       canonicalName = Value(canonicalName);
+  static Insertable<InventoryItem> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? canonicalName,
+    Expression<double>? quantity,
+    Expression<String>? unit,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDirty,
+    Expression<bool>? pendingDelete,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (canonicalName != null) 'canonical_name': canonicalName,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (pendingDelete != null) 'pending_delete': pendingDelete,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  InventoryItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? canonicalName,
+    Value<double>? quantity,
+    Value<String>? unit,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDirty,
+    Value<bool>? pendingDelete,
+    Value<int>? rowid,
+  }) {
+    return InventoryItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      canonicalName: canonicalName ?? this.canonicalName,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDirty: isDirty ?? this.isDirty,
+      pendingDelete: pendingDelete ?? this.pendingDelete,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (canonicalName.present) {
+      map['canonical_name'] = Variable<String>(canonicalName.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (pendingDelete.present) {
+      map['pending_delete'] = Variable<bool>(pendingDelete.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('InventoryItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('pendingDelete: $pendingDelete, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ShoppingCartItemsTable extends ShoppingCartItems
+    with TableInfo<$ShoppingCartItemsTable, ShoppingCartItem> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ShoppingCartItemsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    clientDefault: () => const Uuid().v4(),
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _canonicalNameMeta = const VerificationMeta(
+    'canonicalName',
+  );
+  @override
+  late final GeneratedColumn<String> canonicalName = GeneratedColumn<String>(
+    'canonical_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _quantityMeta = const VerificationMeta(
+    'quantity',
+  );
+  @override
+  late final GeneratedColumn<double> quantity = GeneratedColumn<double>(
+    'quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(1.0),
+  );
+  static const VerificationMeta _unitMeta = const VerificationMeta('unit');
+  @override
+  late final GeneratedColumn<String> unit = GeneratedColumn<String>(
+    'unit',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('pieces'),
+  );
+  static const VerificationMeta _addedFromMeta = const VerificationMeta(
+    'addedFrom',
+  );
+  @override
+  late final GeneratedColumn<String> addedFrom = GeneratedColumn<String>(
+    'added_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reasonMeta = const VerificationMeta('reason');
+  @override
+  late final GeneratedColumn<String> reason = GeneratedColumn<String>(
+    'reason',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _checkedMeta = const VerificationMeta(
+    'checked',
+  );
+  @override
+  late final GeneratedColumn<bool> checked = GeneratedColumn<bool>(
+    'checked',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("checked" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _addedAtMeta = const VerificationMeta(
+    'addedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> addedAt = GeneratedColumn<DateTime>(
+    'added_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _isDirtyMeta = const VerificationMeta(
+    'isDirty',
+  );
+  @override
+  late final GeneratedColumn<bool> isDirty = GeneratedColumn<bool>(
+    'is_dirty',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_dirty" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _pendingDeleteMeta = const VerificationMeta(
+    'pendingDelete',
+  );
+  @override
+  late final GeneratedColumn<bool> pendingDelete = GeneratedColumn<bool>(
+    'pending_delete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("pending_delete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    name,
+    canonicalName,
+    quantity,
+    unit,
+    addedFrom,
+    reason,
+    checked,
+    addedAt,
+    updatedAt,
+    isDirty,
+    pendingDelete,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'shopping_cart_items';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ShoppingCartItem> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('canonical_name')) {
+      context.handle(
+        _canonicalNameMeta,
+        canonicalName.isAcceptableOrUnknown(
+          data['canonical_name']!,
+          _canonicalNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_canonicalNameMeta);
+    }
+    if (data.containsKey('quantity')) {
+      context.handle(
+        _quantityMeta,
+        quantity.isAcceptableOrUnknown(data['quantity']!, _quantityMeta),
+      );
+    }
+    if (data.containsKey('unit')) {
+      context.handle(
+        _unitMeta,
+        unit.isAcceptableOrUnknown(data['unit']!, _unitMeta),
+      );
+    }
+    if (data.containsKey('added_from')) {
+      context.handle(
+        _addedFromMeta,
+        addedFrom.isAcceptableOrUnknown(data['added_from']!, _addedFromMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_addedFromMeta);
+    }
+    if (data.containsKey('reason')) {
+      context.handle(
+        _reasonMeta,
+        reason.isAcceptableOrUnknown(data['reason']!, _reasonMeta),
+      );
+    }
+    if (data.containsKey('checked')) {
+      context.handle(
+        _checkedMeta,
+        checked.isAcceptableOrUnknown(data['checked']!, _checkedMeta),
+      );
+    }
+    if (data.containsKey('added_at')) {
+      context.handle(
+        _addedAtMeta,
+        addedAt.isAcceptableOrUnknown(data['added_at']!, _addedAtMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    }
+    if (data.containsKey('is_dirty')) {
+      context.handle(
+        _isDirtyMeta,
+        isDirty.isAcceptableOrUnknown(data['is_dirty']!, _isDirtyMeta),
+      );
+    }
+    if (data.containsKey('pending_delete')) {
+      context.handle(
+        _pendingDeleteMeta,
+        pendingDelete.isAcceptableOrUnknown(
+          data['pending_delete']!,
+          _pendingDeleteMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ShoppingCartItem map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ShoppingCartItem(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      canonicalName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}canonical_name'],
+      )!,
+      quantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}quantity'],
+      )!,
+      unit: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}unit'],
+      )!,
+      addedFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}added_from'],
+      )!,
+      reason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reason'],
+      ),
+      checked: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}checked'],
+      )!,
+      addedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}added_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      isDirty: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_dirty'],
+      )!,
+      pendingDelete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}pending_delete'],
+      )!,
+    );
+  }
+
+  @override
+  $ShoppingCartItemsTable createAlias(String alias) {
+    return $ShoppingCartItemsTable(attachedDatabase, alias);
+  }
+}
+
+class ShoppingCartItem extends DataClass
+    implements Insertable<ShoppingCartItem> {
+  final String id;
+  final String name;
+  final String canonicalName;
+  final double quantity;
+  final String unit;
+  final String addedFrom;
+  final String? reason;
+  final bool checked;
+  final DateTime addedAt;
+  final DateTime updatedAt;
+  final bool isDirty;
+  final bool pendingDelete;
+  const ShoppingCartItem({
+    required this.id,
+    required this.name,
+    required this.canonicalName,
+    required this.quantity,
+    required this.unit,
+    required this.addedFrom,
+    this.reason,
+    required this.checked,
+    required this.addedAt,
+    required this.updatedAt,
+    required this.isDirty,
+    required this.pendingDelete,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['name'] = Variable<String>(name);
+    map['canonical_name'] = Variable<String>(canonicalName);
+    map['quantity'] = Variable<double>(quantity);
+    map['unit'] = Variable<String>(unit);
+    map['added_from'] = Variable<String>(addedFrom);
+    if (!nullToAbsent || reason != null) {
+      map['reason'] = Variable<String>(reason);
+    }
+    map['checked'] = Variable<bool>(checked);
+    map['added_at'] = Variable<DateTime>(addedAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['is_dirty'] = Variable<bool>(isDirty);
+    map['pending_delete'] = Variable<bool>(pendingDelete);
+    return map;
+  }
+
+  ShoppingCartItemsCompanion toCompanion(bool nullToAbsent) {
+    return ShoppingCartItemsCompanion(
+      id: Value(id),
+      name: Value(name),
+      canonicalName: Value(canonicalName),
+      quantity: Value(quantity),
+      unit: Value(unit),
+      addedFrom: Value(addedFrom),
+      reason: reason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(reason),
+      checked: Value(checked),
+      addedAt: Value(addedAt),
+      updatedAt: Value(updatedAt),
+      isDirty: Value(isDirty),
+      pendingDelete: Value(pendingDelete),
+    );
+  }
+
+  factory ShoppingCartItem.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ShoppingCartItem(
+      id: serializer.fromJson<String>(json['id']),
+      name: serializer.fromJson<String>(json['name']),
+      canonicalName: serializer.fromJson<String>(json['canonicalName']),
+      quantity: serializer.fromJson<double>(json['quantity']),
+      unit: serializer.fromJson<String>(json['unit']),
+      addedFrom: serializer.fromJson<String>(json['addedFrom']),
+      reason: serializer.fromJson<String?>(json['reason']),
+      checked: serializer.fromJson<bool>(json['checked']),
+      addedAt: serializer.fromJson<DateTime>(json['addedAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      isDirty: serializer.fromJson<bool>(json['isDirty']),
+      pendingDelete: serializer.fromJson<bool>(json['pendingDelete']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'name': serializer.toJson<String>(name),
+      'canonicalName': serializer.toJson<String>(canonicalName),
+      'quantity': serializer.toJson<double>(quantity),
+      'unit': serializer.toJson<String>(unit),
+      'addedFrom': serializer.toJson<String>(addedFrom),
+      'reason': serializer.toJson<String?>(reason),
+      'checked': serializer.toJson<bool>(checked),
+      'addedAt': serializer.toJson<DateTime>(addedAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'isDirty': serializer.toJson<bool>(isDirty),
+      'pendingDelete': serializer.toJson<bool>(pendingDelete),
+    };
+  }
+
+  ShoppingCartItem copyWith({
+    String? id,
+    String? name,
+    String? canonicalName,
+    double? quantity,
+    String? unit,
+    String? addedFrom,
+    Value<String?> reason = const Value.absent(),
+    bool? checked,
+    DateTime? addedAt,
+    DateTime? updatedAt,
+    bool? isDirty,
+    bool? pendingDelete,
+  }) => ShoppingCartItem(
+    id: id ?? this.id,
+    name: name ?? this.name,
+    canonicalName: canonicalName ?? this.canonicalName,
+    quantity: quantity ?? this.quantity,
+    unit: unit ?? this.unit,
+    addedFrom: addedFrom ?? this.addedFrom,
+    reason: reason.present ? reason.value : this.reason,
+    checked: checked ?? this.checked,
+    addedAt: addedAt ?? this.addedAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+    isDirty: isDirty ?? this.isDirty,
+    pendingDelete: pendingDelete ?? this.pendingDelete,
+  );
+  ShoppingCartItem copyWithCompanion(ShoppingCartItemsCompanion data) {
+    return ShoppingCartItem(
+      id: data.id.present ? data.id.value : this.id,
+      name: data.name.present ? data.name.value : this.name,
+      canonicalName: data.canonicalName.present
+          ? data.canonicalName.value
+          : this.canonicalName,
+      quantity: data.quantity.present ? data.quantity.value : this.quantity,
+      unit: data.unit.present ? data.unit.value : this.unit,
+      addedFrom: data.addedFrom.present ? data.addedFrom.value : this.addedFrom,
+      reason: data.reason.present ? data.reason.value : this.reason,
+      checked: data.checked.present ? data.checked.value : this.checked,
+      addedAt: data.addedAt.present ? data.addedAt.value : this.addedAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      isDirty: data.isDirty.present ? data.isDirty.value : this.isDirty,
+      pendingDelete: data.pendingDelete.present
+          ? data.pendingDelete.value
+          : this.pendingDelete,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingCartItem(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('addedFrom: $addedFrom, ')
+          ..write('reason: $reason, ')
+          ..write('checked: $checked, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('pendingDelete: $pendingDelete')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    name,
+    canonicalName,
+    quantity,
+    unit,
+    addedFrom,
+    reason,
+    checked,
+    addedAt,
+    updatedAt,
+    isDirty,
+    pendingDelete,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ShoppingCartItem &&
+          other.id == this.id &&
+          other.name == this.name &&
+          other.canonicalName == this.canonicalName &&
+          other.quantity == this.quantity &&
+          other.unit == this.unit &&
+          other.addedFrom == this.addedFrom &&
+          other.reason == this.reason &&
+          other.checked == this.checked &&
+          other.addedAt == this.addedAt &&
+          other.updatedAt == this.updatedAt &&
+          other.isDirty == this.isDirty &&
+          other.pendingDelete == this.pendingDelete);
+}
+
+class ShoppingCartItemsCompanion extends UpdateCompanion<ShoppingCartItem> {
+  final Value<String> id;
+  final Value<String> name;
+  final Value<String> canonicalName;
+  final Value<double> quantity;
+  final Value<String> unit;
+  final Value<String> addedFrom;
+  final Value<String?> reason;
+  final Value<bool> checked;
+  final Value<DateTime> addedAt;
+  final Value<DateTime> updatedAt;
+  final Value<bool> isDirty;
+  final Value<bool> pendingDelete;
+  final Value<int> rowid;
+  const ShoppingCartItemsCompanion({
+    this.id = const Value.absent(),
+    this.name = const Value.absent(),
+    this.canonicalName = const Value.absent(),
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    this.addedFrom = const Value.absent(),
+    this.reason = const Value.absent(),
+    this.checked = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.pendingDelete = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ShoppingCartItemsCompanion.insert({
+    this.id = const Value.absent(),
+    required String name,
+    required String canonicalName,
+    this.quantity = const Value.absent(),
+    this.unit = const Value.absent(),
+    required String addedFrom,
+    this.reason = const Value.absent(),
+    this.checked = const Value.absent(),
+    this.addedAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.isDirty = const Value.absent(),
+    this.pendingDelete = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : name = Value(name),
+       canonicalName = Value(canonicalName),
+       addedFrom = Value(addedFrom);
+  static Insertable<ShoppingCartItem> custom({
+    Expression<String>? id,
+    Expression<String>? name,
+    Expression<String>? canonicalName,
+    Expression<double>? quantity,
+    Expression<String>? unit,
+    Expression<String>? addedFrom,
+    Expression<String>? reason,
+    Expression<bool>? checked,
+    Expression<DateTime>? addedAt,
+    Expression<DateTime>? updatedAt,
+    Expression<bool>? isDirty,
+    Expression<bool>? pendingDelete,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (name != null) 'name': name,
+      if (canonicalName != null) 'canonical_name': canonicalName,
+      if (quantity != null) 'quantity': quantity,
+      if (unit != null) 'unit': unit,
+      if (addedFrom != null) 'added_from': addedFrom,
+      if (reason != null) 'reason': reason,
+      if (checked != null) 'checked': checked,
+      if (addedAt != null) 'added_at': addedAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (isDirty != null) 'is_dirty': isDirty,
+      if (pendingDelete != null) 'pending_delete': pendingDelete,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ShoppingCartItemsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? name,
+    Value<String>? canonicalName,
+    Value<double>? quantity,
+    Value<String>? unit,
+    Value<String>? addedFrom,
+    Value<String?>? reason,
+    Value<bool>? checked,
+    Value<DateTime>? addedAt,
+    Value<DateTime>? updatedAt,
+    Value<bool>? isDirty,
+    Value<bool>? pendingDelete,
+    Value<int>? rowid,
+  }) {
+    return ShoppingCartItemsCompanion(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      canonicalName: canonicalName ?? this.canonicalName,
+      quantity: quantity ?? this.quantity,
+      unit: unit ?? this.unit,
+      addedFrom: addedFrom ?? this.addedFrom,
+      reason: reason ?? this.reason,
+      checked: checked ?? this.checked,
+      addedAt: addedAt ?? this.addedAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      isDirty: isDirty ?? this.isDirty,
+      pendingDelete: pendingDelete ?? this.pendingDelete,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (canonicalName.present) {
+      map['canonical_name'] = Variable<String>(canonicalName.value);
+    }
+    if (quantity.present) {
+      map['quantity'] = Variable<double>(quantity.value);
+    }
+    if (unit.present) {
+      map['unit'] = Variable<String>(unit.value);
+    }
+    if (addedFrom.present) {
+      map['added_from'] = Variable<String>(addedFrom.value);
+    }
+    if (reason.present) {
+      map['reason'] = Variable<String>(reason.value);
+    }
+    if (checked.present) {
+      map['checked'] = Variable<bool>(checked.value);
+    }
+    if (addedAt.present) {
+      map['added_at'] = Variable<DateTime>(addedAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (isDirty.present) {
+      map['is_dirty'] = Variable<bool>(isDirty.value);
+    }
+    if (pendingDelete.present) {
+      map['pending_delete'] = Variable<bool>(pendingDelete.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ShoppingCartItemsCompanion(')
+          ..write('id: $id, ')
+          ..write('name: $name, ')
+          ..write('canonicalName: $canonicalName, ')
+          ..write('quantity: $quantity, ')
+          ..write('unit: $unit, ')
+          ..write('addedFrom: $addedFrom, ')
+          ..write('reason: $reason, ')
+          ..write('checked: $checked, ')
+          ..write('addedAt: $addedAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('isDirty: $isDirty, ')
+          ..write('pendingDelete: $pendingDelete, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -7590,6 +8805,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WaterLogsTable waterLogs = $WaterLogsTable(this);
   late final $StreaksTable streaks = $StreaksTable(this);
   late final $RecipesTable recipes = $RecipesTable(this);
+  late final $InventoryItemsTable inventoryItems = $InventoryItemsTable(this);
+  late final $ShoppingCartItemsTable shoppingCartItems =
+      $ShoppingCartItemsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -7607,6 +8825,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     waterLogs,
     streaks,
     recipes,
+    inventoryItems,
+    shoppingCartItems,
   ];
 }
 
@@ -11383,6 +12603,637 @@ typedef $$RecipesTableProcessedTableManager =
       Recipe,
       PrefetchHooks Function()
     >;
+typedef $$InventoryItemsTableCreateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      Value<String> id,
+      required String name,
+      required String canonicalName,
+      Value<double> quantity,
+      Value<String> unit,
+      Value<DateTime> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> pendingDelete,
+      Value<int> rowid,
+    });
+typedef $$InventoryItemsTableUpdateCompanionBuilder =
+    InventoryItemsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> canonicalName,
+      Value<double> quantity,
+      Value<String> unit,
+      Value<DateTime> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> pendingDelete,
+      Value<int> rowid,
+    });
+
+class $$InventoryItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$InventoryItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$InventoryItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $InventoryItemsTable> {
+  $$InventoryItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => column,
+  );
+}
+
+class $$InventoryItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $InventoryItemsTable,
+          InventoryItem,
+          $$InventoryItemsTableFilterComposer,
+          $$InventoryItemsTableOrderingComposer,
+          $$InventoryItemsTableAnnotationComposer,
+          $$InventoryItemsTableCreateCompanionBuilder,
+          $$InventoryItemsTableUpdateCompanionBuilder,
+          (
+            InventoryItem,
+            BaseReferences<_$AppDatabase, $InventoryItemsTable, InventoryItem>,
+          ),
+          InventoryItem,
+          PrefetchHooks Function()
+        > {
+  $$InventoryItemsTableTableManager(
+    _$AppDatabase db,
+    $InventoryItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$InventoryItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$InventoryItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$InventoryItemsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> canonicalName = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> pendingDelete = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion(
+                id: id,
+                name: name,
+                canonicalName: canonicalName,
+                quantity: quantity,
+                unit: unit,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                pendingDelete: pendingDelete,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                required String name,
+                required String canonicalName,
+                Value<double> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> pendingDelete = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => InventoryItemsCompanion.insert(
+                id: id,
+                name: name,
+                canonicalName: canonicalName,
+                quantity: quantity,
+                unit: unit,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                pendingDelete: pendingDelete,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$InventoryItemsTable, InventoryItem>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $InventoryItemsTable,
+                    InventoryItem
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$InventoryItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $InventoryItemsTable,
+      InventoryItem,
+      $$InventoryItemsTableFilterComposer,
+      $$InventoryItemsTableOrderingComposer,
+      $$InventoryItemsTableAnnotationComposer,
+      $$InventoryItemsTableCreateCompanionBuilder,
+      $$InventoryItemsTableUpdateCompanionBuilder,
+      (
+        InventoryItem,
+        BaseReferences<_$AppDatabase, $InventoryItemsTable, InventoryItem>,
+      ),
+      InventoryItem,
+      PrefetchHooks Function()
+    >;
+typedef $$ShoppingCartItemsTableCreateCompanionBuilder =
+    ShoppingCartItemsCompanion Function({
+      Value<String> id,
+      required String name,
+      required String canonicalName,
+      Value<double> quantity,
+      Value<String> unit,
+      required String addedFrom,
+      Value<String?> reason,
+      Value<bool> checked,
+      Value<DateTime> addedAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> pendingDelete,
+      Value<int> rowid,
+    });
+typedef $$ShoppingCartItemsTableUpdateCompanionBuilder =
+    ShoppingCartItemsCompanion Function({
+      Value<String> id,
+      Value<String> name,
+      Value<String> canonicalName,
+      Value<double> quantity,
+      Value<String> unit,
+      Value<String> addedFrom,
+      Value<String?> reason,
+      Value<bool> checked,
+      Value<DateTime> addedAt,
+      Value<DateTime> updatedAt,
+      Value<bool> isDirty,
+      Value<bool> pendingDelete,
+      Value<int> rowid,
+    });
+
+class $$ShoppingCartItemsTableFilterComposer
+    extends Composer<_$AppDatabase, $ShoppingCartItemsTable> {
+  $$ShoppingCartItemsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get addedFrom => $composableBuilder(
+    column: $table.addedFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get checked => $composableBuilder(
+    column: $table.checked,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ShoppingCartItemsTableOrderingComposer
+    extends Composer<_$AppDatabase, $ShoppingCartItemsTable> {
+  $$ShoppingCartItemsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get quantity => $composableBuilder(
+    column: $table.quantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get unit => $composableBuilder(
+    column: $table.unit,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get addedFrom => $composableBuilder(
+    column: $table.addedFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reason => $composableBuilder(
+    column: $table.reason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get checked => $composableBuilder(
+    column: $table.checked,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get addedAt => $composableBuilder(
+    column: $table.addedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isDirty => $composableBuilder(
+    column: $table.isDirty,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ShoppingCartItemsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ShoppingCartItemsTable> {
+  $$ShoppingCartItemsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get canonicalName => $composableBuilder(
+    column: $table.canonicalName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get quantity =>
+      $composableBuilder(column: $table.quantity, builder: (column) => column);
+
+  GeneratedColumn<String> get unit =>
+      $composableBuilder(column: $table.unit, builder: (column) => column);
+
+  GeneratedColumn<String> get addedFrom =>
+      $composableBuilder(column: $table.addedFrom, builder: (column) => column);
+
+  GeneratedColumn<String> get reason =>
+      $composableBuilder(column: $table.reason, builder: (column) => column);
+
+  GeneratedColumn<bool> get checked =>
+      $composableBuilder(column: $table.checked, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get addedAt =>
+      $composableBuilder(column: $table.addedAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<bool> get isDirty =>
+      $composableBuilder(column: $table.isDirty, builder: (column) => column);
+
+  GeneratedColumn<bool> get pendingDelete => $composableBuilder(
+    column: $table.pendingDelete,
+    builder: (column) => column,
+  );
+}
+
+class $$ShoppingCartItemsTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ShoppingCartItemsTable,
+          ShoppingCartItem,
+          $$ShoppingCartItemsTableFilterComposer,
+          $$ShoppingCartItemsTableOrderingComposer,
+          $$ShoppingCartItemsTableAnnotationComposer,
+          $$ShoppingCartItemsTableCreateCompanionBuilder,
+          $$ShoppingCartItemsTableUpdateCompanionBuilder,
+          (
+            ShoppingCartItem,
+            BaseReferences<
+              _$AppDatabase,
+              $ShoppingCartItemsTable,
+              ShoppingCartItem
+            >,
+          ),
+          ShoppingCartItem,
+          PrefetchHooks Function()
+        > {
+  $$ShoppingCartItemsTableTableManager(
+    _$AppDatabase db,
+    $ShoppingCartItemsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ShoppingCartItemsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ShoppingCartItemsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ShoppingCartItemsTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> canonicalName = const Value.absent(),
+                Value<double> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                Value<String> addedFrom = const Value.absent(),
+                Value<String?> reason = const Value.absent(),
+                Value<bool> checked = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> pendingDelete = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingCartItemsCompanion(
+                id: id,
+                name: name,
+                canonicalName: canonicalName,
+                quantity: quantity,
+                unit: unit,
+                addedFrom: addedFrom,
+                reason: reason,
+                checked: checked,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                pendingDelete: pendingDelete,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                required String name,
+                required String canonicalName,
+                Value<double> quantity = const Value.absent(),
+                Value<String> unit = const Value.absent(),
+                required String addedFrom,
+                Value<String?> reason = const Value.absent(),
+                Value<bool> checked = const Value.absent(),
+                Value<DateTime> addedAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<bool> isDirty = const Value.absent(),
+                Value<bool> pendingDelete = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ShoppingCartItemsCompanion.insert(
+                id: id,
+                name: name,
+                canonicalName: canonicalName,
+                quantity: quantity,
+                unit: unit,
+                addedFrom: addedFrom,
+                reason: reason,
+                checked: checked,
+                addedAt: addedAt,
+                updatedAt: updatedAt,
+                isDirty: isDirty,
+                pendingDelete: pendingDelete,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ShoppingCartItemsTable, ShoppingCartItem>(table),
+                  BaseReferences<
+                    _$AppDatabase,
+                    $ShoppingCartItemsTable,
+                    ShoppingCartItem
+                  >(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ShoppingCartItemsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ShoppingCartItemsTable,
+      ShoppingCartItem,
+      $$ShoppingCartItemsTableFilterComposer,
+      $$ShoppingCartItemsTableOrderingComposer,
+      $$ShoppingCartItemsTableAnnotationComposer,
+      $$ShoppingCartItemsTableCreateCompanionBuilder,
+      $$ShoppingCartItemsTableUpdateCompanionBuilder,
+      (
+        ShoppingCartItem,
+        BaseReferences<
+          _$AppDatabase,
+          $ShoppingCartItemsTable,
+          ShoppingCartItem
+        >,
+      ),
+      ShoppingCartItem,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -11411,4 +13262,8 @@ class $AppDatabaseManager {
       $$StreaksTableTableManager(_db, _db.streaks);
   $$RecipesTableTableManager get recipes =>
       $$RecipesTableTableManager(_db, _db.recipes);
+  $$InventoryItemsTableTableManager get inventoryItems =>
+      $$InventoryItemsTableTableManager(_db, _db.inventoryItems);
+  $$ShoppingCartItemsTableTableManager get shoppingCartItems =>
+      $$ShoppingCartItemsTableTableManager(_db, _db.shoppingCartItems);
 }

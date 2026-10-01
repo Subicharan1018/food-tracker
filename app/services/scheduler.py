@@ -6,8 +6,8 @@ from app.services.firestore_service import firestore_service
 from app.services.fcm_service import fcm_service
 from app.services.nemotron_service import nemotron_service
 from app.routers.pacing import check_and_alert
-from app.services.nutrient_calculator import load_nutrient_profiles
-from app.services.nutrient_coverage_service import compute_weekly_nutrient_ceiling, compute_structural_gaps_detail
+from app.services.food_db_service import food_db_service
+from app.services.shopping_list_service import build_weekly_shopping_list
 from app.config import logger
 
 scheduler = AsyncIOScheduler()
@@ -30,27 +30,15 @@ async def _job_pacing_check(hour: int):
 async def _job_weekly_shopping_list():
     """Saturday 8 AM — regenerate shopping list and structural gaps for every user."""
     logger.info("Executing Saturday weekly shopping list generation...")
-    from datetime import date
-    try:
-        nutrient_db = load_nutrient_profiles()
-    except Exception as e:
-        logger.error("Could not load nutrient profiles for shopping list job: %s", e)
-        return
     for user in firestore_service.get_all_users():
         user_id = user.get("id")
         if not user_id:
             continue
         try:
-            inventory = firestore_service.get_inventory(user_id)
-            recipes = firestore_service.get_recipes(user_id)
-            ceiling = compute_weekly_nutrient_ceiling(inventory, nutrient_db)
-            gaps_detail = compute_structural_gaps_detail(
-                ceiling.get("structural_gaps", []), recipes, inventory, nutrient_db
+            payload = await build_weekly_shopping_list(
+                user_id, firestore_service, food_db_service, nemotron_service
             )
-            week = f"{date.today().isocalendar().year}-W{date.today().isocalendar().week:02d}"
-            payload = {**ceiling, "structural_gaps_detail": gaps_detail, "week": week, "user_id": user_id}
-            firestore_service.save_shopping_list(user_id, week, payload)
-            logger.info("Shopping list saved for user %s (week %s)", user_id, week)
+            logger.info("Shopping list saved for user %s (week %s)", user_id, payload["week"])
         except Exception as e:
             logger.error("Shopping list job failed for user %s: %s", user_id, e)
 

@@ -11,19 +11,17 @@ Endpoints:
 """
 from __future__ import annotations
 
-import json
 from datetime import datetime, timezone
 
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, Field
 
-from app.dependencies import get_firestore_service
+from app.dependencies import get_firestore_service, get_food_db_service, get_nemotron_service
 from app.services.firestore_service import FirestoreService
-from app.services.nutrient_calculator import _normalise, load_nutrient_profiles
-from app.services.nutrient_coverage_service import (
-    compute_structural_gaps_detail,
-    compute_weekly_nutrient_ceiling,
-)
+from app.services.food_db_service import FoodDbService
+from app.services.ingredient_identity import canonicalize
+from app.services.nemotron_service import NemotronService
+from app.services.shopping_list_service import build_weekly_shopping_list, iso_week
 
 router = APIRouter()
 
@@ -58,9 +56,8 @@ async def get_shopping_list(
     user_id: str,
     firestore: FirestoreService = Depends(get_firestore_service),
 ):
-    """Return the most recently generated shopping list for a user."""
-    from datetime import date
-    week = f"{date.today().isocalendar().year}-W{date.today().isocalendar().week:02d}"
+    """Return this week's generated shopping list for a user."""
+    week = iso_week()
     result = firestore.get_shopping_list(user_id, week)
     if not result:
         return {"shopping_list": None, "week": week, "message": "No shopping list generated yet for this week."}
@@ -71,40 +68,17 @@ async def get_shopping_list(
 async def generate_shopping_list(
     request: GenerateShoppingListRequest,
     firestore: FirestoreService = Depends(get_firestore_service),
+    food_db: FoodDbService = Depends(get_food_db_service),
+    nemotron: NemotronService = Depends(get_nemotron_service),
 ):
     """Generate and persist the weekly nutrient ceiling + structural gaps detail.
 
     This is the Saturday scheduled job entry point — also callable on demand.
     """
-    from datetime import date
-    user_id = request.user_id
-    inventory = firestore.get_inventory(user_id)
-    recipes = firestore.get_recipes(user_id)
-
     try:
-        nutrient_db = load_nutrient_profiles()
-    except Exception as e:
+        return await build_weekly_shopping_list(request.user_id, firestore, food_db, nemotron)
+    except FileNotFoundError as e:
         raise HTTPException(status_code=500, detail=f"Could not load nutrient profiles: {e}")
-
-    ceiling = compute_weekly_nutrient_ceiling(inventory, nutrient_db)
-    gaps_detail = compute_structural_gaps_detail(
-        ceiling.get("structural_gaps", []),
-        recipes,
-        inventory,
-        nutrient_db,
-    )
-
-    from datetime import date as _date
-    week = f"{_date.today().isocalendar().year}-W{_date.today().isocalendar().week:02d}"
-
-    payload = {
-        **ceiling,
-        "structural_gaps_detail": gaps_detail,
-        "week": week,
-        "user_id": user_id,
-    }
-    firestore.save_shopping_list(user_id, week, payload)
-    return payload
 
 
 # ── Cart ─────────────────────────────────────────────────────────────────────
@@ -133,13 +107,13 @@ async def add_to_cart(
     If a checked (purchased) item with the same canonical_name exists, a new
     unchecked item is created so the user can buy it again.
     """
-    canonical = _normalise(body.canonical_name)
+    canonical = canonicalize(body.canonical_name)
 
     # Deduplication check
     existing_items = firestore.get_cart_items(user_id)
     for item in existing_items:
         if (
-            _normalise(str(item.get("canonicalName") or item.get("canonical_name") or "")) == canonical
+            canonicalize(str(item.get("canonicalName") or item.get("canonical_name") or "")) == canonical
             and not item.get("checked", False)
         ):
             return {

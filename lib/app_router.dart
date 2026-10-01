@@ -4,7 +4,6 @@ import 'features/ai_digest/weekly_digest_card.dart';
 import 'features/workouts/hiit/hiit_timer_screen.dart';
 import 'features/workouts/progression_card.dart';
 import 'shared/screens/main_nav_screen.dart';
-import 'core/theme/app_theme.dart';
 
 final appRouter = GoRouter(
   initialLocation: '/',

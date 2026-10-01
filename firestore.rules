@@ -5,5 +5,23 @@ service cloud.firestore {
     match /users/{userId}/{document=**} {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
+
+    // Explicit sub-collection rules for documentation clarity
+    // (covered by the wildcard above, restated here for auditability)
+
+    // shopping_cart_items — read/write for owner only
+    match /users/{userId}/shopping_cart_items/{itemId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // inventory (pantry) — read by the weekly ceiling + pacing jobs
+    match /users/{userId}/inventory/{itemId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // shopping_lists — read/write for owner only
+    match /users/{userId}/shopping_lists/{week} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
   }
 }

@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
+import 'package:uuid/uuid.dart';
 import '../sync/sync_scheduler.dart';
 
 part 'app_database.g.dart';
@@ -217,6 +218,44 @@ class Recipes extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+// 13. Inventory Items Table — the pantry the backend computes ceilings from.
+// Synced to users/{uid}/inventory.
+class InventoryItems extends Table {
+  TextColumn get id => text().clientDefault(() => const Uuid().v4())();
+  TextColumn get name => text()();
+  TextColumn get canonicalName => text()();
+  RealColumn get quantity => real().withDefault(const Constant(1.0))();
+  TextColumn get unit => text().withDefault(const Constant('pieces'))();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(true))();
+  // Tombstone: hidden locally, deleted remotely on next push, then purged.
+  BoolColumn get pendingDelete => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+// 14. Shopping Cart Items Table — synced to users/{uid}/shopping_cart_items.
+class ShoppingCartItems extends Table {
+  TextColumn get id => text().clientDefault(() => const Uuid().v4())();
+  TextColumn get name => text()();
+  TextColumn get canonicalName => text()();
+  RealColumn get quantity => real().withDefault(const Constant(1.0))();
+  TextColumn get unit => text().withDefault(const Constant('pieces'))();
+  // addedFrom: "shopping_list" | "nutrient_gap" | "recipe_suggestion" | "manual"
+  TextColumn get addedFrom => text()();
+  // e.g. "Unlocks Naatu Kozhi Kuzhambu"
+  TextColumn get reason => text().nullable()();
+  BoolColumn get checked => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get addedAt => dateTime().withDefault(currentDateAndTime)();
+  DateTimeColumn get updatedAt => dateTime().withDefault(currentDateAndTime)();
+  BoolColumn get isDirty => boolean().withDefault(const Constant(true))();
+  BoolColumn get pendingDelete => boolean().withDefault(const Constant(false))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 @DriftDatabase(tables: [
   Users,
   FoodItems,
@@ -230,6 +269,8 @@ class Recipes extends Table {
   WaterLogs,
   Streaks,
   Recipes,
+  InventoryItems,
+  ShoppingCartItems,
 ])
 class AppDatabase extends _$AppDatabase {
   SyncScheduler? syncScheduler;
@@ -241,7 +282,35 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 3;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onCreate: (m) async {
+      await m.createAll();
+    },
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(inventoryItems);
+        await m.createTable(shoppingCartItems);
+        return;
+      }
+      if (from < 3) {
+        // v2 used local autoincrement ids, which collide as Firestore doc ids
+        // across devices.  Rebuild both tables with text ids, keeping rows.
+        await m.alterTable(TableMigration(
+          inventoryItems,
+          columnTransformer: {inventoryItems.id: inventoryItems.id.cast<String>()},
+          newColumns: [inventoryItems.pendingDelete],
+        ));
+        await m.alterTable(TableMigration(
+          shoppingCartItems,
+          columnTransformer: {shoppingCartItems.id: shoppingCartItems.id.cast<String>()},
+          newColumns: [shoppingCartItems.updatedAt, shoppingCartItems.pendingDelete],
+        ));
+      }
+    },
+  );
 
   static LazyDatabase _openConnection() {
     return LazyDatabase(() async {
@@ -505,5 +574,166 @@ class AppDatabase extends _$AppDatabase {
       b.insertAllOnConflictUpdate(customFoods, foods);
     });
   }
-}
 
+  // ── Inventory Helpers ─────────────────────────────────────────────
+  // Rows with pendingDelete are invisible to every reader below; only the
+  // sync push sees them (to delete the remote doc) before they are purged.
+
+  Future<List<InventoryItem>> getInventoryItemsByCanonicalName(String canonicalName) =>
+      (select(inventoryItems)
+            ..where((i) => i.canonicalName.equals(canonicalName) & i.pendingDelete.equals(false)))
+          .get();
+
+  Future<List<InventoryItem>> getAllInventoryItems() =>
+      (select(inventoryItems)..where((i) => i.pendingDelete.equals(false))).get();
+
+  Stream<List<InventoryItem>> watchInventoryItems() =>
+      (select(inventoryItems)
+            ..where((i) => i.pendingDelete.equals(false))
+            ..orderBy([(i) => OrderingTerm.asc(i.name)]))
+          .watch();
+
+  Future<void> incrementInventoryQuantity(String id, double amount) async {
+    await customUpdate(
+      'UPDATE inventory_items SET quantity = quantity + ?, updated_at = ?, is_dirty = 1 WHERE id = ?',
+      variables: [Variable.withReal(amount), Variable.withDateTime(DateTime.now()), Variable.withString(id)],
+      updates: {inventoryItems},
+    );
+    syncScheduler?.scheduleSync();
+  }
+
+  Future<void> updateInventoryItem(String id, InventoryItemsCompanion companion) async {
+    await (update(inventoryItems)..where((i) => i.id.equals(id))).write(
+      companion.copyWith(updatedAt: Value(DateTime.now()), isDirty: const Value(true)),
+    );
+    syncScheduler?.scheduleSync();
+  }
+
+  Future<String> createInventoryItem(InventoryItemsCompanion item) async {
+    final row = await into(inventoryItems).insertReturning(item);
+    syncScheduler?.scheduleSync();
+    return row.id;
+  }
+
+  Future<void> deleteInventoryItem(String id) async {
+    await (update(inventoryItems)..where((i) => i.id.equals(id))).write(
+      const InventoryItemsCompanion(pendingDelete: Value(true), isDirty: Value(true)),
+    );
+    syncScheduler?.scheduleSync();
+  }
+
+  Future<List<InventoryItem>> getDirtyInventoryItems() =>
+      (select(inventoryItems)..where((i) => i.isDirty.equals(true))).get();
+
+  Future<void> markInventoryItemsClean(List<String> ids) =>
+      (update(inventoryItems)..where((i) => i.id.isIn(ids)))
+          .write(const InventoryItemsCompanion(isDirty: Value(false)));
+
+  Future<void> purgeInventoryItems(List<String> ids) =>
+      (delete(inventoryItems)..where((i) => i.id.isIn(ids))).go();
+
+  /// Applies a complete remote listing: upserts remote rows, drops clean local
+  /// rows the remote no longer has, and never overwrites unpushed local edits.
+  Future<void> reconcileInventory(List<InventoryItemsCompanion> remote) =>
+      _reconcile(inventoryItems, remote, (c) => c.id.value);
+
+  // ── Shopping Cart Helpers ─────────────────────────────────────────
+
+  /// Unchecked live row for an ingredient — the dedup key for addToCart.
+  Future<ShoppingCartItem?> getCartItemByCanonicalName(String canonicalName) =>
+      (select(shoppingCartItems)
+            ..where((c) =>
+                c.canonicalName.equals(canonicalName) &
+                c.checked.equals(false) &
+                c.pendingDelete.equals(false))
+            ..limit(1))
+          .getSingleOrNull();
+
+  Future<ShoppingCartItem?> getCartItem(String id) =>
+      (select(shoppingCartItems)..where((c) => c.id.equals(id))).getSingleOrNull();
+
+  Future<List<ShoppingCartItem>> getAllCartItems() =>
+      (select(shoppingCartItems)..where((c) => c.pendingDelete.equals(false))).get();
+
+  Stream<List<ShoppingCartItem>> watchCartItems() =>
+      (select(shoppingCartItems)
+            ..where((c) => c.pendingDelete.equals(false))
+            ..orderBy([
+              (c) => OrderingTerm.asc(c.checked),
+              (c) => OrderingTerm.desc(c.addedAt),
+            ]))
+          .watch();
+
+  Future<ShoppingCartItem> insertCartItem(ShoppingCartItemsCompanion item) =>
+      into(shoppingCartItems).insertReturning(item);
+
+  Future<void> updateCartItem(String id, ShoppingCartItemsCompanion companion) =>
+      (update(shoppingCartItems)..where((c) => c.id.equals(id))).write(
+        companion.copyWith(updatedAt: Value(DateTime.now()), isDirty: const Value(true)),
+      );
+
+  Future<void> deleteCartItem(String id) async {
+    await updateCartItem(id, const ShoppingCartItemsCompanion(pendingDelete: Value(true)));
+    syncScheduler?.scheduleSync();
+  }
+
+  Future<void> deleteCartItems(List<String> ids) async {
+    await (update(shoppingCartItems)..where((c) => c.id.isIn(ids))).write(
+      ShoppingCartItemsCompanion(
+        pendingDelete: const Value(true),
+        isDirty: const Value(true),
+        updatedAt: Value(DateTime.now()),
+      ),
+    );
+    syncScheduler?.scheduleSync();
+  }
+
+  Future<void> deleteCheckedCartItems() async {
+    final checked = await (select(shoppingCartItems)
+          ..where((c) => c.checked.equals(true) & c.pendingDelete.equals(false)))
+        .get();
+    await deleteCartItems(checked.map((c) => c.id).toList());
+  }
+
+  Future<List<ShoppingCartItem>> getDirtyCartItems() =>
+      (select(shoppingCartItems)..where((c) => c.isDirty.equals(true))).get();
+
+  Future<void> markCartItemsClean(List<String> ids) =>
+      (update(shoppingCartItems)..where((c) => c.id.isIn(ids)))
+          .write(const ShoppingCartItemsCompanion(isDirty: Value(false)));
+
+  Future<void> purgeCartItems(List<String> ids) =>
+      (delete(shoppingCartItems)..where((c) => c.id.isIn(ids))).go();
+
+  Future<void> reconcileCartItems(List<ShoppingCartItemsCompanion> remote) =>
+      _reconcile(shoppingCartItems, remote, (c) => c.id.value);
+
+  Future<void> _reconcile<T extends Table, D>(
+    TableInfo<T, D> table,
+    List<Insertable<D>> remote,
+    String Function(dynamic companion) idOf,
+  ) {
+    return transaction(() async {
+      final idColumn = table.columnsByName['id']! as GeneratedColumn<String>;
+      final dirtyColumn = table.columnsByName['is_dirty']! as GeneratedColumn<bool>;
+      final local = await (select(table)).get();
+      final localDirty = <String>{};
+      final localClean = <String>{};
+      for (final row in local) {
+        final json = (row as DataClass).toJson();
+        (json['isDirty'] == true ? localDirty : localClean).add(json['id'] as String);
+      }
+      final remoteIds = <String>{};
+      for (final companion in remote) {
+        final id = idOf(companion);
+        remoteIds.add(id);
+        if (localDirty.contains(id)) continue; // local edit wins until pushed
+        await into(table).insertOnConflictUpdate(companion);
+      }
+      final gone = localClean.difference(remoteIds);
+      if (gone.isNotEmpty) {
+        await (delete(table)..where((_) => idColumn.isIn(gone) & dirtyColumn.equals(false))).go();
+      }
+    });
+  }
+}

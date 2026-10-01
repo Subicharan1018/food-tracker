@@ -167,7 +167,8 @@ class TestSynonymTableIntegrity:
     def test_no_circular_synonym(self):
         """A → B → A would cause infinite loops in any chain-following logic."""
         for key, value in INGREDIENT_SYNONYMS.items():
-            if value in INGREDIENT_SYNONYMS:
+            # Self-maps (canonical → canonical) are identity entries, not cycles.
+            if value != key and value in INGREDIENT_SYNONYMS:
                 assert INGREDIENT_SYNONYMS[value] != key, (
                     f"Circular synonym: '{key}' → '{value}' → '{key}'"
                 )

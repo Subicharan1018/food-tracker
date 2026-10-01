@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import '../auth/firebase_auth_rest_service.dart';
+import '../ingredients/ingredient_identity.dart';
 import '../local_db/app_database.dart';
 
 class SyncResult {
@@ -356,6 +357,10 @@ class GoogleFirestoreSyncService {
       if (ok) count++;
     }
 
+    // 10–11. Shopping cart + pantry (tombstoned rows become remote deletes)
+    count += await _pushCartItems(db, headers);
+    count += await _pushInventoryItems(db, headers);
+
     return count;
   }
 
@@ -606,6 +611,10 @@ class GoogleFirestoreSyncService {
       count += recipeCompanions.length;
     }
 
+    // 10–11. Shopping cart + pantry: complete listings, reconciled locally
+    count += await _pullCartItems(db, headers);
+    count += await _pullInventoryItems(db, headers);
+
     return count;
   }
 
@@ -642,6 +651,171 @@ class GoogleFirestoreSyncService {
 
     return results;
   }
+
+  // ── Shopping cart & pantry ───────────────────────────────────────────
+
+  Future<int> _pushCartItems(AppDatabase db, Map<String, String> headers) async {
+    final synced = <String>[];
+    final purged = <String>[];
+    for (final c in await db.getDirtyCartItems()) {
+      final docUrl = '$_baseUrl/users/$userId/shopping_cart_items/${c.id}';
+      if (c.pendingDelete) {
+        if (await _deleteDoc(docUrl, headers)) purged.add(c.id);
+        continue;
+      }
+      final ok = await _patchDocument(docUrl, {
+        "fields": {
+          "id": {"stringValue": c.id},
+          "name": {"stringValue": c.name},
+          "canonicalName": {"stringValue": c.canonicalName},
+          "quantity": {"doubleValue": c.quantity},
+          "unit": {"stringValue": c.unit},
+          "addedFrom": {"stringValue": c.addedFrom},
+          "reason": c.reason == null ? {"nullValue": null} : {"stringValue": c.reason},
+          "checked": {"booleanValue": c.checked},
+          "addedAt": {"stringValue": c.addedAt.toUtc().toIso8601String()},
+          "updatedAt": {"stringValue": c.updatedAt.toUtc().toIso8601String()},
+        }
+      }, headers);
+      if (ok) synced.add(c.id);
+    }
+    if (synced.isNotEmpty) await db.markCartItemsClean(synced);
+    if (purged.isNotEmpty) await db.purgeCartItems(purged);
+    return synced.length + purged.length;
+  }
+
+  Future<int> _pushInventoryItems(AppDatabase db, Map<String, String> headers) async {
+    final synced = <String>[];
+    final purged = <String>[];
+    for (final i in await db.getDirtyInventoryItems()) {
+      // The backend's ceiling + shopping-list jobs read this collection.
+      final docUrl = '$_baseUrl/users/$userId/inventory/${i.id}';
+      if (i.pendingDelete) {
+        if (await _deleteDoc(docUrl, headers)) purged.add(i.id);
+        continue;
+      }
+      final ok = await _patchDocument(docUrl, {
+        "fields": {
+          "id": {"stringValue": i.id},
+          "name": {"stringValue": i.name},
+          "canonicalName": {"stringValue": i.canonicalName},
+          "quantity": {"doubleValue": i.quantity},
+          "unit": {"stringValue": i.unit},
+          "updatedAt": {"stringValue": i.updatedAt.toUtc().toIso8601String()},
+        }
+      }, headers);
+      if (ok) synced.add(i.id);
+    }
+    if (synced.isNotEmpty) await db.markInventoryItemsClean(synced);
+    if (purged.isNotEmpty) await db.purgeInventoryItems(purged);
+    return synced.length + purged.length;
+  }
+
+  Future<int> _pullCartItems(AppDatabase db, Map<String, String> headers) async {
+    final docs = await _listCollection('shopping_cart_items', headers);
+    if (docs == null) return 0; // fetch failed — never treat as "remote is empty"
+    final companions = <ShoppingCartItemsCompanion>[];
+    for (final doc in docs) {
+      final f = doc['fields'] as Map<String, dynamic>? ?? const {};
+      final id = _docId(doc);
+      final canonical = _str(f['canonicalName'] ?? f['canonical_name']);
+      if (id.isEmpty || canonical.isEmpty) continue;
+      final reason = _str(f['reason']);
+      companions.add(ShoppingCartItemsCompanion(
+        id: Value(id),
+        name: Value(_str(f['name'], canonical)),
+        canonicalName: Value(canonical),
+        quantity: Value(_parseDouble(f['quantity']) ?? 1.0),
+        unit: Value(_str(f['unit'], 'pieces')),
+        addedFrom: Value(_str(f['addedFrom'] ?? f['added_from'], 'manual')),
+        reason: Value(reason.isEmpty ? null : reason),
+        checked: Value(f['checked']?['booleanValue'] == true),
+        addedAt: Value(_date(f['addedAt'])),
+        updatedAt: Value(_date(f['updatedAt'])),
+        isDirty: const Value(false),
+        pendingDelete: const Value(false),
+      ));
+    }
+    await db.reconcileCartItems(companions);
+    return companions.length;
+  }
+
+  Future<int> _pullInventoryItems(AppDatabase db, Map<String, String> headers) async {
+    final docs = await _listCollection('inventory', headers);
+    if (docs == null) return 0;
+    final companions = <InventoryItemsCompanion>[];
+    for (final doc in docs) {
+      final f = doc['fields'] as Map<String, dynamic>? ?? const {};
+      final id = _docId(doc);
+      final name = _str(f['name']);
+      if (id.isEmpty || name.isEmpty) continue;
+      companions.add(InventoryItemsCompanion(
+        id: Value(id),
+        name: Value(name),
+        canonicalName: Value(_str(f['canonicalName'], canonicalizeIngredient(name))),
+        quantity: Value(_parseDouble(f['quantity']) ?? 1.0),
+        unit: Value(_str(f['unit'], 'pieces')),
+        updatedAt: Value(_date(f['updatedAt'])),
+        isDirty: const Value(false),
+        pendingDelete: const Value(false),
+      ));
+    }
+    await db.reconcileInventory(companions);
+    return companions.length;
+  }
+
+  /// Full listing of a small user subcollection, or `null` if it couldn't be read.
+  Future<List<Map<String, dynamic>>?> _listCollection(String collection, Map<String, String> headers) async {
+    final results = <Map<String, dynamic>>[];
+    String? pageToken;
+    try {
+      do {
+        final res = await _dio.get(
+          '$_baseUrl/users/$userId/$collection',
+          queryParameters: {
+            'pageSize': 300,
+            if (pageToken != null) 'pageToken': pageToken,
+            if (apiKey != null) 'key': apiKey,
+          },
+          options: Options(headers: headers, validateStatus: (s) => s != null && s < 400),
+        );
+        if (res.statusCode != 200 || res.data is! Map) return null;
+        final docs = res.data['documents'];
+        if (docs is List) results.addAll(docs.whereType<Map<String, dynamic>>());
+        pageToken = res.data['nextPageToken'] as String?;
+      } while (pageToken != null && pageToken.isNotEmpty);
+      return results;
+    } catch (e) {
+      debugPrint('List $collection error: $e');
+      return null;
+    }
+  }
+
+  Future<bool> _deleteDoc(String url, Map<String, String> headers) async {
+    try {
+      final res = await _dio.delete(
+        url,
+        queryParameters: apiKey != null ? {'key': apiKey} : null,
+        options: Options(headers: headers, validateStatus: (s) => s != null && s < 500),
+      );
+      // 404: already gone remotely, which is the state we wanted.
+      return res.statusCode == 200 || res.statusCode == 204 || res.statusCode == 404;
+    } catch (e) {
+      debugPrint('Delete error for $url: $e');
+      return false;
+    }
+  }
+
+  static String _docId(Map<String, dynamic> doc) =>
+      (doc['name'] as String? ?? '').split('/').last;
+
+  static String _str(dynamic field, [String fallback = '']) {
+    final v = field is Map ? field['stringValue'] : null;
+    return v is String && v.isNotEmpty ? v : fallback;
+  }
+
+  static DateTime _date(dynamic field) =>
+      DateTime.tryParse(_str(field))?.toLocal() ?? DateTime.now();
 
   Future<bool> _patchDocument(String url, Map<String, dynamic> payload, Map<String, String> headers) async {
     try {

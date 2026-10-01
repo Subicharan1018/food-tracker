@@ -133,7 +133,7 @@ class HomeScreen extends ConsumerWidget {
     final isToday = DateFormat('yyyy-MM-dd').format(DateTime.now()) == dateStr;
 
     final user = userAsync.value;
-    final paceAsync = ref.watch(dailyPaceProvider(user?.id ?? 'default_user'));
+    final paceAsync = ref.watch(dailyPaceProvider);
     final targetKcal = user?.calorieTarget ?? 2350;
     final targetP = user?.proteinTargetG ?? 155.0;
     final targetC = user?.carbTargetG ?? 260.0;
@@ -232,6 +232,7 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(dailyWaterProvider);
           ref.invalidate(dailyWorkoutsProvider);
           ref.invalidate(todayStepsProvider);
+          ref.invalidate(dailyPaceProvider);
         },
         child: ListView(
           padding: const EdgeInsets.all(16),

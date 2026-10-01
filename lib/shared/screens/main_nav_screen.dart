@@ -9,6 +9,8 @@ import '../../features/settings/presentation/screens/settings_screen.dart';
 import '../../features/macro_breakdown/presentation/screens/macro_source_screen.dart';
 import '../../features/sleep/presentation/screens/sleep_screen.dart';
 import '../../features/steps_activity/presentation/screens/steps_screen.dart';
+import '../../features/shopping_cart/shopping_cart_screen.dart';
+import '../../features/pantry/pantry_screen.dart';
 
 class MainNavScreen extends StatefulWidget {
   const MainNavScreen({super.key});
@@ -139,6 +141,32 @@ class MoreMenuScreen extends StatelessWidget {
               Navigator.push(
                 context,
                 MaterialPageRoute(builder: (_) => const RecipesScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _MenuTile(
+            title: 'Shopping',
+            subtitle: 'Your list, plus what this week\'s nutrient gaps call for',
+            icon: Icons.shopping_basket_outlined,
+            color: AppColors.textPrimary,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const ShoppingCartScreen()),
+              );
+            },
+          ),
+          const SizedBox(height: 12),
+          _MenuTile(
+            title: 'Pantry',
+            subtitle: 'What you have — the weekly ceiling is computed from this',
+            icon: Icons.kitchen_outlined,
+            color: AppColors.textPrimary,
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const PantryScreen()),
               );
             },
           ),

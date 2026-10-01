@@ -163,7 +163,7 @@ async def test_recipe_ingestion_counts_raw_rice_chicken_and_zero_energy_fats():
 @pytest.mark.asyncio
 async def test_recipe_ingestion_requires_validated_extraction_tool():
     class _ToolAi:
-        async def extract_with_tool(self, system, user, tool_name, tool_description, tool_schema, max_tokens):
+        async def extract_with_tool(self, system, user, tool_name, tool_description, tool_schema, max_tokens, **kwargs):
             assert tool_name == "extract_recipe"
             assert tool_schema["additionalProperties"] is False
             return {

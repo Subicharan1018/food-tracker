@@ -1,4 +1,21 @@
 # KINETIK — Implementation Progress
+
+## 2026-10-01 — Parts A–E code complete; manual loop check outstanding
+
+Backend 105 tests, Flutter 96 tests, analyzer clean of errors.
+
+- IFCT fallback now requires an unambiguous name match (was taking the first fuzzy hit: egg→Brinjal, oats→Wheat bulgur).
+- All ingredient joins use `canonicalize()`; Dart mirror is generated (`python -m app.scripts.export_synonyms_dart`, CI test guards drift).
+- Weekly ceiling converts units to grams; unknown weights and uncovered nutrients are reported, never zeroed.
+- `shopping_list_service.build_weekly_shopping_list` shared by Saturday job + `/api/shopping-list/generate`; AI summary discarded if it contains any digit.
+- Pacing computes `candidate_recipe` (makeable first, else ≤3 missing) and the AI may only name it; digit guard on its message too.
+- Pantry (`inventory`) and cart now sync with UUID ids, delete tombstones, and pull reconciliation (schema v3, v2 migration tested).
+- New Pantry screen; Cart, checkout sheet, gaps panel and pace card redesigned.
+- Stage-0 sweep: `python -m app.scripts.enrich_recipe_nutrients --user-id <uid>`.
+
+**Still to do (needs real server + device):** run the Stage-0 sweep and the 7-step manual loop below.
+
+---
 > Last updated: 2026-09-25 · Workspace: `c:\Users\yoges\Documents\food-tracker`
 
 ---

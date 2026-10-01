@@ -16,6 +16,7 @@ from app.data.unit_conversions import (
     PIECE_WEIGHTS_G,
     UNIT_TO_GRAMS,
 )
+from app.services.ingredient_identity import canonicalize
 
 TRACKED_NUTRIENTS = (
     "vitaminD_mcg", "b12_mcg", "iron_mg", "calcium_mg",
@@ -43,7 +44,7 @@ def _normalise(value: Any) -> str:
     return " ".join(str(value or "").lower().replace("_", " ").split())
 
 
-def _to_grams(amount: Any, unit: Any, ingredient_name: str, explicit_grams: Any = None) -> float | None:
+def to_grams(amount: Any, unit: Any, ingredient_name: str, explicit_grams: Any = None) -> float | None:
     """Return a reviewable gram amount or ``None`` when it cannot be known."""
     try:
         if explicit_grams is not None:
@@ -78,6 +79,7 @@ def _structured_ingredients(recipe: dict[str, Any]) -> list[dict[str, Any]] | No
 
 
 def _profile_from_ifct(food: dict[str, Any]) -> dict[str, Any]:
+    """Build a profile from an IFCT row, keeping the food code as citation."""
     values: dict[str, float] = {}
     unavailable: list[str] = []
     for nutrient in TRACKED_NUTRIENTS:
@@ -90,9 +92,45 @@ def _profile_from_ifct(food: dict[str, Any]) -> dict[str, Any]:
     return {
         "per_100g": values,
         "source": "IFCT 2017",
+        "ifct_code": food.get("code"),
+        "ifct_name": food.get("name"),
         "verified_date": "2017-01-01",
         "unavailable_nutrients": unavailable,
     }
+
+
+def _confident_ifct_match(canonical: str, food_db) -> dict[str, Any] | None:
+    """Return an IFCT row only when the name match is unambiguous.
+
+    The FTS search is fuzzy: "egg" ranks "Brinjal" first and "oats" returns
+    "Wheat, bulgur".  Taking the first hit silently attaches the wrong food's
+    nutrients, so anything short of a single exact match is left unresolved
+    for the human-confirmed enrichment script.
+    """
+    candidates = food_db.search_foods(canonical, limit=25)
+    exact = [c for c in candidates if _normalise(c.get("name")) == canonical]
+    if len(exact) == 1:
+        return exact[0]
+    heads = [c for c in candidates if _normalise(str(c.get("name") or "").split(",")[0]) == canonical]
+    if len(heads) == 1:
+        return heads[0]
+    return None
+
+
+def resolve_profile(name: str, nutrient_db: dict[str, dict], food_db=None, food_code: Any = None) -> dict[str, Any] | None:
+    """Resolve a per-100 g profile: curated/USDA entries, then IFCT code, then a confident IFCT name match.
+
+    Returns ``None`` when no cited source covers the ingredient.  An explicit
+    ``UNAVAILABLE`` entry is returned as-is so callers can report it.
+    """
+    canonical = canonicalize(name)
+    profile = nutrient_db.get(canonical) or nutrient_db.get(_normalise(name))
+    if profile is not None or food_db is None:
+        return profile
+    food = food_db.get_food_by_code(str(food_code)) if food_code else None
+    if food is None:
+        food = _confident_ifct_match(canonical, food_db)
+    return _profile_from_ifct(food) if food is not None else None
 
 
 def compute_recipe_nutrients(recipe: dict[str, Any], nutrient_db: dict[str, dict], food_db=None) -> dict[str, Any]:
@@ -116,19 +154,11 @@ def compute_recipe_nutrients(recipe: dict[str, Any], nutrient_db: dict[str, dict
         name = str(item.get("ingredient") or item.get("name") or "").strip()
         if not name:
             continue
-        grams = _to_grams(item.get("amount"), item.get("unit"), name, item.get("grams"))
+        grams = to_grams(item.get("amount"), item.get("unit"), canonicalize(name), item.get("grams"))
         if grams is None:
             missing_data.append(f"{name} (unknown portion)")
             continue
-        profile = nutrient_db.get(_normalise(name))
-        if profile is None and food_db is not None:
-            code = item.get("food_code") or item.get("foodCode")
-            food = food_db.get_food_by_code(str(code)) if code else None
-            if food is None:
-                candidates = food_db.search_foods(name, limit=1)
-                food = candidates[0] if candidates else None
-            if food is not None:
-                profile = _profile_from_ifct(food)
+        profile = resolve_profile(name, nutrient_db, food_db, item.get("food_code") or item.get("foodCode"))
         if not profile or profile.get("source") == "UNAVAILABLE":
             missing_data.append(name)
             continue

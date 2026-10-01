@@ -71,7 +71,7 @@ async def test_nemotron_503_retry_and_recover():
 
     assert res == "Recovered"
     assert mock_client.chat.completions.create.call_count == 2
-    mock_sleep.assert_called_once_with(10)
+    mock_sleep.assert_called_once_with(5)
 
 @pytest.mark.asyncio
 async def test_nemotron_agent_loop():

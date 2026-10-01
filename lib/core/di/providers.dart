@@ -9,8 +9,7 @@ import '../local_db/seed_data.dart';
 import '../network/google_firestore_sync_service.dart';
 import '../ai/ai_api_client.dart';
 import '../sync/sync_scheduler.dart';
-import '../../features/workouts/hiit/hiit_timer_engine.dart';
-import '../../features/workouts/set_timer/set_rest_timer_service.dart';
+import '../../features/shopping_cart/shopping_cart_service.dart';
 
 export '../../features/workouts/hiit/hiit_timer_engine.dart'
     show hiitTimerProvider, HiitPhase, HiitState, HiitTimerEngine;
@@ -231,8 +230,42 @@ final weeklyDigestProvider = FutureProvider.family<Map<String, dynamic>?, String
   },
 );
 
+/// The Firestore user the backend reads from.  The local profile row is always
+/// 'default_user', so backend calls that read synced data must use this id.
+final firestoreUserIdProvider = FutureProvider<String>((ref) async {
+  final id = await ref.watch(firebaseAuthRestServiceProvider).getUserId();
+  return (id == null || id.isEmpty) ? 'default_user' : id;
+});
+
 /// Server-computed nutrition pace.  It is deliberately not inferred on-device:
 /// every displayed value must retain the backend's freshness timestamp.
-final dailyPaceProvider = FutureProvider.family<Map<String, dynamic>?, String>(
-  (ref, userId) => ref.read(aiApiClientProvider).fetchDailyPaceStatus(userId: userId),
-);
+final dailyPaceProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final userId = await ref.watch(firestoreUserIdProvider.future);
+  return ref.read(aiApiClientProvider).fetchDailyPaceStatus(userId: userId);
+});
+
+/// This week's shopping list (ceiling + structural gaps), computed server-side.
+final weeklyShoppingListProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
+  final userId = await ref.watch(firestoreUserIdProvider.future);
+  return ref.read(aiApiClientProvider).fetchShoppingList(userId: userId);
+});
+
+/// The pantry: what the weekly ceiling is computed from.
+final inventoryItemsProvider = StreamProvider<List<InventoryItem>>((ref) {
+  return ref.watch(databaseProvider).watchInventoryItems();
+});
+
+// ── Shopping Cart Providers ───────────────────────────────────────────
+
+final shoppingCartServiceProvider = Provider<ShoppingCartService>((ref) {
+  final db = ref.watch(databaseProvider);
+  final scheduler = ref.watch(syncSchedulerProvider);
+  return ShoppingCartService(db, scheduler);
+});
+
+/// Reactive list of all cart items — unchecked first, checked at bottom.
+/// Used by [ShoppingCartScreen] and any widget that needs to observe cart state.
+final cartItemsProvider = StreamProvider<List<ShoppingCartItem>>((ref) {
+  final service = ref.watch(shoppingCartServiceProvider);
+  return service.watchCartItems();
+});
