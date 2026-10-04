@@ -31,13 +31,11 @@ void main() {
 
     // Verify brand title and key dashboard elements
     expect(find.text('KINETIK'), findsOneWidget);
-    expect(find.text('Recomp · Phase 1'), findsOneWidget);
-    expect(find.text('Home'), findsOneWidget);
-    expect(find.text('Log'), findsOneWidget);
-    expect(find.text('Train'), findsOneWidget);
-    expect(find.text('Progress'), findsOneWidget);
-    expect(find.text('More'), findsOneWidget);
-    expect(find.text('Breakfast'), findsWidgets);
+    expect(find.text('CALORIES LEFT'), findsOneWidget);
+    for (final tab in ['HOME', 'LOG', 'TRAIN', 'PROGRESS', 'MORE']) {
+      expect(find.text(tab), findsWidgets);
+    }
+    expect(find.text('BREAKFAST'), findsWidgets);
 
     await inMemoryDb.close();
   });

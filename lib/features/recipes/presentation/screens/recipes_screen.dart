@@ -7,7 +7,7 @@ import '../../../../core/di/providers.dart';
 import '../../../pantry/pantry_service.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../streaks/services/streak_service.dart';
+import '../../../../shared/domain/meal_slots.dart';
 
 class RecipesScreen extends ConsumerStatefulWidget {
   const RecipesScreen({super.key});
@@ -167,24 +167,6 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
 
                       final pantry = await logRecipe(db, recipe, date: dateStr, mealSlot: recipe.mealSlot);
 
-                      // Update logging streak
-                      final currentStreak = await db.getStreak('logging');
-                      final streakRes = StreakEngine.processActivity(
-                        currentCount: currentStreak?.currentCount ?? 0,
-                        longestCount: currentStreak?.longestCount ?? 0,
-                        lastActiveDate: currentStreak?.lastActiveDate,
-                        today: DateTime.now(),
-                      );
-                      await db.updateStreak(
-                        StreaksCompanion.insert(
-                          type: 'logging',
-                          currentCount: Value(streakRes.currentCount),
-                          longestCount: Value(streakRes.longestCount),
-                          lastActiveDate: Value(streakRes.lastActiveDate),
-                          updatedAt: Value(DateTime.now()),
-                        ),
-                      );
-
                       if (ctx.mounted) {
                         Navigator.pop(ctx);
                       }
@@ -290,146 +272,111 @@ class _RecipesScreenState extends ConsumerState<RecipesScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final recipesAsync = ref.watch(recipesStreamProvider);
+    final allRecipes = ref.watch(recipesStreamProvider).value ?? const <Recipe>[];
+    final recipes = _selectedSlot == 'all' ? allRecipes : allRecipes.where((r) => r.mealSlot == _selectedSlot).toList();
+    int count(String slot) => allRecipes.where((r) => r.mealSlot == slot).length;
+    final filters = [
+      ('all', 'All', allRecipes.length),
+      for (final slot in const ['breakfast', 'lunch', 'dinner', 'snack']) (slot, mealSlot(slot).label, count(slot)),
+    ];
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Recomp Recipe Box'),
+        titleSpacing: AppShapes.gutter,
+        title: const Text('RECIPES'),
         actions: [
-          IconButton(
-            tooltip: 'Create recipe with AI',
+          TextButton(
             onPressed: _isCreating ? null : _createRecipeWithAi,
-            icon: _isCreating
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.brandPrimary),
-                  )
-                : const Icon(Icons.auto_awesome_rounded, color: AppColors.brandPrimary),
+            child: Text(_isCreating ? 'Reading…' : 'Paste a recipe'),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Filter Chips
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.surface,
-            child: SingleChildScrollView(
+          SizedBox(
+            height: 52,
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _ChipItem(label: 'All Recipes', value: 'all', selected: _selectedSlot == 'all', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _ChipItem(label: 'Breakfast (20)', value: 'breakfast', selected: _selectedSlot == 'breakfast', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _ChipItem(label: 'Lunch (20)', value: 'lunch', selected: _selectedSlot == 'lunch', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _ChipItem(label: 'Dinner (20)', value: 'dinner', selected: _selectedSlot == 'dinner', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _ChipItem(label: 'Snacks (30)', value: 'snack', selected: _selectedSlot == 'snack', onSelect: (v) => setState(() => _selectedSlot = v)),
-                ],
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
-            child: SizedBox(
-              width: double.infinity,
-              height: 44,
-              child: OutlinedButton.icon(
-                onPressed: _isCreating ? null : _createRecipeWithAi,
-                icon: const Icon(Icons.auto_awesome_rounded, size: 18),
-                label: const Text('Paste recipe · Create with AI'),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.brandPrimary,
-                  side: const BorderSide(color: AppColors.brandPrimary),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-              ),
-            ),
-          ),
-
-          Expanded(
-            child: recipesAsync.when(
-              data: (allRecipes) {
-                final recipes = _selectedSlot == 'all'
-                    ? allRecipes
-                    : allRecipes.where((r) => r.mealSlot == _selectedSlot).toList();
-
-                if (recipes.isEmpty) {
-                  return const Center(child: Text('No recipes found for category.'));
-                }
-
-                return ListView.separated(
-                  padding: const EdgeInsets.all(16),
-                  itemCount: recipes.length,
-                  separatorBuilder: (_, __) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final r = recipes[index];
-
-                    return InkWell(
-                      onTap: () => _showRecipeDetail(r),
-                      borderRadius: BorderRadius.circular(16),
-                      child: Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppColors.card,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Expanded(
-                                  child: Text(
-                                    r.name,
-                                    style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                                  ),
-                                ),
-                                Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: AppColors.surfaceElevated,
-                                    borderRadius: BorderRadius.circular(6),
-                                    border: Border.all(color: AppColors.border),
-                                  ),
-                                  child: Text(
-                                    '${r.calories.toInt()} kcal',
-                                    style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (r.tamilName != null) ...[
-                              const SizedBox(height: 2),
-                              Text(r.tamilName!, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                            ],
-                            const SizedBox(height: 8),
-                            Row(
-                              children: [
-                                _MacroBadge(label: 'P', value: '${r.proteinG}g', color: AppColors.textPrimary),
-                                const SizedBox(width: 8),
-                                _MacroBadge(label: 'C', value: '${r.carbsG}g', color: AppColors.textPrimary),
-                                const SizedBox(width: 8),
-                                _MacroBadge(label: 'F', value: '${r.fatG}g', color: AppColors.textPrimary),
-                                const Spacer(),
-                                const Text('View Recipe & 1-Tap Log →', style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-                              ],
-                            ),
-                          ],
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                for (final (key, label, n) in filters)
+                  InkWell(
+                    onTap: () => setState(() => _selectedSlot = key),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                      alignment: Alignment.center,
+                      decoration: BoxDecoration(
+                        border: Border(
+                          bottom: BorderSide(color: _selectedSlot == key ? AppColors.brandPrimary : Colors.transparent, width: 3),
                         ),
                       ),
-                    );
-                  },
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary)),
-              error: (err, _) => Center(child: Text('Error: $err')),
+                      child: Text.rich(TextSpan(children: [
+                        TextSpan(
+                          text: label.toUpperCase(),
+                          style: AppTypography.label.copyWith(
+                            fontSize: 16,
+                            color: _selectedSlot == key ? AppColors.textPrimary : AppColors.textMuted,
+                          ),
+                        ),
+                        TextSpan(text: ' $n', style: AppTypography.dataSmall.copyWith(fontSize: 11)),
+                      ])),
+                    ),
+                  ),
+              ],
             ),
+          ),
+          const Divider(height: 1),
+          Expanded(
+            child: recipes.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.all(AppShapes.gutter),
+                    child: Text('No recipes here yet. Paste one — Kinetik reads the ingredients and looks up each one.',
+                        style: AppTypography.bodyMedium),
+                  )
+                : ListView.separated(
+                    padding: const EdgeInsets.only(bottom: 32),
+                    itemCount: recipes.length,
+                    separatorBuilder: (_, _) => const Divider(height: 1, indent: AppShapes.gutter),
+                    itemBuilder: (context, index) {
+                      final r = recipes[index];
+                      return InkWell(
+                        onTap: () => _showRecipeDetail(r),
+                        child: Padding(
+                          padding: const EdgeInsets.fromLTRB(AppShapes.gutter, 14, AppShapes.gutter, 14),
+                          child: Row(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(r.name, style: AppTypography.titleMedium),
+                                    if (r.tamilName != null && r.tamilName!.isNotEmpty)
+                                      Text(r.tamilName!, style: AppTypography.bodyMedium),
+                                    const SizedBox(height: 4),
+                                    Text(
+                                      'P ${r.proteinG.toStringAsFixed(0)}  C ${r.carbsG.toStringAsFixed(0)}  F ${r.fatG.toStringAsFixed(0)} g · ${mealSlot(r.mealSlot).label.toUpperCase()}',
+                                      style: AppTypography.dataSmall,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text('${r.calories.round()}', style: AppTypography.displayMedium.copyWith(fontSize: 28)),
+                                  Text('KCAL', style: AppTypography.label.copyWith(fontSize: 11)),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
         ],
       ),
@@ -452,56 +399,6 @@ class _RecipeStat extends StatelessWidget {
         const SizedBox(height: 2),
         Text(value, style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800, color: color)),
       ],
-    );
-  }
-}
-
-class _MacroBadge extends StatelessWidget {
-  final String label;
-  final String value;
-  final Color color;
-
-  const _MacroBadge({required this.label, required this.value, required this.color});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: AppColors.cardElevated,
-        borderRadius: BorderRadius.circular(6),
-      ),
-      child: Text(
-        '$label: $value',
-        style: TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: color),
-      ),
-    );
-  }
-}
-
-class _ChipItem extends StatelessWidget {
-  final String label;
-  final String value;
-  final bool selected;
-  final Function(String) onSelect;
-
-  const _ChipItem({required this.label, required this.value, required this.selected, required this.onSelect});
-
-  @override
-  Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
-      selected: selected,
-      onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.brandPrimary,
-      backgroundColor: AppColors.card,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: selected ? AppColors.textInverse : AppColors.textSecondary,
-      ),
-      side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
-      showCheckmark: false,
     );
   }
 }
@@ -573,10 +470,10 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                       color: AppColors.brandPrimary.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    child: const Icon(Icons.auto_awesome_rounded, color: AppColors.brandPrimary),
+                    child: const Icon(Icons.content_paste_go, color: AppColors.brandPrimary),
                   ),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -587,6 +484,7 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                     ),
                   ),
                   IconButton(
+                    tooltip: 'Close',
                     onPressed: () => Navigator.pop(context),
                     icon: const Icon(Icons.close_rounded, color: AppColors.textSecondary),
                   ),
@@ -602,7 +500,7 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                 textCapitalization: TextCapitalization.sentences,
                 decoration: const InputDecoration(
                   labelText: 'Recipe text',
-                  hintText: 'RECIPE: Chicken Biryani\nSERVINGS: 4\n\nINGREDIENTS:\n- chicken | 500 | g | raw\n- rice | 250 | g | dry\n\nMETHOD:\n...',
+                  hintText: 'RECIPE: Chicken Biryani\nSERVINGS: 4\n\nINGREDIENTS:\n- chicken | 500 | g | raw\n- rice | 250 | g | dry\n\nMETHOD:\n…',
                   alignLabelWithHint: true,
                 ),
                 onChanged: (_) {
@@ -654,7 +552,7 @@ class _RecipeComposerSheetState extends State<_RecipeComposerSheet> {
                 height: 50,
                 child: ElevatedButton.icon(
                   onPressed: _submit,
-                  icon: const Icon(Icons.auto_awesome_rounded, size: 19),
+                  icon: const Icon(Icons.content_paste_go, size: 19),
                   label: const Text('Create and save recipe'),
                 ),
               ),

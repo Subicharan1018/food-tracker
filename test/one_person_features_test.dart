@@ -206,4 +206,26 @@ void main() {
       );
     });
   });
+
+  group('every way of logging advances the streak (was skipped by 4 of 6 paths)', () {
+    Future<int> streak(String type) async => (await db.getStreak(type))?.currentCount ?? 0;
+
+    test('recipe logging and "log again" advance the logging streak', () async {
+      final r = await recipe();
+      await logRecipe(db, r, date: '2026-10-01', mealSlot: 'dinner');
+      expect(await streak('logging'), 1);
+      final last = await db.lastMealsBySlot('2026-09-01', '2026-12-31');
+      await repeatMeal(db, last['dinner']!, date: '2026-10-02');
+      expect(await streak('logging'), 1, reason: 'same day: counted once');
+    });
+
+    test('consecutive days build the streak; a gap resets it', () async {
+      await db.recordActivity('workout', now: DateTime(2026, 9, 29));
+      await db.recordActivity('workout', now: DateTime(2026, 9, 30));
+      expect(await streak('workout'), 2);
+      await db.recordActivity('workout', now: DateTime(2026, 10, 2));
+      expect(await streak('workout'), 1);
+      expect((await db.getStreak('workout'))!.longestCount, 2);
+    });
+  });
 }

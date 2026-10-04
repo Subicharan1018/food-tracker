@@ -64,7 +64,7 @@ class _CartCheckoutSheetState extends State<CartCheckoutSheet> {
       builder: (context, scroll) => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(20, 0, 20, 4),
             child: Text('Into the pantry', style: AppTypography.titleLarge),
           ),

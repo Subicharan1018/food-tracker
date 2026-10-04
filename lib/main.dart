@@ -27,7 +27,7 @@ void main() async {
   final plugin = FlutterLocalNotificationsPlugin();
   try {
     await plugin.initialize(
-      const InitializationSettings(
+      settings: const InitializationSettings(
         android: AndroidInitializationSettings('@mipmap/launcher_icon'),
       ),
       onDidReceiveNotificationResponse: (response) {

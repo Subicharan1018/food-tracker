@@ -51,7 +51,7 @@ class _ShoppingListCardState extends ConsumerState<ShoppingListCard> {
       onPressed: _recomputing ? null : _recompute,
       style: TextButton.styleFrom(
         foregroundColor: AppColors.textSecondary,
-        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(fontFamily: AppFonts.body, fontSize: 13, fontWeight: FontWeight.w600),
       ),
       child: Text(_recomputing ? 'Computing…' : 'Recompute'),
     );

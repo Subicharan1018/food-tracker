@@ -6,20 +6,20 @@ import 'package:drift/drift.dart' hide Column;
 import '../../../../core/di/providers.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../shared/widgets/calorie_ring.dart';
-import '../../../../shared/widgets/macro_bars.dart';
+import '../../../../shared/domain/meal_slots.dart';
+import '../../../../shared/widgets/scoreboard.dart';
+import '../widgets/meal_schedule.dart';
 import '../../../food_logging/presentation/screens/log_food_screen.dart';
 import '../../../macro_breakdown/presentation/screens/macro_source_screen.dart';
 import '../../../steps_activity/presentation/screens/steps_screen.dart';
-import '../widgets/vitals_strip.dart';
-import '../widgets/meal_rail.dart';
-import '../widgets/streak_card.dart';
 import '../../../ai_digest/weekly_digest_card.dart';
 import '../../../ai_planner/meal_plan_card.dart';
 import '../../../workouts/progression_card.dart';
 import '../../../nutrition/nutrient_pace_card.dart';
 import '../../../food_logging/repeat_meal.dart';
 import '../../../checkin/checkin_screen.dart';
+
+String _fmt(num v) => NumberFormat.decimalPattern().format(v.round());
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -170,50 +170,21 @@ class HomeScreen extends ConsumerWidget {
     final loggingStreak = logStreakAsync.value?.currentCount ?? 1;
     final workoutStreak = workStreakAsync.value?.currentCount ?? 1;
 
+    final steps = ref.watch(todayStepsProvider).value ?? 0;
+    final kcalLeft = targetKcal + totalBurnedKcal - totalConsumedKcal;
+    final over = kcalLeft < 0;
+
+    Future<void> addWater(int ml) => ref.read(databaseProvider).addWaterLog(
+          WaterLogsCompanion.insert(id: const Uuid().v4(), date: dateStr, mlAdded: ml, loggedAt: Value(DateTime.now())),
+        );
+
     return Scaffold(
       appBar: AppBar(
-        title: Row(
-          children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(8),
-              child: Image.asset(
-                'assets/icons/app_icon.png',
-                width: 30,
-                height: 30,
-                fit: BoxFit.contain,
-              ),
-            ),
-            const SizedBox(width: 10),
-            Flexible(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Text(
-                    'KINETIK',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w900,
-                      letterSpacing: 1.2,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                  Text(
-                    'Recomp · Phase 1',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(fontSize: 11, color: AppColors.brandPrimary, fontWeight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
+        titleSpacing: AppShapes.gutter,
+        title: Text('KINETIK', style: AppTypography.titleLarge.copyWith(letterSpacing: 2)),
         actions: [
-          // Keep the app bar compact on narrow phones. Date navigation lives
-          // in the first dashboard card below.
           IconButton(
-            icon: const Icon(Icons.calendar_month_rounded, color: AppColors.textPrimary),
+            icon: const Icon(Icons.calendar_today_outlined, size: 20),
             tooltip: 'Choose date',
             onPressed: () async {
               final picked = await showDatePicker(
@@ -222,26 +193,20 @@ class HomeScreen extends ConsumerWidget {
                 firstDate: DateTime(2025),
                 lastDate: DateTime(2030),
               );
-              if (picked != null) {
-                ref.read(selectedDateProvider.notifier).state = picked;
-              }
+              if (picked != null) ref.read(selectedDateProvider.notifier).state = picked;
             },
           ),
           IconButton(
-            icon: const Icon(Icons.pie_chart_rounded, color: AppColors.textPrimary),
-            tooltip: 'Macro Source Breakdown',
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MacroSourceScreen()),
-              );
-            },
+            icon: const Icon(Icons.donut_large_outlined, size: 20),
+            tooltip: 'Where your macros came from',
+            onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const MacroSourceScreen())),
           ),
+          const SizedBox(width: 8),
         ],
       ),
       body: RefreshIndicator(
-        color: AppColors.textPrimary,
-        backgroundColor: AppColors.cardElevated,
+        color: AppColors.brandPrimary,
+        backgroundColor: AppColors.surfaceElevated,
         onRefresh: () async {
           ref.invalidate(diaryEntriesProvider);
           ref.invalidate(dailyWaterProvider);
@@ -250,253 +215,144 @@ class HomeScreen extends ConsumerWidget {
           ref.invalidate(dailyPaceProvider);
         },
         child: ListView(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
-            // Date navigation is deliberately outside the AppBar so the
-            // title and actions cannot overflow on small screens.
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: AppColors.border),
-              ),
+            // Day switcher: the date is the context for every number below.
+            Padding(
+              padding: const EdgeInsets.fromLTRB(8, 0, 8, 8),
               child: Row(
                 children: [
                   IconButton(
                     tooltip: 'Previous day',
                     onPressed: () => ref.read(selectedDateProvider.notifier).state =
                         selectedDate.subtract(const Duration(days: 1)),
-                    icon: const Icon(Icons.chevron_left_rounded),
+                    icon: const Icon(Icons.chevron_left),
                   ),
                   Expanded(
                     child: Text(
-                      isToday ? 'Today' : DateFormat('EEEE, MMM d').format(selectedDate),
+                      (isToday ? 'Today · ${DateFormat('EEE d MMM').format(selectedDate)}' : DateFormat('EEEE d MMMM').format(selectedDate))
+                          .toUpperCase(),
                       textAlign: TextAlign.center,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
+                      style: AppTypography.label.copyWith(color: AppColors.textPrimary),
                     ),
                   ),
                   IconButton(
                     tooltip: 'Next day',
                     onPressed: () => ref.read(selectedDateProvider.notifier).state =
                         selectedDate.add(const Duration(days: 1)),
-                    icon: const Icon(Icons.chevron_right_rounded),
+                    icon: const Icon(Icons.chevron_right),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            // 1. Calorie Hero Ring
-            Container(
-              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(24),
-                border: Border.all(color: AppColors.border),
+
+            // 1. Calories — the headline number.
+            Board(
+              label: over ? 'Over budget' : 'Calories left',
+              trailing: Text('TARGET ${_fmt(targetKcal)}', style: AppTypography.dataSmall),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  BigNumber(
+                    _fmt(kcalLeft.abs()),
+                    unit: 'kcal',
+                    color: over ? AppColors.attention : AppColors.textPrimary,
+                  ),
+                  const SizedBox(height: 16),
+                  SegmentMeter(
+                    fraction: totalConsumedKcal / (targetKcal + totalBurnedKcal),
+                    color: AppColors.brandPrimary,
+                    overColor: AppColors.attention,
+                    segments: 30,
+                    height: 12,
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'EATEN ${_fmt(totalConsumedKcal)}   ·   BURNED ${_fmt(totalBurnedKcal)}',
+                    style: AppTypography.dataSmall,
+                  ),
+                ],
               ),
+            ),
+
+            // 2. Macros — protein leads; it's the recomp priority.
+            Board(
+              label: 'Macros',
               child: Column(
                 children: [
-                  CalorieRing(
-                    targetCalories: targetKcal,
-                    consumedCalories: totalConsumedKcal,
-                    burnedCalories: totalBurnedKcal,
-                  ),
-                  if (totalBurnedKcal > 0) ...[
-                    const SizedBox(height: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: AppColors.cardElevated,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Text(
-                        '🔥 +$totalBurnedKcal kcal burned in workouts offset budget',
-                        style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600, color: AppColors.attention),
-                      ),
-                    ),
-                  ],
+                  StatLine(label: 'Protein', value: totalP, target: targetP, unit: 'g', color: AppColors.brandPrimary),
+                  StatLine(label: 'Carbs', value: totalC, target: targetC, unit: 'g', overColor: AppColors.attention),
+                  StatLine(label: 'Fat', value: totalF, target: targetF, unit: 'g', overColor: AppColors.attention),
+                  StatLine(label: 'Fiber', value: totalFiber, target: 30, unit: 'g'),
                 ],
               ),
             ),
 
-            const SizedBox(height: 16),
-
-            // 2. Macro Quadrant Bars
-            MacroBarsGrid(
-              proteinConsumed: totalP,
-              proteinTarget: targetP,
-              carbsConsumed: totalC,
-              carbsTarget: targetC,
-              fatConsumed: totalF,
-              fatTarget: targetF,
-              fiberConsumed: totalFiber,
-              fiberTarget: 30.0,
-            ),
-
-            const SizedBox(height: 16),
-
-            if (_checkInDue(ref)) ...[
-              InkWell(
+            if (_checkInDue(ref))
+              Board(
+                label: 'Check-in due',
                 onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckInScreen())),
-                borderRadius: AppShapes.information,
-                child: Container(
-                  padding: const EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    color: AppColors.card,
-                    borderRadius: AppShapes.information,
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Row(
-                    children: [
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text('Check-in', style: AppTypography.titleMedium),
-                            SizedBox(height: 2),
-                            Text('Weigh in before food and water, then a progress photo.',
-                                style: TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                          ],
-                        ),
-                      ),
-                      Text('Start', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.brandPrimary)),
-                    ],
-                  ),
-                ),
+                trailing: Text('START', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+                child: Text('Weigh in before food and water, then a progress photo.', style: AppTypography.bodyMedium),
               ),
-              const SizedBox(height: 16),
-            ],
 
+            // 3. Micronutrient pace (server-computed).
             NutrientPaceCard(status: paceAsync.value, unreachable: paceAsync.hasError),
 
-            const SizedBox(height: 16),
-
-            // Macro Source Attribution Shortcut Card
-            InkWell(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (_) => const MacroSourceScreen()),
-                );
-              },
-              borderRadius: BorderRadius.circular(16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                decoration: BoxDecoration(
-                  color: AppColors.cardElevated,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.hub_rounded, color: AppColors.textPrimary, size: 20),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: const [
-                          Text('Macro Source Attribution', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          Text('See which specific foods supplied your protein & carbs', style: TextStyle(fontSize: 11, color: AppColors.textMuted)),
-                        ],
-                      ),
-                    ),
-                    const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textSecondary),
-                  ],
-                ),
+            // 4. Today's vitals.
+            Board(
+              label: 'Today',
+              trailing: Text('LOG STREAK $loggingStreak · TRAIN $workoutStreak', style: AppTypography.dataSmall),
+              child: Column(
+                children: [
+                  StatLine(label: 'Water', value: currentWater, target: targetWater, unit: 'ml', color: AppColors.textPrimary),
+                  Row(
+                    children: [
+                      for (final ml in const [250, 500])
+                        Padding(
+                          padding: const EdgeInsets.only(right: 8),
+                          child: OutlinedButton(onPressed: () => addWater(ml), child: Text('+ $ml ML')),
+                        ),
+                    ],
+                  ),
+                  const SizedBox(height: 18),
+                  InkWell(
+                    onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StepsScreen())),
+                    child: StatLine(label: 'Steps', value: steps, target: targetSteps, unit: 'steps'),
+                  ),
+                ],
               ),
             ),
 
-            const SizedBox(height: 16),
-
-            // 3. Streaks
-            StreaksCard(
-              loggingStreak: loggingStreak,
-              workoutStreak: workoutStreak,
-            ),
-
-            const SizedBox(height: 16),
-
-            VitalsStrip(
-              waterMl: currentWater,
-              waterTargetMl: targetWater,
-              steps: ref.watch(todayStepsProvider).value ?? 0,
-              stepsTarget: targetSteps,
-              onAddWater: (ml) async => ref.read(databaseProvider).addWaterLog(WaterLogsCompanion.insert(id: const Uuid().v4(), date: dateStr, mlAdded: ml, loggedAt: Value(DateTime.now()))),
-              onStepsTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const StepsScreen())),
-            ),
-
-            const SizedBox(height: 24),
-            MealRail(
-              onAdd: (slot) => _navigateLogFood(context, slot),
-              onDelete: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
-              items: [
-                for (final (key, title, time, icon) in const [
-                  ('breakfast', 'Breakfast', '6:00 AM', Icons.wb_sunny_outlined),
-                  ('lunch', 'Lunch', '1:00 PM', Icons.lunch_dining_outlined),
-                  ('shake', 'Shake', '4:30 PM', Icons.local_cafe_outlined),
-                  ('pre_workout', 'Pre-workout', '6:00 PM', Icons.bolt_outlined),
-                  ('dinner', 'Dinner', '8:15 PM', Icons.dinner_dining_outlined),
-                  ('snack', 'Snack', 'Anytime', Icons.cookie_outlined),
-                ])
-                  MealRailItem(
-                    keyName: key,
-                    title: title,
-                    subtitle: usual[key] == null ? 'Nothing logged here in the last 2 weeks' : 'Usually ${usual[key]!.join(' + ')}',
-                    time: time,
-                    icon: icon,
-                    entries: entries.where((e) => e.mealSlot == key).toList(),
-                    repeatLabel: lastMeals[key] == null ? null : repeatLabel(lastMeals[key]!),
-                    onRepeat: lastMeals[key] == null
-                        ? null
-                        : () async {
-                            final report = await repeatMeal(ref.read(databaseProvider), lastMeals[key]!, date: dateStr);
-                            if (context.mounted) {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                SnackBar(content: Text(['Logged $title.', ?report.summary].join(' '))),
-                              );
-                            }
-                          },
-                  ),
-              ],
-            ),
-
-            const SizedBox(height: 16),
-
-            // AI Meal Planning Action Button
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton.icon(
-                icon: const Icon(Icons.auto_awesome_rounded, color: Colors.black, size: 20),
-                label: const Text(
-                  'Plan my evening',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w800,
-                    color: Colors.black,
-                  ),
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.brandPrimary,
-                  shape: RoundedRectangleBorder(borderRadius: AppShapes.action),
-                ),
+            // 5. Meals as a timetable.
+            Board(
+              label: 'Meals',
+              trailing: TextButton(
                 onPressed: () => _requestMealPlan(context, ref),
+                child: Text('PLAN MY EVENING', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+              ),
+              child: MealSchedule(
+                entries: entries,
+                usual: usual,
+                repeatLabels: {for (final e in lastMeals.entries) e.key: repeatLabel(e.value)},
+                onAdd: (slot) => _navigateLogFood(context, slot),
+                onDelete: (id) => ref.read(databaseProvider).deleteDiaryEntry(id),
+                onRepeat: (slot) async {
+                  final meal = lastMeals[slot];
+                  if (meal == null) return;
+                  final report = await repeatMeal(ref.read(databaseProvider), meal, date: dateStr);
+                  if (context.mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text(['Logged ${mealSlot(slot).label}.', ?report.summary].join(' '))),
+                    );
+                  }
+                },
               ),
             ),
 
-            const SizedBox(height: 16),
-
-            // AI Weekly Digest on Sunday/Monday
+            // AI weekly digest (Sun/Mon) and progression (weekends).
             const WeeklyDigestCard(),
-
-            const SizedBox(height: 16),
-
-            // AI Workout Progression Card on Weekends
-            const WorkoutProgressionCard(),
-
-            const SizedBox(height: 20),
+            const Padding(padding: EdgeInsets.symmetric(horizontal: AppShapes.gutter), child: WorkoutProgressionCard()),
           ],
         ),
       ),

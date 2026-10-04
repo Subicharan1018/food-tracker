@@ -49,7 +49,7 @@ void main() {
       await pump(tester, status(makeable: false));
       await tester.pump();
 
-      expect(find.text('Iron'), findsOneWidget);
+      expect(find.text('IRON'), findsOneWidget);
       expect(find.textContaining('4.1'), findsOneWidget);
       expect(find.text('Closest fix'), findsOneWidget);
       expect(find.text('Needs Rajma'), findsOneWidget);

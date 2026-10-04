@@ -99,7 +99,7 @@ class _CheckInScreenState extends ConsumerState<CheckInScreen> {
     final tapeDue = lastTape == null || DateTime.now().difference(lastTape).inDays >= tapeEveryDays;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Check-in')),
+      appBar: AppBar(title: const Text('CHECK-IN')),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 48),
         children: [

@@ -63,6 +63,7 @@ class _SetRestTimerWidgetState extends ConsumerState<SetRestTimerWidget> {
                         ),
                       ),
                       IconButton(
+                        tooltip: 'Stop rest timer',
                         icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
                         onPressed: () => Navigator.pop(ctx),
                       ),
@@ -239,6 +240,7 @@ class _SetRestTimerWidgetState extends ConsumerState<SetRestTimerWidget> {
 
           // Dismiss Button
           IconButton(
+            tooltip: 'Stop rest timer',
             icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
             onPressed: () => notifier.dismiss(),
           ),

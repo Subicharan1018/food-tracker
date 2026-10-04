@@ -52,10 +52,10 @@ class WorkoutNotificationService {
 Future<void> _fireWorkoutNotification(int id, Map<String, dynamic> params) async {
   final plugin = FlutterLocalNotificationsPlugin();
   await plugin.show(
-    id,
-    params['title'] as String? ?? 'Workout time',
-    params['body'] as String? ?? 'Time for your scheduled session.',
-    const NotificationDetails(
+    id: id,
+    title: params['title'] as String? ?? 'Workout time',
+    body: params['body'] as String? ?? 'Time for your scheduled session.',
+    notificationDetails: const NotificationDetails(
       android: AndroidNotificationDetails(
         'workout_start', 'Workout Start',
         importance: Importance.high,

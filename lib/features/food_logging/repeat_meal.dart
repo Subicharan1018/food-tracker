@@ -22,7 +22,7 @@ Future<PantryUseReport> repeatMeal(AppDatabase db, List<DiaryEntry> entries, {re
       notTracked.addAll(report.notTracked);
       continue;
     }
-    await db.addDiaryEntry(DiaryEntriesCompanion.insert(
+    await db.logDiaryEntry(DiaryEntriesCompanion.insert(
       id: const Uuid().v4(),
       date: date,
       mealSlot: e.mealSlot,

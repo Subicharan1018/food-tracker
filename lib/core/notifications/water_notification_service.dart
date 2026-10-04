@@ -60,10 +60,10 @@ class WaterNotificationService {
 Future<void> _fireWaterReminder(int id, Map<String, dynamic> params) async {
   final plugin = FlutterLocalNotificationsPlugin();
   await plugin.show(
-    id,
-    'Hydration check',
-    params['body'] as String? ?? 'Time to drink water.',
-    const NotificationDetails(
+    id: id,
+    title: 'Hydration check',
+    body: params['body'] as String? ?? 'Time to drink water.',
+    notificationDetails: const NotificationDetails(
       android: AndroidNotificationDetails(
         'water_reminders', 'Water Reminders',
         channelShowBadge: false,

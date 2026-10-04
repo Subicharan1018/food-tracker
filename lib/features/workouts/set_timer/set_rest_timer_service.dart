@@ -57,10 +57,10 @@ class SetRestTimerNotifier extends StateNotifier<({RestTimerState status, int re
   Future<void> _fireNotification() async {
     try {
       await _plugin.show(
-        300,
-        'Rest Over',
-        'Start your next set.',
-        const NotificationDetails(
+        id: 300,
+        title: 'Rest Over',
+        body: 'Start your next set.',
+        notificationDetails: const NotificationDetails(
           android: AndroidNotificationDetails(
             'set_rest_timer', 'Set Rest Timer',
             importance: Importance.high,

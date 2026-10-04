@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
+import '../widgets/scoreboard.dart';
 import '../../features/dashboard/presentation/screens/home_screen.dart';
 import '../../features/food_logging/presentation/screens/log_food_screen.dart';
 import '../../features/workouts/presentation/screens/workouts_screen.dart';
@@ -38,43 +39,18 @@ class _MainNavScreenState extends State<MainNavScreen> {
         index: _currentIndex,
         children: _screens,
       ),
-      bottomNavigationBar: Container(
-        decoration: const BoxDecoration(
-          color: AppColors.surface,
-          border: Border(top: BorderSide(color: AppColors.border, width: 1)),
-        ),
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(border: Border(top: BorderSide(color: AppColors.border))),
         child: NavigationBar(
           selectedIndex: _currentIndex,
           onDestinationSelected: (idx) => setState(() => _currentIndex = idx),
-          backgroundColor: AppColors.surface,
-          indicatorColor: AppColors.brandPrimary.withValues(alpha: 0.16),
           elevation: 0,
           destinations: const [
-            NavigationDestination(
-              icon: Icon(Icons.home_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.home_rounded, color: AppColors.brandPrimary),
-              label: 'Home',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.restaurant_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.restaurant_rounded, color: AppColors.brandPrimary),
-              label: 'Log',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.fitness_center_outlined, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.fitness_center_rounded, color: AppColors.brandPrimary),
-              label: 'Train',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.trending_up_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.trending_up_rounded, color: AppColors.brandPrimary),
-              label: 'Progress',
-            ),
-            NavigationDestination(
-              icon: Icon(Icons.grid_view_rounded, color: AppColors.textMuted),
-              selectedIcon: Icon(Icons.grid_view_rounded, color: AppColors.brandPrimary),
-              label: 'More',
-            ),
+            NavigationDestination(icon: Icon(Icons.space_dashboard_outlined), selectedIcon: Icon(Icons.space_dashboard), label: 'HOME'),
+            NavigationDestination(icon: Icon(Icons.restaurant_outlined), selectedIcon: Icon(Icons.restaurant), label: 'LOG'),
+            NavigationDestination(icon: Icon(Icons.fitness_center_outlined), selectedIcon: Icon(Icons.fitness_center), label: 'TRAIN'),
+            NavigationDestination(icon: Icon(Icons.show_chart_outlined), selectedIcon: Icon(Icons.show_chart), label: 'PROGRESS'),
+            NavigationDestination(icon: Icon(Icons.menu), selectedIcon: Icon(Icons.menu_open), label: 'MORE'),
           ],
         ),
       ),
@@ -87,115 +63,33 @@ class MoreMenuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    void go(Widget screen) => Navigator.push(context, MaterialPageRoute(builder: (_) => screen));
+
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('More & Tools'),
-      ),
+      appBar: AppBar(titleSpacing: AppShapes.gutter, title: const Text('MORE')),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(top: 4, bottom: 32),
         children: [
-          _MenuTile(
-            title: 'Macro Source Breakdown',
-            subtitle: 'Attribution analysis for protein & carb sources',
-            icon: Icons.pie_chart_rounded,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const MacroSourceScreen()),
-              );
-            },
+          Board(
+            label: 'Body',
+            child: Column(children: [
+              _MenuRow(title: 'Check-in & photos', detail: 'Sunday weigh-in · progress photo · tape every 4 weeks', onTap: () => go(const CheckInScreen())),
+              _MenuRow(title: 'Sleep', detail: 'Last nights from Health Connect · your schedule', onTap: () => go(const SleepScreen())),
+              _MenuRow(title: 'Steps', detail: 'Today and the 7-day trend', onTap: () => go(const StepsScreen()), last: true),
+            ]),
           ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Daily Steps & 7-Day Trend',
-            subtitle: 'Health Connect integration and weekly bar trend',
-            icon: Icons.directions_walk_rounded,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const StepsScreen()),
-              );
-            },
+          Board(
+            label: 'Kitchen',
+            child: Column(children: [
+              _MenuRow(title: 'Shopping', detail: "Your list · this week's nutrient gaps", onTap: () => go(const ShoppingCartScreen())),
+              _MenuRow(title: 'Pantry', detail: 'What you have — the weekly ceiling is computed from it', onTap: () => go(const PantryScreen())),
+              _MenuRow(title: 'Recipes', detail: 'Your recipe box · add one by pasting it', onTap: () => go(const RecipesScreen())),
+              _MenuRow(title: 'Macro sources', detail: 'Which foods your protein and carbs came from', onTap: () => go(const MacroSourceScreen()), last: true),
+            ]),
           ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Sleep Tracker & Schedule',
-            subtitle: 'Recommended sleep goal, bedtime & wake schedule',
-            icon: Icons.bedtime_rounded,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SleepScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Personal Recipe Box',
-            subtitle: 'Tamil Nadu dry-packs & chicken curries pre-seeded',
-            icon: Icons.menu_book_rounded,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const RecipesScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Shopping',
-            subtitle: 'Your list, plus what this week\'s nutrient gaps call for',
-            icon: Icons.shopping_basket_outlined,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const ShoppingCartScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Check-in & photos',
-            subtitle: 'Sunday weigh-in, progress photo, tape every 4 weeks',
-            icon: Icons.photo_camera_outlined,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const CheckInScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Pantry',
-            subtitle: 'What you have — the weekly ceiling is computed from this',
-            icon: Icons.kitchen_outlined,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const PantryScreen()),
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          _MenuTile(
-            title: 'Settings & Daily Targets',
-            subtitle: 'Calorie budget, protein targets, and equipment setup',
-            icon: Icons.settings_rounded,
-            color: AppColors.textPrimary,
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SettingsScreen()),
-              );
-            },
+          Board(
+            label: 'App',
+            child: _MenuRow(title: 'Settings & targets', detail: 'Calories, protein, sync, export', onTap: () => go(const SettingsScreen()), last: true),
           ),
         ],
       ),
@@ -203,58 +97,42 @@ class MoreMenuScreen extends StatelessWidget {
   }
 }
 
-class _MenuTile extends StatelessWidget {
+/// A navigation row: name in condensed caps, one line of what's inside.
+class _MenuRow extends StatelessWidget {
   final String title;
-  final String subtitle;
-  final IconData icon;
-  final Color color;
+  final String detail;
   final VoidCallback onTap;
+  final bool last;
 
-  const _MenuTile({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.color,
-    required this.onTap,
-  });
+  const _MenuRow({required this.title, required this.detail, required this.onTap, this.last = false});
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: AppColors.card,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border),
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: AppColors.surfaceElevated,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: color, size: 24),
+    return Column(
+      children: [
+        InkWell(
+          onTap: onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(title.toUpperCase(), style: AppTypography.label.copyWith(fontSize: 19, color: AppColors.textPrimary)),
+                      const SizedBox(height: 3),
+                      Text(detail, style: AppTypography.bodyMedium),
+                    ],
+                  ),
+                ),
+                const Icon(Icons.arrow_forward, size: 18, color: AppColors.textMuted),
+              ],
             ),
-            const SizedBox(width: 14),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(title, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                  const SizedBox(height: 2),
-                  Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                ],
-              ),
-            ),
-            const Icon(Icons.arrow_forward_ios_rounded, size: 16, color: AppColors.textMuted),
-          ],
+          ),
         ),
-      ),
+        if (!last) const Divider(height: 1),
+      ],
     );
   }
 }

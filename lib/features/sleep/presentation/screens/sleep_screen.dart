@@ -110,7 +110,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
     final goal = _goalMinutes;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Sleep')),
+      appBar: AppBar(title: const Text('SLEEP')),
       body: RefreshIndicator(
         onRefresh: _refresh,
         child: ListView(
@@ -123,14 +123,7 @@ class _SleepScreenState extends ConsumerState<SleepScreen> {
                 children: [
                   Text(
                     nights.isEmpty ? '–' : SleepEngine.formatDuration(nights.first.minutes),
-                    style: const TextStyle(
-                      fontSize: 40,
-                      height: 1,
-                      fontWeight: FontWeight.w700,
-                      letterSpacing: -1.2,
-                      color: AppColors.textPrimary,
-                      fontFeatures: tabularFigures,
-                    ),
+                    style: AppTypography.hero.copyWith(fontSize: 64),
                   ),
                   const SizedBox(height: 6),
                   Text(

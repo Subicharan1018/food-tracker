@@ -27,7 +27,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Edit Daily Targets', style: AppTypography.titleLarge),
+        title: Text('Edit Daily Targets', style: AppTypography.titleLarge),
         content: SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -86,7 +86,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Settings & Profile', style: TextStyle(fontWeight: FontWeight.w700)),
+        title: const Text('SETTINGS'),
         elevation: 0,
       ),
       body: ListView(
@@ -131,6 +131,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   ),
                 ),
                 IconButton(
+                  tooltip: 'Edit daily targets',
                   icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 20),
                   onPressed: user != null ? () => _showEditTargetsDialog(user) : null,
                 ),
@@ -213,8 +214,8 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
 
               if (isSyncing) {
                 statusColor = AppColors.attention;
-                statusTitle = 'Syncing with Firestore...';
-                statusDesc = 'Uploading local changes & pulling latest cloud records...';
+                statusTitle = 'Syncing with Firestore…';
+                statusDesc = 'Uploading local changes & pulling latest cloud records…';
               } else if (hasError) {
                 statusColor = AppColors.destructive;
                 if (syncStatus.authReason == 'anonymous_auth_disabled') {
@@ -326,7 +327,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                             style: OutlinedButton.styleFrom(side: const BorderSide(color: AppColors.border)),
                             onPressed: () async {
                               ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Testing authenticated Firestore endpoint...')),
+                                const SnackBar(content: Text('Testing authenticated Firestore endpoint…')),
                               );
                               final syncService = ref.read(firestoreSyncServiceProvider);
                               final ok = await syncService.testConnection();
@@ -356,7 +357,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                 ? null
                                 : () async {
                                     ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(content: Text('Triggering sync with Firebase Firestore...')),
+                                      const SnackBar(content: Text('Triggering sync with Firebase Firestore…')),
                                     );
                                     final res = await ref.read(syncSchedulerProvider).syncNow();
                                     if (context.mounted && res != null) {
@@ -378,7 +379,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   )
                                 : const Icon(Icons.refresh_rounded, size: 16),
                             label: Text(
-                              isSyncing ? 'Syncing...' : 'Retry Sync',
+                              isSyncing ? 'Syncing…' : 'Retry Sync',
                               style: const TextStyle(fontWeight: FontWeight.w700, fontSize: 12),
                             ),
                           ),
@@ -450,7 +451,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                       borderRadius: BorderRadius.circular(8),
                                     ),
                                     child: const Text(
-                                      '💡 Tip for Firestore Console:\nIn Firebase Console > Firestore, document "xglm2AMV46WgLwOr7CvEQm5I8x02" is your primary account. You can safely delete the other 3 orphan documents (FkCX..., qJBJ..., xGcC...).',
+                                      'Tip for Firestore console:\nIn Firebase Console > Firestore, document "xglm2AMV46WgLwOr7CvEQm5I8x02" is your primary account. You can safely delete the other 3 orphan documents (FkCX..., qJBJ..., xGcC...).',
                                       style: TextStyle(fontSize: 11, color: AppColors.textSecondary, height: 1.35),
                                     ),
                                   ),
@@ -469,7 +470,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                                   if (id.isEmpty) return;
                                   Navigator.pop(ctx);
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    SnackBar(content: Text('Setting $id as primary and syncing...')),
+                                    SnackBar(content: Text('Setting $id as primary and syncing…')),
                                   );
                                   final auth = ref.read(firebaseAuthRestServiceProvider);
                                   await auth.setCanonicalUserId(id);
@@ -515,7 +516,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
             ),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [

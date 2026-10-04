@@ -5,6 +5,7 @@ import '../../core/di/providers.dart';
 import '../../core/ingredients/ingredient_identity.dart';
 import '../../core/theme/app_theme.dart';
 import '../../shared/widgets/ledger.dart';
+import '../../shared/widgets/scoreboard.dart';
 import '../shopping_cart/shopping_cart_screen.dart';
 import '../shopping_cart/shopping_cart_service.dart';
 import 'nutrient_labels.dart';
@@ -47,31 +48,15 @@ class NutrientPaceCard extends ConsumerWidget {
           _PaceRow(label: n.name, consumed: gaps[n.key]['consumed'], expected: gaps[n.key]['expected'], unit: n.unit),
     ];
 
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 16, 8, 14),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: AppShapes.information,
-        border: Border.all(color: AppColors.border),
+    return Board(
+      label: 'Micronutrient pace',
+      trailing: Text(
+        updatedAt == null ? 'CHECKS 11 · 14 · 17 · 21' : 'AS OF ${formatStamp(updatedAt).toUpperCase()}',
+        style: AppTypography.dataSmall,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Padding(
-            padding: const EdgeInsets.only(right: 8),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                const Text('Micronutrient pace', style: AppTypography.titleMedium),
-                const Spacer(),
-                Text(
-                  updatedAt == null ? 'checks at 11, 2, 5, 9' : 'as of ${formatStamp(updatedAt)}',
-                  style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                ),
-              ],
-            ),
-          ),
           if (unreachable) ...[
             const SizedBox(height: 8),
             Text(
@@ -166,29 +151,16 @@ class _PaceRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final fraction = consumed is num && expected is num && expected > 0 ? consumed / expected : 0.0;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(0, 8, 8, 0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Text(label, style: const TextStyle(fontSize: 14, color: AppColors.textPrimary)),
-              const Spacer(),
-              Text.rich(
-                TextSpan(children: [
-                  TextSpan(text: formatNumber(consumed), style: const TextStyle(color: AppColors.textPrimary)),
-                  TextSpan(text: ' / ${formatNumber(expected)} $unit'),
-                ]),
-                style: const TextStyle(fontSize: 13, color: AppColors.textMuted, fontFeatures: tabularFigures),
-              ),
-            ],
-          ),
-          const SizedBox(height: 6),
-          Meter(fraction: fraction.toDouble(), color: AppColors.attention),
-        ],
-      ),
+    final value = consumed is num ? consumed as num : 0;
+    final target = expected is num ? expected as num : null;
+    return StatLine(
+      label: label,
+      value: value,
+      target: target,
+      unit: unit,
+      decimals: (target ?? value) < 50 ? 1 : 0,
+      color: AppColors.attention,
+      note: 'BEHIND',
     );
   }
 }

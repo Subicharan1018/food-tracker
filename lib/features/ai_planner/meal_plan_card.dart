@@ -64,7 +64,7 @@ class _MealPlanCardState extends ConsumerState<MealPlanCard> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text("Tonight's Plan", style: AppTypography.titleLarge),
+                  Text("Tonight's Plan", style: AppTypography.titleLarge),
                   const SizedBox(height: 2),
                   Text(
                     'Suggested at $timeStr from your recipes',
@@ -75,6 +75,7 @@ class _MealPlanCardState extends ConsumerState<MealPlanCard> {
             ),
             if (widget.onDismiss != null)
               IconButton(
+                tooltip: 'Dismiss plan',
                 icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
                 onPressed: widget.onDismiss,
               ),
@@ -148,7 +149,7 @@ class _PlanRow extends StatelessWidget {
                   style: TextButton.styleFrom(
                     foregroundColor: AppColors.brandPrimary,
                     disabledForegroundColor: AppColors.textMuted,
-                    textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                    textStyle: const TextStyle(fontFamily: AppFonts.body, fontSize: 13, fontWeight: FontWeight.w600),
                   ),
                   child: Text(isLogged ? 'Logged' : 'Log meal'),
                 ),

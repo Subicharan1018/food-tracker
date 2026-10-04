@@ -5,6 +5,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' as p;
 import 'package:uuid/uuid.dart';
 import '../sync/sync_scheduler.dart';
+import '../../features/streaks/services/streak_service.dart';
 
 part 'app_database.g.dart';
 
@@ -567,6 +568,37 @@ class AppDatabase extends _$AppDatabase {
   // Streaks
   Future<Streak?> getStreak(String type) =>
       (select(streaks)..where((s) => s.type.equals(type))).getSingleOrNull();
+
+  /// Advances the [type] streak ('logging' / 'workout') for activity today.
+  /// The one place the streak rule is applied.
+  Future<void> recordActivity(String type, {DateTime? now}) async {
+    final current = await getStreak(type);
+    final result = StreakEngine.processActivity(
+      currentCount: current?.currentCount ?? 0,
+      longestCount: current?.longestCount ?? 0,
+      lastActiveDate: current?.lastActiveDate,
+      today: now ?? DateTime.now(),
+    );
+    if (!result.incremented) return;
+    await updateStreak(StreaksCompanion.insert(
+      type: type,
+      currentCount: Value(result.currentCount),
+      longestCount: Value(result.longestCount),
+      lastActiveDate: Value(result.lastActiveDate),
+      updatedAt: Value(DateTime.now()),
+    ));
+  }
+
+  /// Food the user logged (search, describe, manual, recipe, repeat, plan):
+  /// writes the entry and advances the logging streak.  Sync pulls and
+  /// imports use [addDiaryEntry] / batch upserts and don't count as activity.
+  Future<void> logDiaryEntry(DiaryEntriesCompanion entry) async {
+    await addDiaryEntry(entry);
+    await recordActivity('logging');
+  }
+
+  Stream<Streak?> watchStreak(String type) =>
+      (select(streaks)..where((s) => s.type.equals(type))).watchSingleOrNull();
 
   Future<void> updateStreak(StreaksCompanion streak) =>
       into(streaks).insertOnConflictUpdate(streak);

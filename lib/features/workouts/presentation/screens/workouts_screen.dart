@@ -5,7 +5,7 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../streaks/services/streak_service.dart';
+import '../../../../shared/widgets/scoreboard.dart';
 import '../../data/workout_routines_provider.dart';
 import '../../hiit/hiit_timer_screen.dart';
 import '../../set_timer/set_rest_timer_service.dart';
@@ -89,8 +89,9 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        const Text('Log Activity & Cardio', style: AppTypography.titleLarge),
+                        Text('Log Activity & Cardio', style: AppTypography.titleLarge),
                         IconButton(
+                          tooltip: 'Close',
                           icon: const Icon(Icons.close_rounded, color: AppColors.textMuted),
                           onPressed: () => Navigator.pop(ctx),
                         ),
@@ -181,12 +182,14 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                         Row(
                           children: [
                             IconButton(
+                              tooltip: 'Decrease',
                               icon: const Icon(Icons.remove_circle_outline),
                               color: AppColors.textPrimary,
                               onPressed: durationMin > 5 ? () => setModalState(() => durationMin -= 5) : null,
                             ),
                             Text('$durationMin min', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                             IconButton(
+                              tooltip: 'Increase',
                               icon: const Icon(Icons.add_circle_outline),
                               color: AppColors.textPrimary,
                               onPressed: () => setModalState(() => durationMin += 5),
@@ -281,24 +284,7 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
                               loggedAt: Value(DateTime.now()),
                             ),
                           );
-
-                          // Update workout streak
-                          final currentStreak = await db.getStreak('workout');
-                          final streakRes = StreakEngine.processActivity(
-                            currentCount: currentStreak?.currentCount ?? 0,
-                            longestCount: currentStreak?.longestCount ?? 0,
-                            lastActiveDate: currentStreak?.lastActiveDate,
-                            today: DateTime.now(),
-                          );
-                          await db.updateStreak(
-                            StreaksCompanion.insert(
-                              type: 'workout',
-                              currentCount: Value(streakRes.currentCount),
-                              longestCount: Value(streakRes.longestCount),
-                              lastActiveDate: Value(streakRes.lastActiveDate),
-                              updatedAt: Value(DateTime.now()),
-                            ),
-                          );
+                          await db.recordActivity('workout');
 
                           if (context.mounted) {
                             Navigator.pop(ctx);
@@ -336,13 +322,15 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
         headerSliverBuilder: (context, innerBoxIsScrolled) {
           return [
             SliverAppBar(
-              title: const Text('Workout Tracker'),
+              title: const Text('TRAIN'),
+              titleSpacing: AppShapes.gutter,
               pinned: true,
               floating: false,
               actions: [
                 // Date picker
                 IconButton(
-                  icon: const Icon(Icons.calendar_today_rounded, size: 20),
+                  icon: const Icon(Icons.calendar_today_outlined, size: 20),
+                  tooltip: 'Choose date',
                   onPressed: () async {
                     final picked = await showDatePicker(
                       context: context,
@@ -358,211 +346,66 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
               ],
             ),
             SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const SizedBox(height: 8),
-
-                    // 1. Calorie Burn Banner
-                    Container(
-                      padding: const EdgeInsets.all(16),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 52,
-                            height: 52,
-                            decoration: const BoxDecoration(
-                              color: AppColors.surfaceElevated,
-                              shape: BoxShape.circle,
-                            ),
-                            child: const Icon(Icons.directions_run_rounded, color: AppColors.textPrimary, size: 28),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                FittedBox(
-                                  fit: BoxFit.scaleDown,
-                                  alignment: Alignment.centerLeft,
-                                  child: Text(
-                                    '$totalBurnedKcal of $dailyBurnTarget',
-                                    style: AppTypography.displayMedium.copyWith(fontSize: 22, fontWeight: FontWeight.w900),
-                                  ),
-                                ),
-                                const Text(
-                                  'Cal Burnt',
-                                  style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
-                                ),
-                              ],
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.bar_chart_rounded, color: AppColors.textSecondary),
-                            onPressed: () {},
-                          ),
-                          Container(
-                            decoration: BoxDecoration(
-                              color: AppColors.textPrimary,
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: IconButton(
-                              icon: const Icon(Icons.add_rounded, color: AppColors.textInverse, size: 22),
-                              onPressed: _showActivityLoggerDialog,
-                            ),
-                          ),
-                        ],
-                      ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Board(
+                    label: 'Burned today',
+                    trailing: TextButton(
+                      onPressed: _showActivityLoggerDialog,
+                      child: Text('LOG ACTIVITY', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
                     ),
-
-                    const SizedBox(height: 12),
-
-                    // 2. Health Connect Auto-Sync Row
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(16),
-                        border: Border.all(color: AppColors.border),
-                      ),
-                      child: Row(
-                        children: [
-                          Container(
-                            width: 44,
-                            height: 44,
-                            decoration: BoxDecoration(
-                              color: AppColors.cardElevated,
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            child: const Center(
-                              child: Icon(Icons.watch_rounded, color: AppColors.textSecondary, size: 22),
-                            ),
-                          ),
-                          const SizedBox(width: 14),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                const Text(
-                                  'Others (Health Connect)',
-                                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                                ),
-                                const SizedBox(height: 2),
-                                FutureBuilder<int>(
-                                  future: ref.read(healthSyncServiceProvider).fetchTodaySteps(),
-                                  builder: (context, snapshot) {
-                                    final steps = snapshot.data ?? 0;
-                                    return Text(
-                                      steps > 0
-                                          ? '$steps Steps, Other Activities'
-                                          : '0 Steps, Sync via Health Connect',
-                                      style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                                    );
-                                  },
-                                ),
-                              ],
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: AppColors.cardElevated,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Text('AUTO', style: TextStyle(fontSize: 10, color: AppColors.textMuted, fontWeight: FontWeight.bold)),
-                          ),
-                        ],
-                      ),
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    // 3. My Workout Routine Section (Dynamic ListView over routines)
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: const [
-                        Text('My Workout Routine', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                        Text('VIEW ALL', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        BigNumber('$totalBurnedKcal', unit: 'kcal', caption: 'TARGET $dailyBurnTarget · ${workouts.length} SESSION${workouts.length == 1 ? '' : 'S'} LOGGED'),
+                        const SizedBox(height: 14),
+                        SegmentMeter(
+                          fraction: dailyBurnTarget == 0 ? 0 : totalBurnedKcal / dailyBurnTarget,
+                          color: AppColors.brandPrimary,
+                          segments: 30,
+                          height: 10,
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'STEPS ${ref.watch(todayStepsProvider).value ?? 0} · FROM HEALTH CONNECT',
+                          style: AppTypography.dataSmall,
+                        ),
                       ],
                     ),
-                    const SizedBox(height: 10),
-
-                    // Horizontal Cards Carousel (Dynamic)
-                    SizedBox(
-                      height: 140,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: routines.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          final routine = routines[index];
-                          return InkWell(
-                            onTap: () {
-                              if (index == 0) {
-                                _tabController.animateTo(0);
-                              } else {
-                                _showActivityLoggerDialog();
-                              }
-                            },
-                            borderRadius: BorderRadius.circular(16),
-                            child: Container(
-                              width: 240,
-                              padding: const EdgeInsets.all(16),
-                              decoration: BoxDecoration(
-                                color: AppColors.card,
-                                borderRadius: BorderRadius.circular(16),
-                                border: Border.all(
-                                  color: routine.isCustom ? AppColors.brandPrimary.withValues(alpha: 0.55) : AppColors.border,
+                  ),
+                  if (routines.length > 1)
+                    Board(
+                      label: 'Short on time',
+                      child: Column(
+                        children: [
+                          for (final routine in routines.skip(1)) ...[
+                            InkWell(
+                              onTap: _showActivityLoggerDialog,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(vertical: 10),
+                                child: Row(
+                                  children: [
+                                    Expanded(
+                                      child: Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          Text(routine.name.toUpperCase(), style: AppTypography.label.copyWith(fontSize: 16, color: AppColors.textPrimary)),
+                                          Text(routine.subtitle, style: AppTypography.bodyMedium),
+                                        ],
+                                      ),
+                                    ),
+                                    Text('LOG', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+                                  ],
                                 ),
                               ),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Icon(
-                                    routine.icon,
-                                    color: routine.isCustom ? AppColors.brandPrimary : AppColors.textMuted,
-                                    size: 24,
-                                  ),
-                                  Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        routine.name,
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                                      ),
-                                      const SizedBox(height: 2),
-                                      Text(
-                                        routine.subtitle,
-                                        maxLines: 2,
-                                        overflow: TextOverflow.ellipsis,
-                                        style: TextStyle(
-                                          fontSize: 11,
-                                          color: routine.isCustom ? AppColors.textPrimary : AppColors.textSecondary,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ],
-                              ),
                             ),
-                          );
-                        },
+                            const Divider(height: 1),
+                          ],
+                        ],
                       ),
                     ),
-
-                    const SizedBox(height: 14),
-                  ],
-                ),
+                ],
               ),
             ),
             SliverPersistentHeader(
@@ -570,12 +413,9 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
               delegate: _SliverAppBarDelegate(
                 TabBar(
                   controller: _tabController,
-                  indicatorColor: AppColors.brandPrimary,
-                  labelColor: AppColors.brandPrimary,
-                  unselectedLabelColor: AppColors.textSecondary,
                   tabs: const [
-                    Tab(text: 'Recomp Split'),
-                    Tab(text: 'Activity History'),
+                    Tab(text: 'RECOMP SPLIT'),
+                    Tab(text: 'HISTORY'),
                   ],
                 ),
               ),
@@ -595,13 +435,6 @@ class _WorkoutsScreenState extends ConsumerState<WorkoutsScreen>
             ),
           ],
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        backgroundColor: AppColors.brandPrimary,
-        foregroundColor: AppColors.textInverse,
-        icon: const Icon(Icons.add_rounded),
-        label: const Text('Log Activity', style: TextStyle(fontWeight: FontWeight.w700)),
-        onPressed: _showActivityLoggerDialog,
       ),
     );
   }
@@ -758,189 +591,71 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                 label: Text(splitDays[index].day),
                 selected: active,
                 onSelected: (_) => setState(() => _selectedDay = index),
-                selectedColor: AppColors.brandPrimary,
-                backgroundColor: AppColors.card,
-                side: BorderSide(color: active ? AppColors.brandPrimary : AppColors.border),
-                labelStyle: TextStyle(fontWeight: FontWeight.w800, color: active ? AppColors.textInverse : AppColors.textSecondary),
-                showCheckmark: false,
+                labelStyle: AppTypography.label.copyWith(
+                  fontSize: 14,
+                  color: active ? AppColors.textInverse : AppColors.textSecondary,
+                ),
               );
             },
           ),
         ),
-        const SizedBox(height: 4),
-        ExpansionTile(
-          initiallyExpanded: true,
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-          backgroundColor: AppColors.card,
-          collapsedBackgroundColor: AppColors.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppShapes.information,
-            side: const BorderSide(color: AppColors.border),
-          ),
-          collapsedShape: RoundedRectangleBorder(
-            borderRadius: AppShapes.information,
-            side: const BorderSide(color: AppColors.border),
-          ),
-          leading: Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceElevated,
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Text(
-              dayPlan.day,
-              style: const TextStyle(fontWeight: FontWeight.w800, color: AppColors.textPrimary, fontSize: 14),
-            ),
-          ),
-          title: Text(dayPlan.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          subtitle: Text('${dayPlan.focus} · ${dayPlan.length}', maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-          children: [
-            if (isFriday)
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                child: SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton.icon(
-                    icon: const Icon(Icons.timer_outlined, color: Colors.black, size: 18),
-                    label: const Text('Launch HIIT Sprint Timer', style: TextStyle(color: Colors.black, fontWeight: FontWeight.w800)),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.positive,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-                    ),
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (_) => const HiitTimerScreen()),
-                      );
-                    },
-                  ),
+        const SizedBox(height: 8),
+        Board(
+          label: '${dayPlan.day} · ${dayPlan.title}',
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+          trailing: isFriday
+              ? TextButton(
+                  onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen())),
+                  child: Text('HIIT TIMER', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+                )
+              : null,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('${dayPlan.focus} · ${dayPlan.length}', style: AppTypography.bodyMedium),
+              const SizedBox(height: 8),
+              for (final ex in dayPlan.exercises) ...[
+                const Divider(height: 1),
+                _ExerciseRow(
+                  ex: ex,
+                  setsToday: widget.setLogs.where((l) => l.exerciseName == ex.name).toList(),
+                  next: _nextFor(ex),
+                  onLog: ex.name.toLowerCase().contains('hiit')
+                      ? () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen()))
+                      : () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
+                  logLabel: ex.name.toLowerCase().contains('hiit') ? 'START' : 'LOG SET',
                 ),
-              ),
-            const Divider(height: 1),
-            ListView.separated(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: dayPlan.exercises.length,
-              separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
-              itemBuilder: (ctx, exIndex) {
-                final ex = dayPlan.exercises[exIndex];
-                final isHiitEx = ex.name.toLowerCase().contains('hiit');
-
-                return Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(ex.name, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                          ),
-                          if (ex.restSec > 0)
-                            Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceElevated,
-                                borderRadius: BorderRadius.circular(6),
-                              ),
-                              child: Text('${ex.restSec}s rest', style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w700, color: AppColors.textSecondary)),
-                            ),
-                        ],
-                      ),
-                      const SizedBox(height: 4),
-                      Text(ex.setsReps, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: AppColors.brandPrimary)),
-                      Builder(builder: (_) {
-                        final sleep = ref.watch(recentSleepProvider).value ?? const [];
-                        final week = sleep.take(7).toList();
-                        final next = recommendProgression(
-                          exercise: ex.name,
-                          setsReps: ex.setsReps,
-                          history: ref.watch(recentSetLogsProvider).value ?? const [],
-                          usesBar: RegExp(r'barbell|\bbar\b|ez bar', caseSensitive: false).hasMatch('${ex.name} ${ex.setup}'),
-                          averageSleepHours: week.isEmpty ? null : week.fold<int>(0, (a, n) => a + n.minutes) / week.length / 60,
-                        );
-                        if (next == null) return const SizedBox.shrink();
-                        return Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Text.rich(
-                            TextSpan(children: [
-                              TextSpan(
-                                text: 'Next: ${next.headline}. ',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: next.isStall ? AppColors.attention : AppColors.textPrimary,
-                                ),
-                              ),
-                              TextSpan(text: next.detail),
-                            ]),
-                            style: const TextStyle(fontSize: 12, height: 1.4, color: AppColors.textSecondary),
-                          ),
-                        );
-                      }),
-                      const SizedBox(height: 2),
-                      Text(ex.setup, maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, color: AppColors.textSecondary)),
-                      if (ex.cue.isNotEmpty) ...[
-                        const SizedBox(height: 3),
-                        Text('💡 Cue: ${ex.cue}', maxLines: 2, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textMuted)),
-                      ],
-                      const SizedBox(height: 8),
-                      SizedBox(
-                        width: double.infinity,
-                        child: isHiitEx
-                            ? ElevatedButton.icon(
-                                icon: const Icon(Icons.timer_outlined, size: 16),
-                                label: const Text('Launch HIIT timer'),
-                                style: ElevatedButton.styleFrom(backgroundColor: AppColors.brandPrimary, foregroundColor: AppColors.textInverse, minimumSize: const Size.fromHeight(38)),
-                                onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const HiitTimerScreen())),
-                              )
-                            : OutlinedButton(
-                                style: OutlinedButton.styleFrom(foregroundColor: AppColors.brandPrimary, side: const BorderSide(color: AppColors.brandPrimary), minimumSize: const Size.fromHeight(38)),
-                                onPressed: () => _showQuickSetLogger(context, ref, dayPlan.day, ex),
-                                child: const Text('Log sets', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                              ),
-                      ),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ],
+              ],
+            ],
+          ),
         ),
-        const SizedBox(height: 16),
 
-        // Progression Rules Accordion
-        ExpansionTile(
-          tilePadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
-          backgroundColor: AppColors.card,
-          collapsedBackgroundColor: AppColors.card,
-          shape: RoundedRectangleBorder(
-            borderRadius: AppShapes.information,
-            side: const BorderSide(color: AppColors.border),
+        Board(
+          label: 'Progression rules · manual v3',
+          padding: const EdgeInsets.fromLTRB(16, 0, 16, 28),
+          child: Column(
+            children: const [
+              _ProgressionRuleRow(condition: 'Form is rough on any lift', action: 'Stay at current load — form first, always'),
+              _ProgressionRuleRow(condition: 'Top of rep range on all sets, 2 sessions running', action: 'Add the smallest plate (+2 kg) next session'),
+              _ProgressionRuleRow(condition: 'Bar maxed (26 kg), reps still easy', action: '3-sec lowering → 2-sec pause → extra set → single-arm/leg'),
+              _ProgressionRuleRow(condition: 'Pull-ups 4 × 10 strict', action: '+2 kg in a backpack'),
+              _ProgressionRuleRow(condition: 'Push-ups 3 × 25 easy', action: 'Decline → one-arm negative → archer'),
+              _ProgressionRuleRow(condition: '3+ weeks without progress', action: 'Check sleep and calories before adding volume'),
+            ],
           ),
-          collapsedShape: RoundedRectangleBorder(
-            borderRadius: AppShapes.information,
-            side: const BorderSide(color: AppColors.border),
-          ),
-          leading: const Icon(Icons.trending_up_rounded, color: AppColors.brandPrimary, size: 20),
-          title: const Text('Progression Rules (Manual v3)', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-          children: [
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: const [
-                  _ProgressionRuleRow(condition: 'Form is rough on any lift', action: 'Stay at current load — form first, always'),
-                  _ProgressionRuleRow(condition: 'Hit top of rep range on all sets (2 sessions in a row)', action: 'Add smallest plate available (+2 kg) next session'),
-                  _ProgressionRuleRow(condition: 'Bar maxed (26 kg) and reps still easy', action: 'Add 3-sec lowering → 2-sec pause → extra set → single-arm/single-leg variant'),
-                  _ProgressionRuleRow(condition: 'Pull-ups: 4 × 10 strict reps clean', action: 'Add +2 kg via loaded backpack'),
-                  _ProgressionRuleRow(condition: 'Push-ups: 3 × 25 easy', action: 'Feet on bench (decline) → one-arm negative → archer push-up'),
-                  _ProgressionRuleRow(condition: '3+ weeks without strength progress', action: 'Check sleep and calorie intake first before adding volume'),
-                ],
-              ),
-            ),
-          ],
         ),
       ],
+    );
+  }
+
+  Progression? _nextFor(_SplitExercise ex) {
+    final week = (ref.watch(recentSleepProvider).value ?? const []).take(7).toList();
+    return recommendProgression(
+      exercise: ex.name,
+      setsReps: ex.setsReps,
+      history: ref.watch(recentSetLogsProvider).value ?? const [],
+      usesBar: RegExp(r'barbell|\bbar\b|ez bar', caseSensitive: false).hasMatch('${ex.name} ${ex.setup}'),
+      averageSleepHours: week.isEmpty ? null : week.fold<int>(0, (a, n) => a + n.minutes) / week.length / 60,
     );
   }
 
@@ -965,7 +680,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                   Text('Target: ${ex.setsReps} · Rest: ${ex.restSec}s', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   if (ex.cue.isNotEmpty) ...[
                     const SizedBox(height: 4),
-                    Text('💡 ${ex.cue}', style: const TextStyle(fontSize: 11, fontStyle: FontStyle.italic, color: AppColors.textMuted)),
+                    Text('Cue — ${ex.cue}', style: AppTypography.labelSmall),
                   ],
                   const SizedBox(height: 18),
                   Row(
@@ -975,12 +690,14 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                       Row(
                         children: [
                           IconButton(
+                            tooltip: 'Decrease',
                             icon: const Icon(Icons.remove_circle_outline),
                             color: AppColors.textPrimary,
                             onPressed: weight >= 2.0 ? () => setModalState(() => weight -= 2.0) : null,
                           ),
                           Text('${weight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           IconButton(
+                            tooltip: 'Increase',
                             icon: const Icon(Icons.add_circle_outline),
                             color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => weight += 2.0),
@@ -996,12 +713,14 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                       Row(
                         children: [
                           IconButton(
+                            tooltip: 'Decrease',
                             icon: const Icon(Icons.remove_circle_outline),
                             color: AppColors.textPrimary,
                             onPressed: reps > 1 ? () => setModalState(() => reps -= 1) : null,
                           ),
                           Text('$reps reps', style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
                           IconButton(
+                            tooltip: 'Increase',
                             icon: const Icon(Icons.add_circle_outline),
                             color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => reps += 1),
@@ -1038,6 +757,7 @@ class _RecompSplitTabState extends ConsumerState<_RecompSplitTab> {
                             loggedAt: Value(DateTime.now()),
                           ),
                         ]);
+                        await db.recordActivity('workout');
 
                         // Auto-start rest timer based on exercise category and recomp v3 blueprint rest seconds
                         ref.read(setRestTimerProvider.notifier).startFor(
@@ -1074,22 +794,90 @@ class _ProgressionRuleRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Text('• ', style: TextStyle(color: AppColors.brandPrimary, fontWeight: FontWeight.bold, fontSize: 14)),
-          Expanded(
-            child: RichText(
-              text: TextSpan(
-                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, height: 1.4),
-                children: [
-                  TextSpan(text: '$condition: ', style: const TextStyle(fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
-                  TextSpan(text: action),
-                ],
+          Text(condition.toUpperCase(), style: AppTypography.label.copyWith(fontSize: 13, color: AppColors.textPrimary)),
+          const SizedBox(height: 2),
+          Text(action, style: AppTypography.bodyMedium),
+        ],
+      ),
+    );
+  }
+}
+
+/// One planned exercise: target, today's sets, next-session advice, log action.
+class _ExerciseRow extends StatelessWidget {
+  final _SplitExercise ex;
+  final List<WorkoutSetLog> setsToday;
+  final Progression? next;
+  final VoidCallback onLog;
+  final String logLabel;
+
+  const _ExerciseRow({required this.ex, required this.setsToday, required this.next, required this.onLog, required this.logLabel});
+
+  String _kg(double v) => v % 1 == 0 ? v.toStringAsFixed(0) : v.toStringAsFixed(1);
+
+  @override
+  Widget build(BuildContext context) {
+    final n = next;
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(ex.name, style: AppTypography.titleMedium),
+                    const SizedBox(height: 2),
+                    Text(
+                      '${ex.setsReps}${ex.restSec > 0 ? '   ·   REST ${ex.restSec}s' : ''}',
+                      style: AppTypography.data.copyWith(color: AppColors.brandPrimary, fontSize: 13),
+                    ),
+                  ],
+                ),
               ),
-            ),
+              TextButton(
+                onPressed: onLog,
+                child: Text(logLabel, style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+              ),
+            ],
           ),
+          if (setsToday.isNotEmpty) ...[
+            const SizedBox(height: 6),
+            Text(
+              'TODAY  ${setsToday.map((l) => l.weightKg > 0 ? '${_kg(l.weightKg)}×${l.reps}' : '${l.reps}').join('  ')}',
+              style: AppTypography.data.copyWith(fontSize: 13),
+            ),
+          ],
+          if (n != null) ...[
+            const SizedBox(height: 6),
+            Text.rich(
+              TextSpan(children: [
+                TextSpan(
+                  text: 'NEXT  ${n.headline.toUpperCase()}  ',
+                  style: AppTypography.label.copyWith(
+                    fontSize: 13,
+                    color: n.isStall ? AppColors.attention : AppColors.textPrimary,
+                  ),
+                ),
+                TextSpan(text: n.detail, style: AppTypography.bodyMedium.copyWith(fontSize: 13)),
+              ]),
+            ),
+          ],
+          const SizedBox(height: 6),
+          Text(ex.setup, style: AppTypography.bodyMedium.copyWith(fontSize: 13)),
+          if (ex.cue.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(top: 2),
+              child: Text('Cue — ${ex.cue}', style: AppTypography.labelSmall),
+            ),
         ],
       ),
     );

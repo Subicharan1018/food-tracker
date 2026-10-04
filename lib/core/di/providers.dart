@@ -164,15 +164,13 @@ final weighInsStreamProvider = StreamProvider<List<WeighIn>>((ref) {
 });
 
 // Logging Streak Provider
-final loggingStreakProvider = FutureProvider<Streak?>((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.getStreak('logging');
+final loggingStreakProvider = StreamProvider<Streak?>((ref) {
+  return ref.watch(databaseProvider).watchStreak('logging');
 });
 
 // Workout Streak Provider
-final workoutStreakProvider = FutureProvider<Streak?>((ref) {
-  final db = ref.watch(databaseProvider);
-  return db.getStreak('workout');
+final workoutStreakProvider = StreamProvider<Streak?>((ref) {
+  return ref.watch(databaseProvider).watchStreak('workout');
 });
 
 const defaultDailyStepsTarget = 10000;

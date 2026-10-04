@@ -23,6 +23,7 @@ double stepFor(String unit) => switch (unit) {
       _ => 1,
     };
 
+/// Opens a section the scoreboard way: heavy rule, then a caps label.
 class SectionHeader extends StatelessWidget {
   final String title;
   final String? detail;
@@ -41,22 +42,23 @@ class SectionHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: padding,
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.end,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          Text(
-            title,
-            style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: AppColors.textSecondary),
+          const Divider(height: AppShapes.ruleHeavy, thickness: AppShapes.ruleHeavy, color: AppColors.rule),
+          const SizedBox(height: 10),
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Text(title.toUpperCase(), style: AppTypography.label),
+              if (detail != null) ...[
+                const SizedBox(width: 8),
+                Text(detail!.toUpperCase(), style: AppTypography.dataSmall),
+              ],
+              const Spacer(),
+              ?trailing,
+            ],
           ),
-          if (detail != null) ...[
-            const SizedBox(width: 8),
-            Text(
-              detail!,
-              style: const TextStyle(fontSize: 13, color: AppColors.textMuted, fontFeatures: tabularFigures),
-            ),
-          ],
-          const Spacer(),
-          ?trailing,
         ],
       ),
     );
@@ -113,7 +115,7 @@ class AddToCartLink extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 8),
         minimumSize: const Size(0, 40),
         tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-        textStyle: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+        textStyle: const TextStyle(fontFamily: AppFonts.body, fontSize: 13, fontWeight: FontWeight.w600),
       ),
       child: const Text('+ Add'),
     );

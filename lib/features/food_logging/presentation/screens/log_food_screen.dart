@@ -6,7 +6,7 @@ import '../../../../core/di/providers.dart';
 import '../../../../core/ingredients/ingredient_identity.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../streaks/services/streak_service.dart';
+import '../../../../shared/domain/meal_slots.dart';
 import '../../nlp_input_widget.dart';
 
 class _PortionSpec {
@@ -137,7 +137,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
           : (spec.isMass ? _convertMass(requested, parsedUnit, spec.unit) : requested);
       final factor = _portionFactor(spec, portion);
 
-      await db.addDiaryEntry(
+      await db.logDiaryEntry(
         DiaryEntriesCompanion.insert(
           id: const Uuid().v4(),
           date: dateStr,
@@ -288,6 +288,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                       Row(
                         children: [
                           IconButton(
+                            tooltip: 'Decrease',
                             icon: const Icon(Icons.remove_circle_outline_rounded),
                             color: AppColors.textPrimary,
                             onPressed: portionQty > spec.step
@@ -311,6 +312,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             ),
                           ),
                           IconButton(
+                            tooltip: 'Increase',
                             icon: const Icon(Icons.add_circle_outline_rounded),
                             color: AppColors.textPrimary,
                             onPressed: () => setModalState(() => portionQty += spec.step),
@@ -371,7 +373,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                         final db = ref.read(databaseProvider);
                         final dateStr = ref.read(formattedSelectedDateProvider);
 
-                        await db.addDiaryEntry(
+                        await db.logDiaryEntry(
                           DiaryEntriesCompanion.insert(
                             id: const Uuid().v4(),
                             date: dateStr,
@@ -386,24 +388,6 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                             fatG: fat,
                             fiberG: Value(food.fiberG * factor),
                             loggedAt: Value(DateTime.now()),
-                          ),
-                        );
-
-                        // Update streak
-                        final currentStreak = await db.getStreak('logging');
-                        final streakRes = StreakEngine.processActivity(
-                          currentCount: currentStreak?.currentCount ?? 0,
-                          longestCount: currentStreak?.longestCount ?? 0,
-                          lastActiveDate: currentStreak?.lastActiveDate,
-                          today: DateTime.now(),
-                        );
-                        await db.updateStreak(
-                          StreaksCompanion.insert(
-                            type: 'logging',
-                            currentCount: Value(streakRes.currentCount),
-                            longestCount: Value(streakRes.longestCount),
-                            lastActiveDate: Value(streakRes.lastActiveDate),
-                            updatedAt: Value(DateTime.now()),
                           ),
                         );
 
@@ -452,7 +436,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
       builder: (ctx) {
         return AlertDialog(
           backgroundColor: AppColors.surface,
-          title: const Text('Manual Food Entry', style: AppTypography.titleLarge),
+          title: Text('Manual Food Entry', style: AppTypography.titleLarge),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -531,7 +515,7 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                 final db = ref.read(databaseProvider);
                 final dateStr = ref.read(formattedSelectedDateProvider);
 
-                await db.addDiaryEntry(
+                await db.logDiaryEntry(
                   DiaryEntriesCompanion.insert(
                     id: const Uuid().v4(),
                     date: dateStr,
@@ -568,47 +552,40 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
   @override
   Widget build(BuildContext context) {
     final recentFoodsAsync = ref.watch(recentFoodsProvider);
+    final query = _searchController.text.trim();
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Log Food'),
+        titleSpacing: AppShapes.gutter,
+        title: const Text('LOG'),
         actions: [
-          TextButton.icon(
-            onPressed: _showManualEntryDialog,
-            icon: const Icon(Icons.edit_note_rounded, color: AppColors.textSecondary),
-            label: const Text('Manual Entry', style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.w600)),
-          ),
+          TextButton(onPressed: _showManualEntryDialog, child: const Text('Enter manually')),
+          const SizedBox(width: 8),
         ],
       ),
       body: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          // Meal slot selector chips
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-            color: AppColors.surface,
-            child: SingleChildScrollView(
+          // Which meal this goes into — straight from the day's slot catalogue.
+          SizedBox(
+            height: 56,
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: [
-                  _SlotChip(label: 'Breakfast', value: 'breakfast', selected: _selectedSlot == 'breakfast', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _SlotChip(label: 'Lunch', value: 'lunch', selected: _selectedSlot == 'lunch', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _SlotChip(label: 'Shake (4:30 PM)', value: 'shake', selected: _selectedSlot == 'shake', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _SlotChip(label: 'Pre-workout (6 PM)', value: 'pre_workout', selected: _selectedSlot == 'pre_workout', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _SlotChip(label: 'Dinner', value: 'dinner', selected: _selectedSlot == 'dinner', onSelect: (v) => setState(() => _selectedSlot = v)),
-                  const SizedBox(width: 8),
-                  _SlotChip(label: 'Snack', value: 'snack', selected: _selectedSlot == 'snack', onSelect: (v) => setState(() => _selectedSlot = v)),
-                ],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12),
+              children: [
+                for (final slot in mealSlots)
+                  _SlotTab(
+                    slot: slot,
+                    selected: _selectedSlot == slot.key,
+                    onSelect: () => setState(() => _selectedSlot = slot.key),
+                  ),
+              ],
             ),
           ),
+          const Divider(height: 1),
 
-          // Search Bar or NLP Input Toggle
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.fromLTRB(AppShapes.gutter, 8, 8, 4),
             child: _nlpMode
                 ? NlpInputWidget(
                     userId: ref.watch(firestoreUserIdProvider).value,
@@ -622,113 +599,131 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
                       _performSearch(fallback);
                     },
                   )
-                : TextField(
-                    controller: _searchController,
-                    autofocus: false,
-                    onChanged: _performSearch,
-                    decoration: InputDecoration(
-                      hintText: 'Search food (e.g. egg, chicken, rice, chapati)',
-                      prefixIcon: const Icon(Icons.search_rounded, color: AppColors.textMuted),
-                      suffixIcon: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          if (_searchController.text.isNotEmpty)
-                            IconButton(
-                              icon: const Icon(Icons.clear_rounded, size: 18),
-                              onPressed: () {
-                                _searchController.clear();
-                                _performSearch('');
-                              },
-                            ),
-                          IconButton(
-                            icon: const Icon(Icons.auto_awesome_rounded, color: AppColors.positive, size: 20),
-                            tooltip: 'Natural Language Input',
-                            onPressed: () => setState(() => _nlpMode = true),
+                : Row(
+                    children: [
+                      Expanded(
+                        child: TextField(
+                          controller: _searchController,
+                          onChanged: (q) {
+                            setState(() {});
+                            _performSearch(q);
+                          },
+                          textInputAction: TextInputAction.search,
+                          style: AppTypography.bodyLarge,
+                          decoration: InputDecoration(
+                            hintText: 'Search IFCT foods — egg, rice, chapati…',
+                            prefixIcon: const Icon(Icons.search, color: AppColors.textMuted),
+                            suffixIcon: query.isEmpty
+                                ? null
+                                : IconButton(
+                                    tooltip: 'Clear search',
+                                    icon: const Icon(Icons.close, size: 18),
+                                    onPressed: () {
+                                      _searchController.clear();
+                                      setState(() {});
+                                      _performSearch('');
+                                    },
+                                  ),
                           ),
-                        ],
+                        ),
                       ),
-                    ),
+                      TextButton(
+                        onPressed: () => setState(() => _nlpMode = true),
+                        child: const Text('Describe'),
+                      ),
+                    ],
                   ),
           ),
 
-          // Recent / Frequent items horizontal list
+          // Recent foods — one tap to search them again.
           recentFoodsAsync.when(
             data: (recents) {
-              if (recents.isEmpty) return const SizedBox.shrink();
-              return Container(
-                height: 40,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
-                margin: const EdgeInsets.only(bottom: 8),
+              if (recents.isEmpty || _nlpMode) return const SizedBox.shrink();
+              return SizedBox(
+                height: 48,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: AppShapes.gutter, vertical: 6),
                   itemCount: recents.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (context, index) {
-                    final foodName = recents[index];
-                    return ActionChip(
-                      label: Text(foodName, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
-                      backgroundColor: AppColors.card,
-                      side: const BorderSide(color: AppColors.border),
-                      onPressed: () {
-                        _searchController.text = foodName;
-                        _performSearch(foodName);
-                      },
-                    );
-                  },
+                  separatorBuilder: (_, _) => const SizedBox(width: 8),
+                  itemBuilder: (context, index) => ActionChip(
+                    label: Text(recents[index]),
+                    onPressed: () {
+                      _searchController.text = recents[index];
+                      setState(() {});
+                      _performSearch(recents[index]);
+                    },
+                  ),
                 ),
               );
             },
             loading: () => const SizedBox.shrink(),
-            error: (_, __) => const SizedBox.shrink(),
+            error: (_, _) => const SizedBox.shrink(),
           ),
 
-          // Food items list
           Expanded(
             child: _isLoading
-                ? const Center(child: CircularProgressIndicator(color: AppColors.brandPrimary))
+                ? const SizedBox.shrink()
                 : _searchResults.isEmpty
-                    ? Center(
+                    ? Padding(
+                        padding: const EdgeInsets.all(AppShapes.gutter),
                         child: Column(
-                          mainAxisSize: MainAxisSize.min,
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.search_off_rounded, size: 48, color: AppColors.textMuted),
-                            const SizedBox(height: 10),
-                            const Text('No foods found matching query', style: TextStyle(color: AppColors.textSecondary)),
-                            const SizedBox(height: 12),
-                            ElevatedButton.icon(
-                              onPressed: _showManualEntryDialog,
-                              icon: const Icon(Icons.add, color: AppColors.textInverse),
-                              label: const Text('Add Custom Food', style: TextStyle(color: AppColors.textInverse, fontWeight: FontWeight.w700)),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: AppColors.brandPrimary,
-                                foregroundColor: AppColors.textInverse,
-                              ),
+                            Text(
+                              query.isEmpty ? 'NO FOODS YET' : 'NO MATCH FOR “${query.toUpperCase()}”',
+                              style: AppTypography.label.copyWith(color: AppColors.textPrimary),
                             ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'Try the Tamil or Hindi name, describe the meal, or enter its numbers from the label.',
+                              style: AppTypography.bodyMedium,
+                            ),
+                            const SizedBox(height: 16),
+                            OutlinedButton(onPressed: _showManualEntryDialog, child: const Text('ENTER MANUALLY')),
                           ],
                         ),
                       )
                     : ListView.separated(
                         itemCount: _searchResults.length,
-                        separatorBuilder: (_, __) => const Divider(height: 1),
+                        separatorBuilder: (_, _) => const Divider(height: 1, indent: AppShapes.gutter),
                         itemBuilder: (context, index) {
                           final item = _searchResults[index];
-                          return ListTile(
-                            contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 6),
-                            title: Text(item.name, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                            subtitle: Text(
-                              '${item.servingSize} ${item.servingUnit} · ${item.calories.toInt()} kcal · ${item.proteinG}g P · ${item.carbsG}g C · ${item.fatG}g F',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                            ),
-                            trailing: Container(
-                              padding: const EdgeInsets.all(8),
-                              decoration: BoxDecoration(
-                                color: AppColors.surfaceElevated,
-                                borderRadius: BorderRadius.circular(8),
-                                border: Border.all(color: AppColors.border),
-                              ),
-                              child: const Icon(Icons.add_rounded, color: AppColors.textPrimary, size: 20),
-                            ),
+                          final serving = '${item.servingSize % 1 == 0 ? item.servingSize.toInt() : item.servingSize} ${item.servingUnit}';
+                          return InkWell(
                             onTap: () => _showPortionDialog(item),
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(AppShapes.gutter, 12, 8, 12),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(item.name, style: AppTypography.bodyLarge, maxLines: 2, overflow: TextOverflow.ellipsis),
+                                        const SizedBox(height: 3),
+                                        Text(
+                                          '$serving · P ${item.proteinG.toStringAsFixed(1)}  C ${item.carbsG.toStringAsFixed(1)}  F ${item.fatG.toStringAsFixed(1)}',
+                                          style: AppTypography.dataSmall,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Semantics(
+                                    label: '${item.calories.round()} kilocalories',
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.end,
+                                      children: [
+                                        Text('${item.calories.round()}', style: AppTypography.displayMedium.copyWith(fontSize: 26)),
+                                        Text('KCAL', style: AppTypography.label.copyWith(fontSize: 11)),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                ],
+                              ),
+                            ),
                           );
                         },
                       ),
@@ -739,29 +734,44 @@ class _LogFoodScreenState extends ConsumerState<LogFoodScreen> {
   }
 }
 
-class _SlotChip extends StatelessWidget {
-  final String label;
-  final String value;
+/// Meal slot as a scoreboard tab: caps name over its planned time.
+class _SlotTab extends StatelessWidget {
+  final MealSlot slot;
   final bool selected;
-  final Function(String) onSelect;
+  final VoidCallback onSelect;
 
-  const _SlotChip({required this.label, required this.value, required this.selected, required this.onSelect});
+  const _SlotTab({required this.slot, required this.selected, required this.onSelect});
 
   @override
   Widget build(BuildContext context) {
-    return ChoiceChip(
-      label: Text(label),
+    return Semantics(
       selected: selected,
-      onSelected: (_) => onSelect(value),
-      selectedColor: AppColors.brandPrimary,
-      backgroundColor: AppColors.card,
-      labelStyle: TextStyle(
-        fontSize: 12,
-        fontWeight: FontWeight.w600,
-        color: selected ? AppColors.textInverse : AppColors.textSecondary,
+      button: true,
+      child: InkWell(
+        onTap: onSelect,
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 10),
+          decoration: BoxDecoration(
+            border: Border(
+              bottom: BorderSide(color: selected ? AppColors.brandPrimary : Colors.transparent, width: 3),
+            ),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                slot.label.toUpperCase(),
+                style: AppTypography.label.copyWith(
+                  fontSize: 16,
+                  color: selected ? AppColors.textPrimary : AppColors.textMuted,
+                ),
+              ),
+              Text(slot.timeLabel, style: AppTypography.dataSmall.copyWith(fontSize: 10, color: AppColors.textMuted)),
+            ],
+          ),
+        ),
       ),
-      side: BorderSide(color: selected ? AppColors.brandPrimary : AppColors.border),
-      showCheckmark: false,
     );
   }
 }

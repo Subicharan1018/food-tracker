@@ -49,7 +49,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
     // Estimated ~12-15 kcal/min for high intensity sprint intervals
     final calories = (durationMin * 13).toDouble();
 
-    await db.into(db.workoutSessions).insert(
+    await db.addWorkoutSession(
       WorkoutSessionsCompanion.insert(
         id: 'hiit_${now.millisecondsSinceEpoch}',
         activityName: 'Lower B + HIIT ($totalRounds rounds)',
@@ -61,11 +61,12 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
         loggedAt: Value(now),
       ),
     );
+    await db.recordActivity('workout');
 
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('HIIT Session logged successfully! 🔥'),
+          content: Text('HIIT session logged'),
           backgroundColor: AppColors.positive,
         ),
       );
@@ -110,7 +111,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('HIIT Sprint Engine'),
+        title: const Text('HIIT'),
         centerTitle: true,
       ),
       body: SafeArea(
@@ -273,7 +274,7 @@ class _HiitTimerScreenState extends ConsumerState<HiitTimerScreen> {
                   child: Column(
                     children: [
                       const Text(
-                        'HIIT Session Finished! 🔥',
+                        'SESSION DONE',
                         style: TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,

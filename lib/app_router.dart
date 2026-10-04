@@ -19,7 +19,7 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/workout/progression',
       builder: (context, state) => Scaffold(
-        appBar: AppBar(title: const Text('Workout Progression')),
+        appBar: AppBar(title: const Text('PROGRESSION')),
         body: const SafeArea(
           child: Padding(
             padding: EdgeInsets.all(16.0),

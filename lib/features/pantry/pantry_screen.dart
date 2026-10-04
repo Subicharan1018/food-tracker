@@ -103,7 +103,7 @@ class PantryScreen extends ConsumerWidget {
     final uncounted = inStock.where((i) => i.unit == 'pieces').length;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Pantry')),
+      appBar: AppBar(title: const Text('PANTRY')),
       body: ListView(
         padding: const EdgeInsets.only(bottom: 48),
         children: [

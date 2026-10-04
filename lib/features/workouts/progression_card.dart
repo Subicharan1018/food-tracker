@@ -82,6 +82,7 @@ class _WorkoutProgressionCardState extends ConsumerState<WorkoutProgressionCard>
                   ),
                   if (widget.onDismiss != null)
                     IconButton(
+                      tooltip: 'Dismiss',
                       icon: const Icon(Icons.close_rounded, color: AppColors.textMuted, size: 20),
                       onPressed: widget.onDismiss,
                     ),
@@ -184,7 +185,7 @@ class _WorkoutProgressionCardState extends ConsumerState<WorkoutProgressionCard>
             ),
             SizedBox(width: 14),
             Text(
-              'Analyzing training progression...',
+              'Analyzing training progression…',
               style: TextStyle(fontSize: 13, color: AppColors.textSecondary),
             ),
           ],

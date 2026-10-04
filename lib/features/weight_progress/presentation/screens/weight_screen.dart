@@ -7,6 +7,8 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/di/providers.dart';
 import '../../../../core/local_db/app_database.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../shared/widgets/scoreboard.dart';
+import '../../../checkin/checkin_screen.dart';
 import '../../../adherence_engine/services/adherence_service.dart';
 
 class WeightProgressScreen extends ConsumerStatefulWidget {
@@ -29,7 +31,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: AppColors.surface,
-        title: const Text('Edit Weight Goal', style: AppTypography.titleLarge),
+        title: Text('Edit Weight Goal', style: AppTypography.titleLarge),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -91,7 +93,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Log Today\'s Weigh-In', style: AppTypography.titleLarge),
+                  Text('Log Today\'s Weigh-In', style: AppTypography.titleLarge),
                   const SizedBox(height: 4),
                   const Text('Weigh in the morning before food for consistency.', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(height: 24),
@@ -111,12 +113,14 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
+                        tooltip: 'Decrease',
                         icon: const Icon(Icons.remove_circle_outline_rounded, size: 32),
                         color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => weight -= 0.1),
                       ),
                       const SizedBox(width: 24),
                       IconButton(
+                        tooltip: 'Increase',
                         icon: const Icon(Icons.add_circle_outline_rounded, size: 32),
                         color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => weight += 0.1),
@@ -174,7 +178,7 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Text('Log Tape Measurement', style: AppTypography.titleLarge),
+                  Text('Log Tape Measurement', style: AppTypography.titleLarge),
                   const SizedBox(height: 4),
                   const Text('Measure every 2–4 weeks (waist, arms, chest).', style: TextStyle(fontSize: 12, color: AppColors.textSecondary)),
                   const SizedBox(height: 16),
@@ -225,12 +229,14 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
+                        tooltip: 'Decrease',
                         icon: const Icon(Icons.remove_circle_outline_rounded, size: 28),
                         color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => valueCm -= 0.5),
                       ),
                       const SizedBox(width: 24),
                       IconButton(
+                        tooltip: 'Increase',
                         icon: const Icon(Icons.add_circle_outline_rounded, size: 28),
                         color: AppColors.textPrimary,
                         onPressed: () => setModalState(() => valueCm += 0.5),
@@ -281,372 +287,217 @@ class _WeightProgressScreenState extends ConsumerState<WeightProgressScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final weighInsAsync = ref.watch(weighInsStreamProvider);
-    final userAsync = ref.watch(userProfileProvider);
-    final currentWeight = userAsync.value?.weightKg ?? 62.0;
+    final weighIns = ref.watch(weighInsStreamProvider).value ?? const <WeighIn>[];
+    final profileWeight = ref.watch(userProfileProvider).value?.weightKg ?? 62.0;
+    // Newest first from the db; charts read left-to-right in time.
+    final chronological = weighIns.reversed.toList();
+    final latest = weighIns.isEmpty ? null : weighIns.first;
+    final currentWeight = latest?.weightKg ?? profileWeight;
+    final average = latest?.rollingAvgKg ?? currentWeight;
+    final change = chronological.length < 2 ? null : currentWeight - chronological.first.weightKg;
 
     final targetWeight = _targetWeightKg ?? (currentWeight > 1.8 ? currentWeight - 1.8 : currentWeight);
-    final diff = targetWeight - currentWeight;
-    final String goalTitle;
-    if (diff < -0.2) {
-      goalTitle = 'Lose ${(-diff).toStringAsFixed(1)} kg';
-    } else if (diff > 0.2) {
-      goalTitle = 'Gain ${diff.toStringAsFixed(1)} kg';
-    } else {
-      goalTitle = 'Maintain Weight (${currentWeight.toStringAsFixed(1)} kg)';
-    }
+    final toGo = targetWeight - average;
+    final suggestion = AdherenceEngine.evaluate(weeklyAverages: weighIns.take(4).map((w) => w.weightKg).toList());
 
-    final weighIns = weighInsAsync.value ?? [];
-
-    // Adherence suggestion check
-    final weeklyAverages = weighIns.take(4).map((w) => w.weightKg).toList();
-    final suggestion = AdherenceEngine.evaluate(weeklyAverages: weeklyAverages);
+    String kg(double v) => v.toStringAsFixed(1);
+    String signed(double v) => '${v > 0 ? '+' : v < 0 ? '−' : '±'}${kg(v.abs())}';
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Weight Tracker'),
+        titleSpacing: AppShapes.gutter,
+        title: const Text('PROGRESS'),
         actions: [
           IconButton(
-            icon: const Icon(Icons.straighten_rounded, color: AppColors.textSecondary),
-            tooltip: 'Tape Measurements',
+            icon: const Icon(Icons.straighten, size: 20),
+            tooltip: 'Log tape measurements',
             onPressed: _showMeasurementDialog,
           ),
-          IconButton(
-            icon: const Icon(Icons.more_vert_rounded),
-            onPressed: () {},
-          ),
+          const SizedBox(width: 8),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: AppColors.brandPrimary,
-        foregroundColor: AppColors.textInverse,
-        elevation: 4,
-        onPressed: () => _showWeighInDialog(currentWeight),
-        child: const Icon(Icons.add_rounded, size: 30),
-      ),
       body: ListView(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.only(top: 4, bottom: 32),
         children: [
-          // 1. Goal Card
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Icon(Icons.scale_rounded, color: AppColors.textPrimary, size: 26),
-                ),
-                const SizedBox(width: 14),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        goalTitle,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        '$_weeksRemaining weeks remaining',
-                        style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                    ],
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.edit_outlined, color: AppColors.textSecondary, size: 18),
-                  onPressed: () => _showEditGoalDialog(currentWeight),
-                ),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 16),
-
-          // 2. 7-Day Rolling Trend Chart
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
+          Board(
+            label: 'Weight',
+            trailing: TextButton(
+              onPressed: () => _showWeighInDialog(currentWeight),
+              child: Text('LOG WEIGH-IN', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
             ),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                BigNumber(kg(currentWeight), unit: 'kg', caption: latest == null ? 'No weigh-ins yet' : 'WEIGHED ${_day(latest.date)}'),
+                const SizedBox(height: 16),
                 Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    const Text('Weight Trend (7-Day Avg)', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-                    Text('Current: ${currentWeight.toStringAsFixed(1)} kg', style: const TextStyle(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.w600)),
+                    Expanded(child: _Figure(label: '7-day avg', value: '${kg(average)} kg')),
+                    Expanded(child: _Figure(label: 'Since start', value: change == null ? '–' : '${signed(change)} kg')),
+                    Expanded(
+                      child: InkWell(
+                        onTap: () => _showEditGoalDialog(currentWeight),
+                        child: _Figure(label: 'Goal · edit', value: '${kg(targetWeight)} kg', note: '${signed(toGo)} to go'),
+                      ),
+                    ),
                   ],
-                ),
-                const SizedBox(height: 20),
-                SizedBox(
-                  height: 180,
-                  child: weighIns.isEmpty
-                      ? const Center(
-                          child: Text(
-                            'No weigh-in data logged yet.\nLog daily morning weigh-ins to track your 7-day trend.',
-                            textAlign: TextAlign.center,
-                            style: TextStyle(color: AppColors.textMuted, fontSize: 13, height: 1.4),
-                          ),
-                        )
-                      : LineChart(
-                          LineChartData(
-                            gridData: FlGridData(
-                              show: true,
-                              drawVerticalLine: false,
-                              getDrawingHorizontalLine: (value) => const FlLine(color: AppColors.border, strokeWidth: 1),
-                            ),
-                            titlesData: FlTitlesData(
-                              topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
-                              leftTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 36,
-                                  getTitlesWidget: (val, _) => Text(val.toStringAsFixed(1), style: const TextStyle(color: AppColors.textMuted, fontSize: 10)),
-                                ),
-                              ),
-                              bottomTitles: AxisTitles(
-                                sideTitles: SideTitles(
-                                  showTitles: true,
-                                  reservedSize: 22,
-                                  getTitlesWidget: (val, _) {
-                                    final index = val.toInt();
-                                    if (index < 0 || index >= weighIns.length) return const SizedBox.shrink();
-                                    final date = DateFormat('M/d').format(DateTime.tryParse(weighIns[index].date) ?? DateTime.now());
-                                    return Text(date, style: const TextStyle(color: AppColors.textMuted, fontSize: 10));
-                                  },
-                                ),
-                              ),
-                            ),
-                            borderData: FlBorderData(show: false),
-                            lineBarsData: [
-                              LineChartBarData(
-                                spots: weighIns.asMap().entries.map((e) => FlSpot(e.key.toDouble(), e.value.weightKg)).toList(),
-                                isCurved: true,
-                                color: AppColors.textPrimary,
-                                barWidth: 3,
-                                dotData: const FlDotData(show: true),
-                                belowBarData: BarAreaData(
-                                  show: true,
-                                  color: AppColors.textPrimary.withValues(alpha: 0.06),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
                 ),
               ],
             ),
           ),
 
-          // Adherence Rule Card (if triggered)
-          if (suggestion.type != AdherenceSuggestionType.none) ...[
-            const SizedBox(height: 14),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: suggestion.type == AdherenceSuggestionType.trimCalories
-                    ? AppColors.attention.withValues(alpha: 0.12)
-                    : AppColors.positive.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(
-                  color: suggestion.type == AdherenceSuggestionType.trimCalories
-                      ? AppColors.attention.withValues(alpha: 0.4)
-                      : AppColors.positive.withValues(alpha: 0.4),
-                ),
-              ),
+          Board(
+            label: 'Trend',
+            trailing: Text('LINE = 7-DAY AVG', style: AppTypography.dataSmall),
+            child: SizedBox(
+              height: 200,
+              child: chronological.length < 2
+                  ? Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text('Two weigh-ins draw the trend. Weigh in each Sunday, before food and water.', style: AppTypography.bodyMedium),
+                    )
+                  : LineChart(
+                      LineChartData(
+                        minY: (chronological.map((w) => w.weightKg).reduce((a, b) => a < b ? a : b) - 0.5).floorToDouble(),
+                        maxY: (chronological.map((w) => w.weightKg).reduce((a, b) => a > b ? a : b) + 0.5).ceilToDouble(),
+                        gridData: FlGridData(
+                          drawVerticalLine: false,
+                          horizontalInterval: 0.5,
+                          getDrawingHorizontalLine: (_) => const FlLine(color: AppColors.borderSubtle, strokeWidth: 1),
+                        ),
+                        borderData: FlBorderData(
+                          show: true,
+                          border: const Border(bottom: BorderSide(color: AppColors.border)),
+                        ),
+                        titlesData: FlTitlesData(
+                          topTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          rightTitles: const AxisTitles(sideTitles: SideTitles(showTitles: false)),
+                          leftTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 40,
+                              interval: 0.5,
+                              getTitlesWidget: (v, _) => Text(kg(v), style: AppTypography.dataSmall.copyWith(fontSize: 10)),
+                            ),
+                          ),
+                          bottomTitles: AxisTitles(
+                            sideTitles: SideTitles(
+                              showTitles: true,
+                              reservedSize: 24,
+                              interval: 1,
+                              getTitlesWidget: (v, _) {
+                                final i = v.toInt();
+                                if (i < 0 || i >= chronological.length || v != i.toDouble()) return const SizedBox.shrink();
+                                return Padding(
+                                  padding: const EdgeInsets.only(top: 6),
+                                  child: Text(
+                                    DateFormat('d MMM').format(DateTime.parse(chronological[i].date)).toUpperCase(),
+                                    style: AppTypography.dataSmall.copyWith(fontSize: 10),
+                                  ),
+                                );
+                              },
+                            ),
+                          ),
+                        ),
+                        lineBarsData: [
+                          // 7-day average: the line that matters.
+                          LineChartBarData(
+                            spots: [
+                              for (var i = 0; i < chronological.length; i++)
+                                FlSpot(i.toDouble(), chronological[i].rollingAvgKg ?? chronological[i].weightKg),
+                            ],
+                            color: AppColors.brandPrimary,
+                            barWidth: 3,
+                            isCurved: false,
+                            dotData: const FlDotData(show: false),
+                          ),
+                          // Raw weigh-ins as dots only.
+                          LineChartBarData(
+                            spots: [for (var i = 0; i < chronological.length; i++) FlSpot(i.toDouble(), chronological[i].weightKg)],
+                            color: Colors.transparent,
+                            barWidth: 0,
+                            dotData: FlDotData(
+                              getDotPainter: (_, _, _, _) => FlDotCirclePainter(radius: 3, color: AppColors.textPrimary, strokeWidth: 0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+            ),
+          ),
+
+          if (suggestion.type != AdherenceSuggestionType.none)
+            Board(
+              label: suggestion.title,
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.auto_awesome_rounded,
-                        color: suggestion.type == AdherenceSuggestionType.trimCalories ? AppColors.attention : AppColors.positive,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          suggestion.title,
-                          style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w700,
-                            color: suggestion.type == AdherenceSuggestionType.trimCalories ? AppColors.attention : AppColors.positive,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 6),
-                  Text(suggestion.description, style: const TextStyle(fontSize: 12, color: AppColors.textPrimary)),
+                  Text(suggestion.description, style: AppTypography.bodyLarge),
                   const SizedBox(height: 8),
-                  Container(
-                    padding: const EdgeInsets.all(10),
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                    child: Text(
-                      'Action: ${suggestion.actionRecommendation}',
-                      style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                  Text(
+                    suggestion.actionRecommendation,
+                    style: AppTypography.bodyLarge.copyWith(
+                      color: suggestion.type == AdherenceSuggestionType.trimCalories ? AppColors.attention : AppColors.textPrimary,
                     ),
                   ),
                 ],
               ),
             ),
-          ],
 
-          const SizedBox(height: 16),
+          Board(
+            label: 'Photos & tape',
+            onTap: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const CheckInScreen())),
+            trailing: Text('OPEN', style: AppTypography.label.copyWith(color: AppColors.brandPrimary)),
+            child: Text('Sunday photo in the same spot, tape every 4 weeks, first-vs-latest side by side.', style: AppTypography.bodyMedium),
+          ),
 
-          // 3. Build Your Progress Gallery Card
-          Container(
-            padding: const EdgeInsets.all(18),
-            decoration: BoxDecoration(
-              color: AppColors.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          Board(
+            label: 'Log',
+            child: weighIns.isEmpty
+                ? Text('No weigh-ins yet.', style: AppTypography.bodyMedium)
+                : Column(
                     children: [
-                      const Text(
-                        'Build Your Progress Gallery',
-                        style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Every photo helps you see changes the scale can\'t.',
-                        style: TextStyle(fontSize: 12, color: AppColors.textSecondary),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.brandPrimary,
-                          foregroundColor: AppColors.textInverse,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      for (final w in weighIns) ...[
+                        Padding(
+                          padding: const EdgeInsets.symmetric(vertical: 10),
+                          child: Row(
+                            children: [
+                              Expanded(child: Text(_day(w.date), style: AppTypography.dataSmall)),
+                              SizedBox(width: 90, child: Text('${kg(w.weightKg)} kg', style: AppTypography.data, textAlign: TextAlign.right)),
+                              SizedBox(
+                                width: 110,
+                                child: Text('avg ${kg(w.rollingAvgKg ?? w.weightKg)}', style: AppTypography.dataSmall, textAlign: TextAlign.right),
+                              ),
+                            ],
+                          ),
                         ),
-                        onPressed: () {
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text('Photo progress attached to today\'s weigh-in!')),
-                          );
-                        },
-                        child: const Text('Add Photo  >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700)),
-                      ),
+                        const Divider(height: 1),
+                      ],
                     ],
                   ),
-                ),
-                const SizedBox(width: 12),
-                Container(
-                  width: 60,
-                  height: 60,
-                  decoration: BoxDecoration(
-                    color: AppColors.surfaceElevated,
-                    borderRadius: BorderRadius.circular(12),
-                    border: Border.all(color: AppColors.border),
-                  ),
-                  child: const Icon(Icons.photo_library_rounded, color: AppColors.textPrimary, size: 30),
-                ),
-              ],
-            ),
           ),
-
-          const SizedBox(height: 20),
-
-          // 4. Timeline Section
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: const [
-              Text('Timeline', style: TextStyle(fontSize: 15, fontWeight: FontWeight.w700, color: AppColors.textPrimary)),
-              Text('View Progress Gallery >', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: AppColors.textSecondary)),
-            ],
-          ),
-          const SizedBox(height: 12),
-
-          // Timeline weigh-in records
-          if (weighIns.isEmpty)
-            Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: AppColors.card,
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: const Center(
-                child: Text('No weigh-ins recorded yet. Tap + to log today.', style: TextStyle(color: AppColors.textMuted, fontSize: 13)),
-              ),
-            )
-          else
-            ...weighIns.map((item) {
-              return Container(
-                margin: const EdgeInsets.only(bottom: 10),
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                decoration: BoxDecoration(
-                  color: AppColors.card,
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 8,
-                      height: 8,
-                      decoration: const BoxDecoration(
-                        color: AppColors.textSecondary,
-                        shape: BoxShape.circle,
-                      ),
-                    ),
-                    const SizedBox(width: 14),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            '${item.weightKg.toStringAsFixed(1)} kg',
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800, color: AppColors.textPrimary),
-                          ),
-                          Text(
-                            item.date,
-                            style: const TextStyle(fontSize: 12, color: AppColors.textMuted),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      icon: const Icon(Icons.camera_alt_outlined, color: AppColors.textSecondary, size: 20),
-                      onPressed: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Attached progress snapshot')),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              );
-            }),
-
-          const SizedBox(height: 80), // Padding for FAB
         ],
       ),
     );
   }
+}
+
+String _day(String date) => DateFormat('EEE d MMM').format(DateTime.parse(date)).toUpperCase();
+
+class _Figure extends StatelessWidget {
+  final String label;
+  final String value;
+  final String? note;
+  const _Figure({required this.label, required this.value, this.note});
+
+  @override
+  Widget build(BuildContext context) => Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(label.toUpperCase(), style: AppTypography.label.copyWith(fontSize: 12)),
+          const SizedBox(height: 4),
+          Text(value, style: AppTypography.data.copyWith(fontSize: 16)),
+          if (note != null) Text(note!, style: AppTypography.dataSmall),
+        ],
+      );
 }

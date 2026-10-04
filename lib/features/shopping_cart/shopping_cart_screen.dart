@@ -117,7 +117,7 @@ class _ShoppingCartScreenState extends ConsumerState<ShoppingCartScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Shopping'),
+        title: const Text('SHOPPING'),
         actions: [
           TextButton(
             onPressed: () => Navigator.push(context, MaterialPageRoute(builder: (_) => const PantryScreen())),
@@ -219,14 +219,7 @@ class _Header extends StatelessWidget {
             children: [
               Text(
                 total == 0 ? 'Empty' : '$toBuy',
-                style: const TextStyle(
-                  fontSize: 40,
-                  height: 1,
-                  fontWeight: FontWeight.w700,
-                  letterSpacing: -1.2,
-                  color: AppColors.textPrimary,
-                  fontFeatures: tabularFigures,
-                ),
+                style: AppTypography.hero.copyWith(fontSize: 64),
               ),
               if (total > 0) ...[
                 const SizedBox(width: 8),

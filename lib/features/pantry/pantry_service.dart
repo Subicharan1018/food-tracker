@@ -53,7 +53,7 @@ Future<PantryUseReport> logRecipe(
 }) {
   return db.transaction(() async {
     final entryId = const Uuid().v4();
-    await db.addDiaryEntry(DiaryEntriesCompanion.insert(
+    await db.logDiaryEntry(DiaryEntriesCompanion.insert(
       id: entryId,
       date: date,
       mealSlot: mealSlot,
